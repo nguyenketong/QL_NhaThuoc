@@ -1,0 +1,142 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Nhà Thuốc Online</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <!-- Top Header -->
+    <div class="top-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <div class="contact-info">
+                        <i class="fas fa-phone"></i> Hotline: 1800 6928
+                        <span class="ms-3"><i class="fas fa-envelope"></i> support@nhathuoc.vn</span>
+                    </div>
+                </div>
+                <div class="col-md-6 text-end">
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <span class="me-3">Xin chào, @User.Identity.Name</span>
+                        <a asp-controller="User" asp-action="Logout" class="text-white">Đăng xuất</a>
+                    }
+                    else
+                    {
+                        <a asp-controller="User" asp-action="Login" class="text-white me-3">Đăng nhập</a>
+                        <a asp-controller="User" asp-action="Register" class="text-white">Đăng ký</a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Header -->
+    <header class="main-header">
+        <div class="container">
+            <div class="row align-items-center py-3">
+                <div class="col-md-3">
+                    <a asp-controller="Home" asp-action="Index" class="logo">
+                        <h2 class="mb-0"><i class="fas fa-prescription-bottle-medical"></i> Nhà Thuốc</h2>
+                    </a>
+                </div>
+                <div class="col-md-6">
+                    <form asp-controller="Product" asp-action="Search" method="get" class="search-form">
+                        <div class="input-group">
+                            <input type="text" name="keyword" class="form-control" placeholder="Tìm tên thuốc, bệnh, thành phần..." />
+                            <button class="btn btn-primary" type="submit">
+                                <i class="fas fa-search"></i> Tìm kiếm
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <div class="col-md-3 text-end">
+                    <a asp-controller="Cart" asp-action="Index" class="cart-icon">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span class="badge">0</span>
+                        <span class="ms-2">Giỏ hàng</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="main-nav">
+        <div class="container">
+            <ul class="nav-menu">
+                <li><a asp-controller="Home" asp-action="Index"><i class="fas fa-home"></i> Trang chủ</a></li>
+                <li><a asp-controller="Product" asp-action="Index"><i class="fas fa-pills"></i> Sản phẩm</a></li>
+                <li><a asp-controller="Category" asp-action="Index"><i class="fas fa-list"></i> Danh mục</a></li>
+                <li><a asp-controller="Brand" asp-action="Index"><i class="fas fa-building"></i> Thương hiệu</a></li>
+                <li><a asp-controller="Order" asp-action="Index"><i class="fas fa-box"></i> Đơn hàng</a></li>
+                @if (User.IsInRole("Admin"))
+                {
+                    <li><a asp-area="Admin" asp-controller="Admin" asp-action="Index"><i class="fas fa-cog"></i> Quản trị</a></li>
+                }
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        @RenderBody()
+    </main>
+
+    <!-- Footer -->
+    <footer class="main-footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-3">
+                    <h5>Về chúng tôi</h5>
+                    <p>Nhà thuốc uy tín, chất lượng hàng đầu Việt Nam</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                        <a href="#"><i class="fab fa-zalo"></i></a>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <h5>Hỗ trợ khách hàng</h5>
+                    <ul class="footer-links">
+                        <li><a href="#">Chính sách đổi trả</a></li>
+                        <li><a href="#">Chính sách giao hàng</a></li>
+                        <li><a href="#">Hướng dẫn mua hàng</a></li>
+                        <li><a href="#">Câu hỏi thường gặp</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3">
+                    <h5>Danh mục</h5>
+                    <ul class="footer-links">
+                        <li><a href="#">Thuốc không kê đơn</a></li>
+                        <li><a href="#">Thực phẩm chức năng</a></li>
+                        <li><a href="#">Chăm sóc sức khỏe</a></li>
+                        <li><a href="#">Sản phẩm tiện lợi</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-3">
+                    <h5>Liên hệ</h5>
+                    <ul class="footer-links">
+                        <li><i class="fas fa-map-marker-alt"></i> Hà Nội, Việt Nam</li>
+                        <li><i class="fas fa-phone"></i> 1800 6928</li>
+                        <li><i class="fas fa-envelope"></i> support@nhathuoc.vn</li>
+                    </ul>
+                </div>
+            </div>
+            <hr />
+            <div class="text-center py-3">
+                <p>&copy; 2025 Nhà Thuốc Online. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
