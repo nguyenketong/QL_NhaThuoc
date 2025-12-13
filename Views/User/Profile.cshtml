@@ -1,0 +1,345 @@
+@model QL_NhaThuoc.Models.NguoiDung
+@{
+    ViewData["Title"] = "Thông tin cá nhân";
+    var tongDonHang = ViewBag.TongDonHang ?? 0;
+    var tongChiTieu = ViewBag.TongChiTieu ?? 0m;
+}
+
+<div class="container py-4">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+            <li class="breadcrumb-item"><a href="#">Cá nhân</a></li>
+            <li class="breadcrumb-item active">Thông tin cá nhân</li>
+        </ol>
+    </nav>
+
+    <div class="row g-4">
+        <!-- Sidebar Menu -->
+        <div class="col-lg-3">
+            <div class="user-sidebar">
+                <!-- User Info Card -->
+                <div class="user-info-card">
+                    <div class="user-avatar">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <div class="user-name">@(Model.HoTen ?? Model.SoDienThoai)</div>
+                    <div class="user-phone">@Model.SoDienThoai</div>
+                </div>
+
+                <!-- Menu -->
+                <div class="user-menu">
+                    <a asp-action="Profile" class="menu-item active">
+                        <i class="fas fa-user"></i>
+                        <span>Thông tin cá nhân</span>
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                    <a asp-controller="DonHang" asp-action="DanhSach" class="menu-item">
+                        <i class="fas fa-shopping-bag"></i>
+                        <span>Đơn hàng của tôi</span>
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                    <a asp-action="DiaChi" class="menu-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <span>Quản lý sổ địa chỉ</span>
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                    <a asp-action="Logout" class="menu-item text-danger">
+                        <i class="fas fa-sign-out-alt"></i>
+                        <span>Đăng xuất</span>
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-9">
+            @if (TempData["ThongBao"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show mb-4">
+                    <i class="fas fa-check-circle"></i> @TempData["ThongBao"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+
+            <div class="profile-card">
+                <div class="profile-header">
+                    <h4><i class="fas fa-user-circle"></i> Thông tin cá nhân</h4>
+                </div>
+                <div class="profile-body">
+                    <!-- Avatar Section -->
+                    <div class="text-center mb-4">
+                        <div class="profile-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                    </div>
+
+                    <!-- Profile Form -->
+                    <form asp-action="UpdateProfile" method="post" id="profileForm">
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">Họ và tên</label>
+                                    <input type="text" name="hoTen" class="form-control" 
+                                           value="@Model.HoTen" placeholder="Nhập họ và tên" />
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">Số điện thoại</label>
+                                    <input type="text" class="form-control" value="@Model.SoDienThoai" readonly 
+                                           style="background: #f5f5f5;" />
+                                    <small class="text-muted">Số điện thoại không thể thay đổi</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">Giới tính</label>
+                                    <select class="form-select" disabled>
+                                        <option value="">Chọn giới tính</option>
+                                        <option value="Nam">Nam</option>
+                                        <option value="Nu">Nữ</option>
+                                        <option value="Khac">Khác</option>
+                                    </select>
+                                    <small class="text-muted">
+                                        <a href="#" class="text-primary">Thêm thông tin</a>
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">Ngày sinh</label>
+                                    <input type="date" class="form-control" disabled />
+                                    <small class="text-muted">
+                                        <a href="#" class="text-primary">Thêm thông tin</a>
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <label class="form-label">Địa chỉ</label>
+                                    <textarea name="diaChi" class="form-control" rows="2" 
+                                              placeholder="Nhập địa chỉ của bạn">@Model.DiaChi</textarea>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <label class="form-label">Ngày tạo tài khoản</label>
+                                    <input type="text" class="form-control" 
+                                           value="@(Model.NgayTao?.ToString("dd/MM/yyyy HH:mm") ?? "Chưa có")" 
+                                           readonly style="background: #f5f5f5;" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="text-center mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg px-5">
+                                <i class="fas fa-save"></i> Chỉnh sửa thông tin
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Statistics Cards -->
+            <div class="row g-4 mt-4">
+                <div class="col-md-6">
+                    <div class="stat-card">
+                        <div class="stat-icon bg-primary">
+                            <i class="fas fa-shopping-bag"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-value">@tongDonHang</div>
+                            <div class="stat-label">Tổng đơn hàng</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="stat-card">
+                        <div class="stat-icon bg-success">
+                            <i class="fas fa-wallet"></i>
+                        </div>
+                        <div class="stat-info">
+                            <div class="stat-value">@(((decimal)tongChiTieu).ToString("N0"))đ</div>
+                            <div class="stat-label">Tổng chi tiêu</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<style>
+    /* User Sidebar */
+    .user-sidebar {
+        background: var(--white);
+        border-radius: var(--radius);
+        overflow: hidden;
+        box-shadow: var(--shadow);
+    }
+
+    .user-info-card {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        padding: 30px 20px;
+        text-align: center;
+        color: var(--white);
+    }
+
+    .user-avatar {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 15px;
+        background: rgba(255,255,255,0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+    }
+
+    .user-name {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+
+    .user-phone {
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+
+    .user-menu {
+        padding: 10px 0;
+    }
+
+    .menu-item {
+        display: flex;
+        align-items: center;
+        padding: 15px 20px;
+        color: var(--text-dark);
+        text-decoration: none;
+        transition: all 0.3s;
+        border-left: 3px solid transparent;
+    }
+
+    .menu-item:hover,
+    .menu-item.active {
+        background: var(--bg-light);
+        color: var(--primary-color);
+        border-left-color: var(--primary-color);
+    }
+
+    .menu-item i:first-child {
+        width: 25px;
+        font-size: 1.1rem;
+    }
+
+    .menu-item span {
+        flex: 1;
+        margin-left: 10px;
+    }
+
+    .menu-item i:last-child {
+        font-size: 0.8rem;
+        opacity: 0.5;
+    }
+
+    /* Profile Card */
+    .profile-card {
+        background: var(--white);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+    }
+
+    .profile-header {
+        background: var(--bg-light);
+        padding: 20px 25px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .profile-header h4 {
+        margin: 0;
+        color: var(--text-dark);
+        font-weight: 600;
+    }
+
+    .profile-header h4 i {
+        color: var(--primary-color);
+        margin-right: 10px;
+    }
+
+    .profile-body {
+        padding: 30px;
+    }
+
+    .profile-avatar {
+        width: 100px;
+        height: 100px;
+        margin: 0 auto;
+        background: linear-gradient(135deg, #E3F2FD, #BBDEFB);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        color: var(--primary-color);
+    }
+
+    /* Stat Cards */
+    .stat-card {
+        background: var(--white);
+        border-radius: var(--radius);
+        padding: 25px;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        box-shadow: var(--shadow);
+    }
+
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: var(--white);
+    }
+
+    .stat-icon.bg-primary {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+    }
+
+    .stat-icon.bg-success {
+        background: linear-gradient(135deg, #4CAF50, #2E7D32);
+    }
+
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--text-dark);
+    }
+
+    .stat-label {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+    }
+
+    /* Form Styles */
+    .form-group {
+        margin-bottom: 0;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: var(--text-dark);
+        margin-bottom: 8px;
+    }
+</style>
+}

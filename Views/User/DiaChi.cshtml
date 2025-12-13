@@ -1,0 +1,96 @@
+@model QL_NhaThuoc.Models.NguoiDung
+@{
+    ViewData["Title"] = "Quản lý địa chỉ";
+}
+
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+            <li class="breadcrumb-item"><a asp-action="Profile">Cá nhân</a></li>
+            <li class="breadcrumb-item active">Quản lý địa chỉ</li>
+        </ol>
+    </nav>
+
+    <div class="row g-4">
+        <!-- Sidebar -->
+        <div class="col-lg-3">
+            @await Html.PartialAsync("_UserSidebar", "DiaChi")
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-9">
+            <div class="profile-card">
+                <div class="profile-header d-flex justify-content-between align-items-center">
+                    <h4><i class="fas fa-map-marker-alt"></i> Quản lý sổ địa chỉ</h4>
+                    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addAddressModal">
+                        <i class="fas fa-plus"></i> Thêm địa chỉ mới
+                    </button>
+                </div>
+                <div class="profile-body">
+                    @if (!string.IsNullOrEmpty(Model?.DiaChi))
+                    {
+                        <div class="address-card">
+                            <div class="address-header">
+                                <span class="badge bg-primary">Mặc định</span>
+                            </div>
+                            <div class="address-body">
+                                <div class="address-name">
+                                    <i class="fas fa-user"></i> @(Model.HoTen ?? Model.SoDienThoai)
+                                </div>
+                                <div class="address-phone">
+                                    <i class="fas fa-phone"></i> @Model.SoDienThoai
+                                </div>
+                                <div class="address-detail">
+                                    <i class="fas fa-map-marker-alt"></i> @Model.DiaChi
+                                </div>
+                            </div>
+                            <div class="address-actions">
+                                <button class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-edit"></i> Sửa
+                                </button>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-5">
+                            <i class="fas fa-map-marker-alt" style="font-size: 4rem; color: #ddd;"></i>
+                            <h5 class="mt-3 text-muted">Chưa có địa chỉ nào</h5>
+                            <p class="text-muted">Thêm địa chỉ để thuận tiện cho việc giao hàng</p>
+                            <a asp-action="Profile" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Thêm địa chỉ
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .address-card {
+        border: 1px solid #e0e0e0;
+        border-radius: var(--radius);
+        padding: 20px;
+        margin-bottom: 15px;
+    }
+    .address-header {
+        margin-bottom: 15px;
+    }
+    .address-body > div {
+        margin-bottom: 8px;
+        color: var(--text-dark);
+    }
+    .address-body i {
+        width: 20px;
+        color: var(--primary-color);
+        margin-right: 10px;
+    }
+    .address-actions {
+        margin-top: 15px;
+        padding-top: 15px;
+        border-top: 1px dashed #e0e0e0;
+    }
+</style>

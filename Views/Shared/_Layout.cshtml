@@ -4,139 +4,211 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Nhà Thuốc Online</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <meta name="description" content="Nhà thuốc online uy tín - Thuốc chính hãng, giá tốt, giao hàng nhanh toàn quốc">
+    
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome 6 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="~/css/custom.css" asp-append-version="true" />
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
 </head>
 <body>
-    <!-- Top Header -->
-    <div class="top-header">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-md-6">
-                    <div class="contact-info">
-                        <i class="fas fa-phone"></i> Hotline: 1800 6928
-                        <span class="ms-3"><i class="fas fa-envelope"></i> support@nhathuoc.vn</span>
-                    </div>
-                </div>
-                <div class="col-md-6 text-end">
-                    @if (User.Identity?.IsAuthenticated == true)
-                    {
-                        <span class="me-3">Xin chào, @User.Identity.Name</span>
-                        <a asp-controller="User" asp-action="Logout" class="text-white">Đăng xuất</a>
-                    }
-                    else
-                    {
-                        <a asp-controller="User" asp-action="Login" class="text-white me-3">Đăng nhập</a>
-                        <a asp-controller="User" asp-action="Register" class="text-white">Đăng ký</a>
-                    }
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Main Header -->
-    <header class="main-header">
-        <div class="container">
-            <div class="row align-items-center py-3">
-                <div class="col-md-3">
-                    <a asp-controller="Home" asp-action="Index" class="logo">
-                        <h2 class="mb-0"><i class="fas fa-prescription-bottle-medical"></i> Nhà Thuốc</h2>
-                    </a>
-                </div>
-                <div class="col-md-6">
-                    <form asp-controller="Product" asp-action="Search" method="get" class="search-form">
-                        <div class="input-group">
-                            <input type="text" name="keyword" class="form-control" placeholder="Tìm tên thuốc, bệnh, thành phần..." />
-                            <button class="btn btn-primary" type="submit">
-                                <i class="fas fa-search"></i> Tìm kiếm
-                            </button>
-                        </div>
-                    </form>
-                </div>
-                <div class="col-md-3 text-end">
-                    <a asp-controller="Cart" asp-action="Index" class="cart-icon">
-                        <i class="fas fa-shopping-cart"></i>
-                        <span class="badge">0</span>
-                        <span class="ms-2">Giỏ hàng</span>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </header>
-
-    <!-- Navigation -->
-    <nav class="main-nav">
-        <div class="container">
-            <ul class="nav-menu">
-                <li><a asp-controller="Home" asp-action="Index"><i class="fas fa-home"></i> Trang chủ</a></li>
-                <li><a asp-controller="Product" asp-action="Index"><i class="fas fa-pills"></i> Sản phẩm</a></li>
-                <li><a asp-controller="Category" asp-action="Index"><i class="fas fa-list"></i> Danh mục</a></li>
-                <li><a asp-controller="Brand" asp-action="Index"><i class="fas fa-building"></i> Thương hiệu</a></li>
-                <li><a asp-controller="Order" asp-action="Index"><i class="fas fa-box"></i> Đơn hàng</a></li>
-                @if (User.IsInRole("Admin"))
-                {
-                    <li><a asp-area="Admin" asp-controller="Admin" asp-action="Index"><i class="fas fa-cog"></i> Quản trị</a></li>
-                }
-            </ul>
-        </div>
-    </nav>
+    <!-- Header Component -->
+    @await Html.PartialAsync("_Header")
 
     <!-- Main Content -->
     <main class="main-content">
+        @if (TempData["ThongBao"] != null)
+        {
+            <div class="container mt-3">
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle"></i> @TempData["ThongBao"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            </div>
+        }
+        @if (TempData["LoiThongBao"] != null)
+        {
+            <div class="container mt-3">
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-circle"></i> @TempData["LoiThongBao"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            </div>
+        }
+        
         @RenderBody()
     </main>
 
     <!-- Footer -->
     <footer class="main-footer">
         <div class="container">
-            <div class="row">
-                <div class="col-md-3">
-                    <h5>Về chúng tôi</h5>
-                    <p>Nhà thuốc uy tín, chất lượng hàng đầu Việt Nam</p>
-                    <div class="social-links">
-                        <a href="#"><i class="fab fa-facebook"></i></a>
-                        <a href="#"><i class="fab fa-youtube"></i></a>
-                        <a href="#"><i class="fab fa-zalo"></i></a>
+            <div class="row g-4">
+                <div class="col-lg-4 col-md-6">
+                    <div class="footer-brand">
+                        <a href="/" class="logo mb-3 d-inline-block">
+                            <i class="fas fa-clinic-medical"></i>
+                            <span class="logo-text">NhàThuốc</span>
+                        </a>
+                        <p>Hệ thống nhà thuốc uy tín hàng đầu Việt Nam. Cam kết cung cấp thuốc chính hãng, giá tốt nhất.</p>
+                        <div class="social-links">
+                            <a href="#" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+                            <a href="#" title="Youtube"><i class="fab fa-youtube"></i></a>
+                            <a href="#" title="Zalo"><i class="fas fa-comment-dots"></i></a>
+                            <a href="#" title="Tiktok"><i class="fab fa-tiktok"></i></a>
+                        </div>
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <h5>Hỗ trợ khách hàng</h5>
+                <div class="col-lg-2 col-md-6">
+                    <h5>Về chúng tôi</h5>
                     <ul class="footer-links">
-                        <li><a href="#">Chính sách đổi trả</a></li>
-                        <li><a href="#">Chính sách giao hàng</a></li>
-                        <li><a href="#">Hướng dẫn mua hàng</a></li>
-                        <li><a href="#">Câu hỏi thường gặp</a></li>
+                        <li><a asp-controller="Home" asp-action="GioiThieu">Giới thiệu</a></li>
+                        <li><a href="#">Hệ thống cửa hàng</a></li>
+                        <li><a href="#">Giấy phép kinh doanh</a></li>
+                        <li><a href="#">Quy chế hoạt động</a></li>
                     </ul>
                 </div>
-                <div class="col-md-3">
+                <div class="col-lg-2 col-md-6">
                     <h5>Danh mục</h5>
                     <ul class="footer-links">
-                        <li><a href="#">Thuốc không kê đơn</a></li>
-                        <li><a href="#">Thực phẩm chức năng</a></li>
-                        <li><a href="#">Chăm sóc sức khỏe</a></li>
-                        <li><a href="#">Sản phẩm tiện lợi</a></li>
+                        <li><a asp-controller="Thuoc" asp-action="TheoNhom" asp-route-id="1">Thuốc giảm đau</a></li>
+                        <li><a asp-controller="Thuoc" asp-action="TheoNhom" asp-route-id="5">Vitamin & TPCN</a></li>
+                        <li><a asp-controller="Thuoc" asp-action="TheoNhom" asp-route-id="4">Thuốc cảm cúm</a></li>
+                        <li><a asp-controller="NhomThuoc" asp-action="DanhSach">Xem tất cả</a></li>
                     </ul>
                 </div>
-                <div class="col-md-3">
-                    <h5>Liên hệ</h5>
+                <div class="col-lg-2 col-md-6">
+                    <h5>Hỗ trợ</h5>
                     <ul class="footer-links">
-                        <li><i class="fas fa-map-marker-alt"></i> Hà Nội, Việt Nam</li>
-                        <li><i class="fas fa-phone"></i> 1800 6928</li>
-                        <li><i class="fas fa-envelope"></i> support@nhathuoc.vn</li>
+                        <li><a href="#">Hướng dẫn mua hàng</a></li>
+                        <li><a href="#">Chính sách đổi trả</a></li>
+                        <li><a href="#">Chính sách bảo mật</a></li>
+                        <li><a asp-controller="Home" asp-action="LienHe">Liên hệ</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-2 col-md-6">
+                    <h5>Tổng đài</h5>
+                    <ul class="footer-links">
+                        <li>
+                            <i class="fas fa-phone-alt text-primary"></i>
+                            <a href="tel:18006928"><strong>1800 6928</strong></a>
+                            <br><small class="text-muted">Miễn phí 24/7</small>
+                        </li>
+                        <li>
+                            <i class="fas fa-envelope text-primary"></i>
+                            <a href="mailto:support@nhathuoc.vn">support@nhathuoc.vn</a>
+                        </li>
                     </ul>
                 </div>
             </div>
             <hr />
-            <div class="text-center py-3">
-                <p>&copy; 2025 Nhà Thuốc Online. All rights reserved.</p>
+            <div class="footer-bottom">
+                <p class="mb-0 text-center">&copy; 2025 Nhà Thuốc Online. All rights reserved.</p>
             </div>
         </div>
     </footer>
 
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
+    <!-- Back to Top -->
+    <button id="backToTop" class="back-to-top">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Back to top
+        const backToTop = document.getElementById('backToTop');
+        window.addEventListener('scroll', () => {
+            backToTop.classList.toggle('show', window.scrollY > 300);
+        });
+        backToTop?.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // Auto hide alerts
+        setTimeout(() => {
+            document.querySelectorAll('.alert-dismissible').forEach(alert => {
+                bootstrap.Alert.getOrCreateInstance(alert).close();
+            });
+        }, 5000);
+
+        // Cập nhật số lượng giỏ hàng
+        function capNhatSoLuongGioHang() {
+            fetch('/GioHang/LaySoLuong')
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('cart-count').textContent = data.soLuong;
+                })
+                .catch(err => console.log('Lỗi lấy số lượng giỏ hàng:', err));
+        }
+
+        // Thêm vào giỏ hàng bằng AJAX
+        function themVaoGioHang(maThuoc, soLuong = 1) {
+            fetch('/GioHang/ThemAjax', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `maThuoc=${maThuoc}&soLuong=${soLuong}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById('cart-count').textContent = data.soLuong;
+                    const cartBadge = document.getElementById('cart-count');
+                    cartBadge.classList.add('cart-badge-animate');
+                    setTimeout(() => cartBadge.classList.remove('cart-badge-animate'), 300);
+                    hienThiThongBao(data.message, 'success');
+                } else {
+                    hienThiThongBao(data.message, 'danger');
+                }
+            })
+            .catch(err => {
+                console.log('Lỗi:', err);
+                hienThiThongBao('Có lỗi xảy ra', 'danger');
+            });
+        }
+
+        // Hiển thị thông báo toast
+        function hienThiThongBao(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+            alertDiv.style.cssText = 'top: 180px; right: 20px; z-index: 9999; min-width: 300px;';
+            alertDiv.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(alertDiv);
+            setTimeout(() => alertDiv.remove(), 3000);
+        }
+        
+        // Gọi khi trang load
+        document.addEventListener('DOMContentLoaded', capNhatSoLuongGioHang);
+
+        // Fixed header scroll effect
+        const headerWrapper = document.getElementById('headerWrapper');
+        const headerSpacer = document.querySelector('.header-spacer');
+        
+        function updateHeaderSpacer() {
+            if (headerWrapper && headerSpacer) {
+                headerSpacer.style.height = headerWrapper.offsetHeight + 'px';
+            }
+        }
+        
+        window.addEventListener('scroll', () => {
+            if (headerWrapper) {
+                headerWrapper.classList.toggle('scrolled', window.scrollY > 50);
+            }
+        });
+        
+        window.addEventListener('resize', updateHeaderSpacer);
+        document.addEventListener('DOMContentLoaded', updateHeaderSpacer);
+    </script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

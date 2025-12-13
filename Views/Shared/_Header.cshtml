@@ -1,0 +1,269 @@
+@{
+    var hoTen = Context.Session.GetString("HoTen");
+    var soDienThoai = Context.Session.GetString("SoDienThoai");
+    var maNguoiDung = Context.Session.GetInt32("MaNguoiDung");
+    var isLoggedIn = maNguoiDung.HasValue;
+}
+
+<!-- Fixed Header Wrapper -->
+<div class="header-wrapper" id="headerWrapper">
+    <!-- Top Header -->
+    <div class="top-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <div class="top-header-left">
+                        <span class="me-4">
+                            <i class="fas fa-phone-alt text-warning"></i> 
+                            Hotline: <strong>1800 6928</strong> (Miễn phí)
+                        </span>
+                        <span class="me-4 d-none d-lg-inline">
+                            <i class="fas fa-clock text-warning"></i> 8:00 - 22:00
+                        </span>
+                        <span class="d-none d-lg-inline">
+                            <i class="fas fa-truck text-warning"></i> Freeship đơn từ 300K
+                        </span>
+                    </div>
+                </div>
+                <div class="col-md-4 text-end">
+                    @if (isLoggedIn)
+                    {
+                        <div class="dropdown d-inline-block">
+                            <a href="#" class="text-white dropdown-toggle" data-bs-toggle="dropdown">
+                                <i class="fas fa-user-circle"></i> @(hoTen ?? soDienThoai)
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" asp-controller="User" asp-action="Profile">
+                                    <i class="fas fa-user me-2"></i>Thông tin cá nhân</a></li>
+                                <li><a class="dropdown-item" asp-controller="DonHang" asp-action="DanhSach">
+                                    <i class="fas fa-box me-2"></i>Đơn hàng của tôi</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" asp-controller="User" asp-action="Logout">
+                                    <i class="fas fa-sign-out-alt me-2"></i>Đăng xuất</a></li>
+                            </ul>
+                        </div>
+                    }
+                    else
+                    {
+                        <a asp-controller="User" asp-action="PhoneLogin" class="text-white">
+                            <i class="fas fa-sign-in-alt"></i> Đăng nhập
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Header -->
+    <header class="main-header">
+        <div class="container">
+            <div class="row align-items-center py-2">
+                <!-- Logo -->
+                <div class="col-lg-2 col-md-3 col-6">
+                    <a asp-controller="Home" asp-action="Index" class="logo">
+                        <i class="fas fa-clinic-medical"></i>
+                        <span class="logo-text">NhàThuốc</span>
+                    </a>
+                </div>
+
+                <!-- Search Bar -->
+                <div class="col-lg-6 col-md-5 d-none d-md-block">
+                    <form asp-controller="Thuoc" asp-action="TimKiem" method="get" class="search-form">
+                        <div class="input-group">
+                            <span class="input-group-text bg-white border-end-0">
+                                <i class="fas fa-search text-muted"></i>
+                            </span>
+                            <input type="text" name="tuKhoa" class="form-control border-start-0" 
+                                   placeholder="Tìm tên thuốc, triệu chứng, thương hiệu..." />
+                            <button class="btn btn-primary px-4" type="submit">Tìm kiếm</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Right Actions -->
+                <div class="col-lg-4 col-md-4 col-6">
+                    <div class="header-actions">
+                        <!-- Hotline -->
+                        <a href="tel:18006928" class="header-action-item d-none d-lg-flex">
+                            <div class="action-icon">
+                                <i class="fas fa-headset"></i>
+                            </div>
+                            <div class="action-text">
+                                <small>Tư vấn</small>
+                                <strong>1800 6928</strong>
+                            </div>
+                        </a>
+
+                        <!-- Account -->
+                        @if (isLoggedIn)
+                        {
+                            <a asp-controller="User" asp-action="Profile" class="header-action-item">
+                                <div class="action-icon">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <div class="action-text d-none d-lg-block">
+                                    <small>Tài khoản</small>
+                                    <strong>@(hoTen?.Split(' ').LastOrDefault() ?? "Của tôi")</strong>
+                                </div>
+                            </a>
+                        }
+                        else
+                        {
+                            <a asp-controller="User" asp-action="PhoneLogin" class="header-action-item">
+                                <div class="action-icon">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <div class="action-text d-none d-lg-block">
+                                    <small>Đăng nhập</small>
+                                    <strong>Tài khoản</strong>
+                                </div>
+                            </a>
+                        }
+
+                        <!-- Cart -->
+                        <a asp-controller="GioHang" asp-action="Index" class="header-action-item cart-btn">
+                            <div class="action-icon">
+                                <i class="fas fa-shopping-cart"></i>
+                                <span class="cart-badge" id="cart-count">0</span>
+                            </div>
+                            <div class="action-text d-none d-lg-block">
+                                <small>Giỏ hàng</small>
+                                <strong>Sản phẩm</strong>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mobile Search -->
+            <div class="row d-md-none pb-2">
+                <div class="col-12">
+                    <form asp-controller="Thuoc" asp-action="TimKiem" method="get">
+                        <div class="input-group input-group-sm">
+                            <input type="text" name="tuKhoa" class="form-control" placeholder="Tìm kiếm..." />
+                            <button class="btn btn-primary" type="submit"><i class="fas fa-search"></i></button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation Menu -->
+    <nav class="main-nav">
+        <div class="container">
+            <div class="nav-wrapper">
+                <!-- Category Dropdown -->
+                <div class="nav-category dropdown">
+                    <button class="btn btn-category dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-bars me-2"></i> Danh mục sản phẩm
+                    </button>
+                    <div class="dropdown-menu mega-menu">
+                        <div class="row g-0">
+                            <div class="col-md-4 mega-menu-col">
+                                <h6 class="mega-menu-title"><i class="fas fa-pills"></i> Thuốc</h6>
+                                <ul class="mega-menu-list">
+                                    <li><a asp-controller="Thuoc" asp-action="TheoNhom" asp-route-id="1">Thuốc giảm đau, hạ sốt</a></li>
+                                    <li><a asp-controller="Thuoc" asp-action="TheoNhom" asp-route-id="2">Thuốc kháng sinh</a></li>
+                                    <li><a asp-controller="Thuoc" asp-action="TheoNhom" asp-route-id="3">Thuốc tiêu hóa</a></li>
+                                    <li><a asp-controller="Thuoc" asp-action="TheoNhom" asp-route-id="4">Thuốc cảm cúm</a></li>
+                                </ul>
+                            </div>
+                            <div class="col-md-4 mega-menu-col">
+                                <h6 class="mega-menu-title"><i class="fas fa-capsules"></i> Thực phẩm chức năng</h6>
+                                <ul class="mega-menu-list">
+                                    <li><a asp-controller="Thuoc" asp-action="TheoNhom" asp-route-id="5">Vitamin & Khoáng chất</a></li>
+                                    <li><a href="#">Bổ sung dinh dưỡng</a></li>
+                                    <li><a href="#">Hỗ trợ tiêu hóa</a></li>
+                                    <li><a href="#">Tăng cường miễn dịch</a></li>
+                                </ul>
+                            </div>
+                            <div class="col-md-4 mega-menu-col">
+                                <h6 class="mega-menu-title"><i class="fas fa-heartbeat"></i> Chăm sóc sức khỏe</h6>
+                                <ul class="mega-menu-list">
+                                    <li><a href="#">Dụng cụ y tế</a></li>
+                                    <li><a href="#">Chăm sóc cá nhân</a></li>
+                                    <li><a href="#">Sản phẩm cho mẹ & bé</a></li>
+                                    <li><a asp-controller="NhomThuoc" asp-action="DanhSach">Xem tất cả danh mục →</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Menu -->
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <a asp-controller="Home" asp-action="Index" 
+                           class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" && ViewContext.RouteData.Values["action"]?.ToString() == "Index" ? "active" : "")">
+                            <i class="fas fa-home"></i> Trang chủ
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a asp-controller="Thuoc" asp-action="DanhSach" 
+                           class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Thuoc" ? "active" : "")">
+                            <i class="fas fa-capsules"></i> Sản phẩm
+                        </a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
+                            <i class="fas fa-tags"></i> Khuyến mãi
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-bolt text-warning"></i> Flash Sale</a></li>
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-percent text-danger"></i> Giảm giá hot</a></li>
+                            <li><a class="dropdown-item" href="#"><i class="fas fa-gift text-success"></i> Quà tặng</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item">
+                        <a asp-controller="Home" asp-action="GioiThieu" class="nav-link">
+                            <i class="fas fa-info-circle"></i> Giới thiệu
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a asp-controller="Home" asp-action="LienHe" class="nav-link">
+                            <i class="fas fa-phone-alt"></i> Liên hệ
+                        </a>
+                    </li>
+                    @if (isLoggedIn)
+                    {
+                        <li class="nav-item">
+                            <a asp-controller="DonHang" asp-action="DanhSach" 
+                               class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "DonHang" ? "active" : "")">
+                                <i class="fas fa-clipboard-list"></i> Đơn hàng
+                            </a>
+                        </li>
+                    }
+                </ul>
+
+                <!-- Mobile Menu Toggle -->
+                <button class="btn d-lg-none mobile-menu-toggle" type="button" data-bs-toggle="collapse" data-bs-target="#mobileMenu">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+
+            <!-- Mobile Menu -->
+            <div class="collapse d-lg-none" id="mobileMenu">
+                <ul class="mobile-nav-menu">
+                    <li><a asp-controller="Home" asp-action="Index"><i class="fas fa-home"></i> Trang chủ</a></li>
+                    <li><a asp-controller="Thuoc" asp-action="DanhSach"><i class="fas fa-capsules"></i> Sản phẩm</a></li>
+                    <li><a asp-controller="NhomThuoc" asp-action="DanhSach"><i class="fas fa-th-list"></i> Danh mục</a></li>
+                    <li><a asp-controller="Home" asp-action="GioiThieu"><i class="fas fa-info-circle"></i> Giới thiệu</a></li>
+                    <li><a asp-controller="Home" asp-action="LienHe"><i class="fas fa-phone-alt"></i> Liên hệ</a></li>
+                    @if (isLoggedIn)
+                    {
+                        <li><a asp-controller="User" asp-action="Profile"><i class="fas fa-user"></i> Tài khoản</a></li>
+                        <li><a asp-controller="DonHang" asp-action="DanhSach"><i class="fas fa-box"></i> Đơn hàng</a></li>
+                        <li><a asp-controller="User" asp-action="Logout" class="text-danger"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a></li>
+                    }
+                    else
+                    {
+                        <li><a asp-controller="User" asp-action="PhoneLogin"><i class="fas fa-sign-in-alt"></i> Đăng nhập</a></li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </nav>
+</div>
+<!-- Header Spacer - để tránh content bị che bởi fixed header -->
+<div class="header-spacer"></div>

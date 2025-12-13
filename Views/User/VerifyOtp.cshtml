@@ -1,0 +1,169 @@
+@model QL_NhaThuoc.ViewModels.VerifyOtpVM
+@{
+    ViewData["Title"] = "Xác thực OTP";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card shadow">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-shield-alt fa-3x text-success mb-3"></i>
+                        <h3 class="card-title">Xác thực OTP</h3>
+                        <p class="text-muted">
+                            Mã OTP đã được gửi đến<br>
+                            <strong class="text-primary">@Model.PhoneNumber</strong>
+                        </p>
+                    </div>
+
+                    @if (ViewBag.SuccessMessage != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fas fa-check-circle"></i> @ViewBag.SuccessMessage
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    <form asp-action="VerifyOtp" method="post" id="otpForm">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                        
+                        <input type="hidden" asp-for="PhoneNumber" />
+
+                        <div class="form-group mb-4">
+                            <label asp-for="OTP" class="form-label">
+                                <i class="fas fa-key"></i> Mã OTP (6 chữ số)
+                            </label>
+                            <input asp-for="OTP" 
+                                   class="form-control form-control-lg text-center" 
+                                   placeholder="000000"
+                                   maxlength="6"
+                                   style="letter-spacing: 10px; font-size: 24px; font-weight: bold;"
+                                   autofocus />
+                            <span asp-validation-for="OTP" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">
+                                    <i class="fas fa-clock"></i> 
+                                    Mã có hiệu lực: <span id="countdown" class="fw-bold text-danger">05:00</span>
+                                </small>
+                                <button type="button" 
+                                        class="btn btn-link btn-sm p-0" 
+                                        id="resendBtn"
+                                        onclick="resendOtp()">
+                                    <i class="fas fa-redo"></i> Gửi lại mã
+                                </button>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-success btn-lg w-100 mb-3">
+                            <i class="fas fa-sign-in-alt"></i> Xác nhận & Đăng nhập
+                        </button>
+
+                        <a asp-action="PhoneLogin" class="btn btn-outline-secondary w-100">
+                            <i class="fas fa-arrow-left"></i> Quay lại
+                        </a>
+                    </form>
+                </div>
+            </div>
+
+            <div class="alert alert-warning mt-3">
+                <i class="fas fa-exclamation-triangle"></i>
+                <strong>Không nhận được mã?</strong> Kiểm tra tin nhắn hoặc nhấn "Gửi lại mã"
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    
+    <script>
+        // Countdown timer
+        let timeLeft = 300; // 5 minutes in seconds
+        const countdownElement = document.getElementById('countdown');
+        const resendBtn = document.getElementById('resendBtn');
+
+        function updateCountdown() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            countdownElement.textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            
+            if (timeLeft <= 0) {
+                countdownElement.textContent = 'Hết hạn';
+                countdownElement.classList.remove('text-danger');
+                countdownElement.classList.add('text-muted');
+            } else if (timeLeft <= 60) {
+                countdownElement.classList.add('text-danger');
+            }
+            
+            timeLeft--;
+        }
+
+        // Update countdown every second
+        updateCountdown();
+        const countdownInterval = setInterval(updateCountdown, 1000);
+
+        // Auto-focus and format OTP input
+        const otpInput = document.querySelector('input[name="OTP"]');
+        otpInput.addEventListener('input', function(e) {
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+
+        // Resend OTP function
+        async function resendOtp() {
+            const phoneNumber = '@Model.PhoneNumber';
+            resendBtn.disabled = true;
+            resendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang gửi...';
+
+            try {
+                const response = await fetch('@Url.Action("ResendOtp", "User")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(phoneNumber)
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Reset countdown
+                    timeLeft = 300;
+                    countdownElement.classList.remove('text-muted');
+                    countdownElement.classList.add('text-danger');
+                    
+                    // Show success message
+                    showAlert('success', result.message);
+                } else {
+                    showAlert('danger', result.message);
+                }
+            } catch (error) {
+                showAlert('danger', 'Đã xảy ra lỗi. Vui lòng thử lại');
+            } finally {
+                resendBtn.disabled = false;
+                resendBtn.innerHTML = '<i class="fas fa-redo"></i> Gửi lại mã';
+            }
+        }
+
+        function showAlert(type, message) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+            alertDiv.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i> ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.querySelector('.card-body').insertBefore(alertDiv, document.querySelector('form'));
+            
+            setTimeout(() => alertDiv.remove(), 5000);
+        }
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            clearInterval(countdownInterval);
+        });
+    </script>
+}

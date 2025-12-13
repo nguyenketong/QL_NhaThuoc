@@ -1,0 +1,126 @@
+@{
+    ViewData["Title"] = "Danh sách thuốc";
+}
+
+<div class="container my-5">
+    <h2 class="mb-4">
+        <i class="fas fa-pills"></i> 
+        @if (ViewBag.TenNhom != null)
+        {
+            <text>@ViewBag.TenNhom</text>
+        }
+        else if (ViewBag.TenThuongHieu != null)
+        {
+            <text>@ViewBag.TenThuongHieu</text>
+        }
+        else if (ViewBag.TuKhoa != null)
+        {
+            <text>Kết quả tìm kiếm: "@ViewBag.TuKhoa"</text>
+        }
+        else
+        {
+            <text>Danh sách thuốc</text>
+        }
+    </h2>
+
+    <!-- Filter -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" asp-action="DanhSach">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <label class="form-label">Nhóm thuốc</label>
+                        <select name="maNhom" class="form-select">
+                            <option value="">Tất cả</option>
+                            @if (ViewBag.DanhSachNhom != null)
+                            {
+                                var nhomList = ViewBag.DanhSachNhom as IEnumerable<dynamic>;
+                                @foreach (var nhom in nhomList)
+                                {
+                                    <option value="@nhom.MaNhomThuoc">@nhom.TenNhomThuoc</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Thương hiệu</label>
+                        <select name="maThuongHieu" class="form-select">
+                            <option value="">Tất cả</option>
+                            @if (ViewBag.DanhSachThuongHieu != null)
+                            {
+                                var thList = ViewBag.DanhSachThuongHieu as IEnumerable<dynamic>;
+                                @foreach (var th in thList)
+                                {
+                                    <option value="@th.MaThuongHieu">@th.TenThuongHieu</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Giá từ</label>
+                        <input type="number" name="giaMin" class="form-control" placeholder="0">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Giá đến</label>
+                        <input type="number" name="giaMax" class="form-control" placeholder="1000000">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">&nbsp;</label>
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-filter"></i> Lọc
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Products Grid -->
+    <div class="row g-4">
+        @if (Model != null)
+        {
+            var items = Model as IEnumerable<dynamic>;
+            @foreach (var thuoc in items)
+            {
+                <div class="col-md-3">
+                    <div class="product-card">
+                        <div class="product-image">
+                            <img src="@(string.IsNullOrEmpty((string)thuoc.HinhAnh) ? "/images/no-image.svg" : thuoc.HinhAnh)" 
+                                 alt="@thuoc.TenThuoc" onerror="this.src='/images/no-image.svg'" />
+                        </div>
+                        <div class="product-info">
+                            <h6 class="product-name">@thuoc.TenThuoc</h6>
+                            <div class="product-category">
+                                <small class="text-muted">@thuoc.TenNhomThuoc</small>
+                            </div>
+                            <div class="product-price">
+                                <span class="price-new">@(((decimal?)thuoc.GiaBan ?? 0).ToString("N0"))đ</span>
+                            </div>
+                            <div class="product-brand">
+                                <small><i class="fas fa-building"></i> @thuoc.TenThuongHieu</small>
+                            </div>
+                            <div class="mt-2">
+                                <a asp-action="ChiTiet" asp-route-id="@thuoc.MaThuoc" 
+                                   class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-info-circle"></i> Chi tiết
+                                </a>
+                                <button type="button" class="btn btn-primary btn-sm" onclick="themVaoGioHang(@thuoc.MaThuoc, 1)">
+                                    <i class="fas fa-cart-plus"></i> Thêm
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+            
+            @if (!items.Any())
+            {
+                <div class="col-12">
+                    <div class="alert alert-info text-center">
+                        <i class="fas fa-info-circle"></i> Không tìm thấy sản phẩm nào
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>

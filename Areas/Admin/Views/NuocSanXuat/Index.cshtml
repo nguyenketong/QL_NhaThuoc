@@ -1,0 +1,39 @@
+@{
+    ViewData["Title"] = "Quan ly nuoc san xuat";
+}
+
+<div class="d-flex justify-content-end mb-4">
+    <a asp-action="Create" class="btn btn-success"><i class="fas fa-plus"></i> Them nuoc SX</a>
+</div>
+
+<div class="admin-table">
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Ten nuoc san xuat</th>
+                <th>So luong thuoc</th>
+                <th width="150">Thao tac</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.NuocSanXuat.MaNuocSX</td>
+                    <td><strong>@item.NuocSanXuat.TenNuocSX</strong></td>
+                    <td><span class="badge bg-info">@item.SoLuongThuoc san pham</span></td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.NuocSanXuat.MaNuocSX" class="btn btn-sm btn-warning">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <form asp-action="Delete" asp-route-id="@item.NuocSanXuat.MaNuocSX" method="post" class="d-inline"
+                              onsubmit="return confirm('Xoa nuoc san xuat nay?')">
+                            <button type="submit" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Admin Panel</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --sidebar-width: 260px;
+            --primary: #1E88E5;
+            --primary-dark: #1565C0;
+            --dark: #1a1a2e;
+            --dark-light: #16213e;
+        }
+        body { font-family: 'Inter', sans-serif; background: #f4f6f9; }
+        
+        /* Sidebar */
+        .admin-sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: var(--sidebar-width);
+            background: linear-gradient(180deg, var(--dark) 0%, var(--dark-light) 100%);
+            color: #fff;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+        .sidebar-brand {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .sidebar-brand h4 { margin: 0; font-weight: 700; }
+        .sidebar-brand i { font-size: 2rem; color: var(--primary); }
+        
+        .sidebar-menu { padding: 15px 0; }
+        .menu-header {
+            padding: 10px 20px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: rgba(255,255,255,0.4);
+            font-weight: 600;
+        }
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+        }
+        .menu-item:hover, .menu-item.active {
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            border-left-color: var(--primary);
+        }
+        .menu-item i { width: 25px; margin-right: 10px; }
+        .menu-item .badge { margin-left: auto; }
+        
+        /* Main Content */
+        .admin-main {
+            margin-left: var(--sidebar-width);
+            min-height: 100vh;
+        }
+        .admin-header {
+            background: #fff;
+            padding: 15px 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .admin-content { padding: 25px; }
+        
+        /* Cards */
+        .stat-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: #fff;
+        }
+        .stat-icon.blue { background: linear-gradient(135deg, #1E88E5, #1565C0); }
+        .stat-icon.green { background: linear-gradient(135deg, #4CAF50, #2E7D32); }
+        .stat-icon.orange { background: linear-gradient(135deg, #FF9800, #F57C00); }
+        .stat-icon.red { background: linear-gradient(135deg, #F44336, #D32F2F); }
+        .stat-value { font-size: 1.8rem; font-weight: 700; color: #333; }
+        .stat-label { color: #666; font-size: 0.9rem; }
+        
+        /* Table */
+        .admin-table { background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+        .admin-table .table { margin: 0; }
+        .admin-table thead { background: var(--dark); color: #fff; }
+        .admin-table th { font-weight: 600; padding: 15px; border: none; }
+        .admin-table td { padding: 15px; vertical-align: middle; }
+        
+        /* Buttons */
+        .btn-admin { border-radius: 8px; padding: 8px 16px; font-weight: 500; }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="admin-sidebar">
+        <div class="sidebar-brand">
+            <i class="fas fa-clinic-medical"></i>
+            <h4>Admin Panel</h4>
+        </div>
+        <nav class="sidebar-menu">
+            <div class="menu-header">Tổng quan</div>
+            <a asp-area="Admin" asp-controller="Dashboard" asp-action="Index" class="menu-item">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+            </a>
+            
+            <div class="menu-header">Quản lý sản phẩm</div>
+            <a asp-area="Admin" asp-controller="Thuoc" asp-action="Index" class="menu-item">
+                <i class="fas fa-pills"></i> Thuốc
+            </a>
+            <a asp-area="Admin" asp-controller="NhomThuoc" asp-action="Index" class="menu-item">
+                <i class="fas fa-th-list"></i> Nhóm thuốc
+            </a>
+            <a asp-area="Admin" asp-controller="ThuongHieu" asp-action="Index" class="menu-item">
+                <i class="fas fa-building"></i> Thương hiệu
+            </a>
+            <a asp-area="Admin" asp-controller="NuocSanXuat" asp-action="Index" class="menu-item">
+                <i class="fas fa-globe"></i> Nước sản xuất
+            </a>
+            <a asp-area="Admin" asp-controller="ThanhPhan" asp-action="Index" class="menu-item">
+                <i class="fas fa-flask"></i> Thành phần
+            </a>
+            <a asp-area="Admin" asp-controller="TacDungPhu" asp-action="Index" class="menu-item">
+                <i class="fas fa-exclamation-triangle"></i> Tác dụng phụ
+            </a>
+            <a asp-area="Admin" asp-controller="DoiTuongSuDung" asp-action="Index" class="menu-item">
+                <i class="fas fa-user-tag"></i> Đối tượng sử dụng
+            </a>
+            
+            <div class="menu-header">Quản lý bán hàng</div>
+            <a asp-area="Admin" asp-controller="DonHang" asp-action="Index" class="menu-item">
+                <i class="fas fa-shopping-cart"></i> Đơn hàng
+            </a>
+            <a asp-area="Admin" asp-controller="NguoiDung" asp-action="Index" class="menu-item">
+                <i class="fas fa-users"></i> Khách hàng
+            </a>
+            
+            <div class="menu-header">Hệ thống</div>
+            <a asp-controller="Home" asp-action="Index" asp-area="" class="menu-item">
+                <i class="fas fa-globe"></i> Xem trang web
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="admin-main">
+        <header class="admin-header">
+            <h5 class="mb-0">@ViewData["Title"]</h5>
+            <div class="d-flex align-items-center gap-3">
+                <span class="text-muted">@DateTime.Now.ToString("dd/MM/yyyy")</span>
+                <div class="dropdown">
+                    <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" data-bs-toggle="dropdown">
+                        <i class="fas fa-user-circle fs-4 text-primary me-2"></i>
+                        <span>@Context.Session.GetString("HoTen")</span>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li><span class="dropdown-item-text text-muted small">@Context.Session.GetString("SoDienThoai")</span></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="/"><i class="fas fa-globe me-2"></i>Xem trang web</a></li>
+                        <li><a class="dropdown-item text-danger" asp-area="Admin" asp-controller="Auth" asp-action="Logout">
+                            <i class="fas fa-sign-out-alt me-2"></i>Đăng xuất</a></li>
+                    </ul>
+                </div>
+            </div>
+        </header>
+        
+        <div class="admin-content">
+            @if (TempData["ThongBao"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show">
+                    <i class="fas fa-check-circle"></i> @TempData["ThongBao"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+            @if (TempData["LoiThongBao"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show">
+                    <i class="fas fa-exclamation-circle"></i> @TempData["LoiThongBao"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            }
+            @RenderBody()
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

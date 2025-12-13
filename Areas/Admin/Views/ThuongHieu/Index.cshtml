@@ -1,0 +1,41 @@
+@{
+    ViewData["Title"] = "Quản lý thương hiệu";
+}
+
+<div class="d-flex justify-content-end mb-4">
+    <a asp-action="Create" class="btn btn-success"><i class="fas fa-plus"></i> Thêm thương hiệu</a>
+</div>
+
+<div class="admin-table">
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Tên thương hiệu</th>
+                <th>Quốc gia</th>
+                <th>Số lượng thuốc</th>
+                <th width="150">Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.ThuongHieu.MaThuongHieu</td>
+                    <td><strong>@item.ThuongHieu.TenThuongHieu</strong></td>
+                    <td>@item.ThuongHieu.QuocGia</td>
+                    <td><span class="badge bg-info">@item.SoLuongThuoc sản phẩm</span></td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.ThuongHieu.MaThuongHieu" class="btn btn-sm btn-warning">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <form asp-action="Delete" asp-route-id="@item.ThuongHieu.MaThuongHieu" method="post" class="d-inline"
+                              onsubmit="return confirm('Xóa thương hiệu này?')">
+                            <button type="submit" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

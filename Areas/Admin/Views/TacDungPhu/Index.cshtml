@@ -1,0 +1,41 @@
+@{
+    ViewData["Title"] = "Quản lý tác dụng phụ";
+}
+
+<div class="d-flex justify-content-end mb-4">
+    <a asp-action="Create" class="btn btn-success"><i class="fas fa-plus"></i> Thêm tác dụng phụ</a>
+</div>
+
+<div class="admin-table">
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Tên tác dụng phụ</th>
+                <th>Mô tả</th>
+                <th>Số lượng thuốc</th>
+                <th width="150">Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.TacDungPhu.MaTacDungPhu</td>
+                    <td><strong>@item.TacDungPhu.TenTacDungPhu</strong></td>
+                    <td>@item.TacDungPhu.MoTa</td>
+                    <td><span class="badge bg-info">@item.SoLuongThuoc sản phẩm</span></td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.TacDungPhu.MaTacDungPhu" class="btn btn-sm btn-warning">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <form asp-action="Delete" asp-route-id="@item.TacDungPhu.MaTacDungPhu" method="post" class="d-inline"
+                              onsubmit="return confirm('Xóa tác dụng phụ này?')">
+                            <button type="submit" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

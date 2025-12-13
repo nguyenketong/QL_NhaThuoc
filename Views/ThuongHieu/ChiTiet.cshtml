@@ -1,0 +1,62 @@
+@{
+    ViewData["Title"] = "Chi tiết thương hiệu";
+    var thuongHieu = Model as dynamic;
+    var thuocs = ViewBag.Thuocs as IEnumerable<dynamic>;
+}
+
+<div class="container my-5">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+            <li class="breadcrumb-item"><a asp-controller="Thuoc" asp-action="DanhSach">Sản phẩm</a></li>
+            <li class="breadcrumb-item active">@thuongHieu.TenThuongHieu</li>
+        </ol>
+    </nav>
+
+    <div class="mb-4">
+        <h2><i class="fas fa-building me-2"></i>@thuongHieu.TenThuongHieu</h2>
+        @if (!string.IsNullOrEmpty((string)thuongHieu.QuocGia))
+        {
+            <p class="text-muted"><i class="fas fa-globe me-1"></i>@thuongHieu.QuocGia</p>
+        }
+    </div>
+
+    <h4 class="mb-3">Sản phẩm của thương hiệu</h4>
+
+    @if (thuocs != null && thuocs.Any())
+    {
+        <div class="row">
+            @foreach (var thuoc in thuocs)
+            {
+                <div class="col-md-3 col-sm-6 mb-4">
+                    <div class="card product-card h-100">
+                        <a asp-controller="Thuoc" asp-action="ChiTiet" asp-route-id="@thuoc.MaThuoc">
+                            <img src="@(string.IsNullOrEmpty((string)thuoc.HinhAnh) ? "/images/no-image.svg" : thuoc.HinhAnh)" 
+                                 class="card-img-top" alt="@thuoc.TenThuoc" style="height: 200px; object-fit: cover;"
+                                 onerror="this.src='/images/no-image.svg'" />
+                        </a>
+                        <div class="card-body">
+                            <h6 class="card-title">
+                                <a asp-controller="Thuoc" asp-action="ChiTiet" asp-route-id="@thuoc.MaThuoc" class="text-decoration-none text-dark">
+                                    @thuoc.TenThuoc
+                                </a>
+                            </h6>
+                            <p class="card-text text-danger fw-bold">@(((decimal?)thuoc.GiaBan ?? 0).ToString("N0"))đ</p>
+                        </div>
+                        <div class="card-footer bg-white">
+                            <button type="button" class="btn btn-primary btn-sm w-100" onclick="themVaoGioHang(@thuoc.MaThuoc, 1)">
+                                <i class="fas fa-cart-plus"></i> Thêm vào giỏ
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            <i class="fas fa-info-circle"></i> Chưa có sản phẩm nào thuộc thương hiệu này.
+        </div>
+    }
+</div>

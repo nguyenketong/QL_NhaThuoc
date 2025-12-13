@@ -1,0 +1,70 @@
+@{
+    ViewData["Title"] = "Chi tiết nhóm thuốc";
+    var nhomThuoc = ViewBag.NhomThuoc as dynamic;
+}
+
+<div class="container my-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+            <li class="breadcrumb-item"><a asp-action="DanhSach">Nhóm thuốc</a></li>
+            <li class="breadcrumb-item active">@nhomThuoc?.TenNhomThuoc</li>
+        </ol>
+    </nav>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h1 class="card-title">@nhomThuoc?.TenNhomThuoc</h1>
+            @if (!string.IsNullOrEmpty((string)nhomThuoc?.MoTa))
+            {
+                <p class="card-text">@nhomThuoc.MoTa</p>
+            }
+        </div>
+    </div>
+
+    <div class="row">
+        @if (Model != null)
+        {
+            var items = Model as IEnumerable<dynamic>;
+            @foreach (var thuoc in items)
+            {
+                <div class="col-md-4 col-lg-3 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        <img src="@(string.IsNullOrEmpty((string)thuoc.HinhAnh) ? "/images/no-image.svg" : thuoc.HinhAnh)" 
+                             class="card-img-top" alt="@thuoc.TenThuoc" style="height: 200px; object-fit: cover;"
+                             onerror="this.src='/images/no-image.svg'">
+                        <div class="card-body">
+                            <h6 class="card-title">@thuoc.TenThuoc</h6>
+                            @if (!string.IsNullOrEmpty((string)thuoc.TenThuongHieu))
+                            {
+                                <p class="text-muted small mb-1">@thuoc.TenThuongHieu</p>
+                            }
+                            <p class="text-danger fw-bold">@(((decimal?)thuoc.GiaBan ?? 0).ToString("N0")) đ</p>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <div class="d-grid gap-2">
+                                <a asp-controller="Thuoc" asp-action="ChiTiet" asp-route-id="@thuoc.MaThuoc" 
+                                   class="btn btn-outline-primary btn-sm">
+                                    <i class="bi bi-eye"></i> Chi tiết
+                                </a>
+                                <button type="button" class="btn btn-primary btn-sm" 
+                                        onclick="themVaoGioHang(@thuoc.MaThuoc)">
+                                    <i class="bi bi-cart-plus"></i> Thêm vào giỏ
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+            
+            @if (!items.Any())
+            {
+                <div class="col-12">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> Nhóm thuốc này chưa có sản phẩm nào.
+                    </div>
+                </div>
+            }
+        }
+    </div>
+</div>

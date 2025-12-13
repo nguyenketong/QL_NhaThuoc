@@ -1,0 +1,69 @@
+@{
+    ViewData["Title"] = "Chi tiết khách hàng";
+    var nguoiDung = Model as dynamic;
+}
+
+<div class="row g-4">
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <i class="fas fa-user-circle" style="font-size: 5rem; color: #1E88E5;"></i>
+                </div>
+                <h5>@(nguoiDung.HoTen ?? nguoiDung.SoDienThoai)</h5>
+                <p class="text-muted">@nguoiDung.SoDienThoai</p>
+                <hr>
+                <p><i class="fas fa-map-marker-alt text-primary"></i> @(nguoiDung.DiaChi ?? "Chưa cập nhật")</p>
+                <p><i class="fas fa-calendar text-primary"></i> Tham gia: @(nguoiDung.NgayTao != null ? ((DateTime)nguoiDung.NgayTao).ToString("dd/MM/yyyy") : "N/A")</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white"><h6 class="mb-0">Lịch sử đơn hàng</h6></div>
+            <table class="table mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Mã ĐH</th>
+                        <th>Ngày đặt</th>
+                        <th>Tổng tiền</th>
+                        <th>Trạng thái</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (ViewBag.DonHangs != null)
+                    {
+                        var donHangs = ViewBag.DonHangs as IEnumerable<dynamic>;
+                        @foreach (var dh in donHangs)
+                        {
+                            <tr>
+                                <td><a asp-action="Details" asp-controller="DonHang" asp-route-id="@dh.MaDonHang">#@dh.MaDonHang</a></td>
+                                <td>@((DateTime)dh.NgayDatHang).ToString("dd/MM/yyyy")</td>
+                                <td class="text-danger">@(((decimal?)dh.TongTien ?? 0).ToString("N0"))đ</td>
+                                <td>
+                                    @{
+                                        var trangThai = (string)dh.TrangThai;
+                                    }
+                                    @if (trangThai == "Hoan thanh")
+                                    {
+                                        <span class="badge bg-success">Hoàn thành</span>
+                                    }
+                                    else if (trangThai == "Cho xu ly")
+                                    {
+                                        <span class="badge bg-warning">Chờ xử lý</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-secondary">@trangThai</span>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<a asp-action="Index" class="btn btn-secondary mt-3"><i class="fas fa-arrow-left"></i> Quay lại</a>

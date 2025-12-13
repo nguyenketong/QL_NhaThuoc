@@ -1,0 +1,76 @@
+@{
+    ViewData["Title"] = "Quản lý thuốc";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <form method="get" class="d-flex gap-2">
+            <input type="text" name="search" class="form-control" placeholder="Tìm kiếm..." value="@Context.Request.Query["search"]" />
+            <select name="nhomId" class="form-select" style="width: 200px;">
+                <option value="">-- Tất cả nhóm --</option>
+                @foreach (var nhom in ViewBag.NhomThuocs)
+                {
+                    <option value="@nhom.MaNhomThuoc">@nhom.TenNhomThuoc</option>
+                }
+            </select>
+            <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i></button>
+        </form>
+    </div>
+    <a asp-action="Create" class="btn btn-success">
+        <i class="fas fa-plus"></i> Thêm thuốc
+    </a>
+</div>
+
+<div class="admin-table">
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Tên thuốc</th>
+                <th>Nhóm</th>
+                <th>Thương hiệu</th>
+                <th>Giá bán</th>
+                <th>Đơn vị</th>
+                <th width="150">Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null)
+            {
+                var items = Model as IEnumerable<dynamic>;
+                @foreach (var item in items)
+                {
+                    <tr>
+                        <td>@item.MaThuoc</td>
+                        <td><strong>@item.TenThuoc</strong></td>
+                        <td><span class="badge bg-info">@item.TenNhomThuoc</span></td>
+                        <td>@item.TenThuongHieu</td>
+                        <td class="text-danger fw-bold">@(((decimal?)item.GiaBan)?.ToString("N0") ?? "0")đ</td>
+                        <td>@item.DonViTinh</td>
+                        <td>
+                            <a asp-action="Edit" asp-route-id="@item.MaThuoc" class="btn btn-sm btn-warning">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <form asp-action="Delete" asp-route-id="@item.MaThuoc" method="post" class="d-inline"
+                                  onsubmit="return confirm('Bạn có chắc muốn xóa?')">
+                                <button type="submit" class="btn btn-sm btn-danger">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+@{
+    var allItems = Model as IEnumerable<dynamic>;
+    if (allItems == null || !allItems.Any())
+    {
+        <div class="alert alert-info text-center mt-3">
+            <i class="fas fa-info-circle"></i> Chưa có thuốc nào
+        </div>
+    }
+}

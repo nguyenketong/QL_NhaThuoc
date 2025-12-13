@@ -1,0 +1,41 @@
+@{
+    ViewData["Title"] = "Quản lý đối tượng sử dụng";
+}
+
+<div class="d-flex justify-content-end mb-4">
+    <a asp-action="Create" class="btn btn-success"><i class="fas fa-plus"></i> Thêm đối tượng</a>
+</div>
+
+<div class="admin-table">
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Tên đối tượng</th>
+                <th>Mô tả</th>
+                <th>Số lượng thuốc</th>
+                <th width="150">Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.DoiTuong.MaDoiTuong</td>
+                    <td><strong>@item.DoiTuong.TenDoiTuong</strong></td>
+                    <td>@item.DoiTuong.MoTa</td>
+                    <td><span class="badge bg-info">@item.SoLuongThuoc sản phẩm</span></td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.DoiTuong.MaDoiTuong" class="btn btn-sm btn-warning">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <form asp-action="Delete" asp-route-id="@item.DoiTuong.MaDoiTuong" method="post" class="d-inline"
+                              onsubmit="return confirm('Xóa đối tượng này?')">
+                            <button type="submit" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

@@ -1,0 +1,195 @@
+@{
+    ViewData["Title"] = "Chi tiết thuốc";
+    var thuoc = Model as dynamic;
+    var thanhPhans = ViewBag.ThanhPhans as IEnumerable<dynamic>;
+    var tacDungPhus = ViewBag.TacDungPhus as IEnumerable<dynamic>;
+    var doiTuongs = ViewBag.DoiTuongs as IEnumerable<dynamic>;
+}
+
+<div class="container my-5">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+            <li class="breadcrumb-item"><a asp-controller="Thuoc" asp-action="DanhSach">Sản phẩm</a></li>
+            <li class="breadcrumb-item active">@thuoc.TenThuoc</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <div class="col-md-5">
+            <div class="product-detail-image">
+                <img src="@(string.IsNullOrEmpty((string)thuoc.HinhAnh) ? "/images/no-image.svg" : thuoc.HinhAnh)" 
+                     alt="@thuoc.TenThuoc" class="img-fluid rounded" onerror="this.src='/images/no-image.svg'" />
+            </div>
+        </div>
+        <div class="col-md-7">
+            <h2>@thuoc.TenThuoc</h2>
+            <div class="mb-3">
+                <span class="badge bg-primary">@thuoc.TenNhomThuoc</span>
+                @if (!string.IsNullOrEmpty((string)thuoc.TenThuongHieu))
+                {
+                    <span class="badge bg-secondary">@thuoc.TenThuongHieu</span>
+                }
+            </div>
+
+            <div class="product-price-large mb-4">
+                <h3 class="text-danger">@(((decimal?)thuoc.GiaBan ?? 0).ToString("N0"))đ</h3>
+                @if (!string.IsNullOrEmpty((string)thuoc.DonViTinh))
+                {
+                    <span class="text-muted">/ @thuoc.DonViTinh</span>
+                }
+            </div>
+
+            <div class="mb-4">
+                <h5>Thông tin sản phẩm</h5>
+                <table class="table table-borderless">
+                    <tr>
+                        <td width="150"><strong>Nhóm thuốc:</strong></td>
+                        <td>@thuoc.TenNhomThuoc</td>
+                    </tr>
+                    @if (!string.IsNullOrEmpty((string)thuoc.TenThuongHieu))
+                    {
+                        <tr>
+                            <td><strong>Thương hiệu:</strong></td>
+                            <td>@thuoc.TenThuongHieu</td>
+                        </tr>
+                    }
+                    @if (!string.IsNullOrEmpty((string)thuoc.TenNuocSX))
+                    {
+                        <tr>
+                            <td><strong>Nước sản xuất:</strong></td>
+                            <td>@thuoc.TenNuocSX</td>
+                        </tr>
+                    }
+                    @if (!string.IsNullOrEmpty((string)thuoc.DonViTinh))
+                    {
+                        <tr>
+                            <td><strong>Đơn vị tính:</strong></td>
+                            <td>@thuoc.DonViTinh</td>
+                        </tr>
+                    }
+                </table>
+            </div>
+
+            <div class="input-group mb-3" style="max-width: 200px;">
+                <button class="btn btn-outline-secondary" type="button" onclick="giamSoLuong()">-</button>
+                <input type="number" id="soLuong" value="1" min="1" class="form-control text-center" />
+                <button class="btn btn-outline-secondary" type="button" onclick="tangSoLuong()">+</button>
+            </div>
+            <button type="button" class="btn btn-primary btn-lg" onclick="themVaoGioHang(@thuoc.MaThuoc, document.getElementById('soLuong').value)">
+                <i class="fas fa-cart-plus"></i> Thêm vào giỏ hàng
+            </button>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="mt-5">
+        <ul class="nav nav-tabs" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link active" data-bs-toggle="tab" href="#mota">Mô tả</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-bs-toggle="tab" href="#thanhphan">Thành phần</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-bs-toggle="tab" href="#tacdungphu">Tác dụng phụ</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" data-bs-toggle="tab" href="#doituong">Đối tượng sử dụng</a>
+            </li>
+        </ul>
+
+        <div class="tab-content p-4 border border-top-0">
+            <div id="mota" class="tab-pane fade show active">
+                <h5>Mô tả sản phẩm</h5>
+                <p>@(thuoc.MoTa ?? "Chưa có mô tả")</p>
+            </div>
+
+            <div id="thanhphan" class="tab-pane fade">
+                <h5>Thành phần</h5>
+                @if (thanhPhans != null && thanhPhans.Any())
+                {
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Tên thành phần</th>
+                                <th>Hàm lượng</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var ct in thanhPhans)
+                            {
+                                <tr>
+                                    <td>@ct.TenThanhPhan</td>
+                                    <td>@ct.HamLuong</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else
+                {
+                    <p class="text-muted">Chưa có thông tin thành phần</p>
+                }
+            </div>
+
+            <div id="tacdungphu" class="tab-pane fade">
+                <h5>Tác dụng phụ</h5>
+                @if (tacDungPhus != null && tacDungPhus.Any())
+                {
+                    <ul class="list-group">
+                        @foreach (var ct in tacDungPhus)
+                        {
+                            <li class="list-group-item">
+                                <strong>@ct.TenTacDungPhu</strong>
+                                @if (!string.IsNullOrEmpty((string)ct.MucDo))
+                                {
+                                    <span class="badge bg-warning">@ct.MucDo</span>
+                                }
+                            </li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <p class="text-muted">Chưa có thông tin tác dụng phụ</p>
+                }
+            </div>
+
+            <div id="doituong" class="tab-pane fade">
+                <h5>Đối tượng sử dụng</h5>
+                @if (doiTuongs != null && doiTuongs.Any())
+                {
+                    <ul class="list-group">
+                        @foreach (var ct in doiTuongs)
+                        {
+                            <li class="list-group-item">
+                                <strong>@ct.TenDoiTuong</strong>
+                            </li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <p class="text-muted">Chưa có thông tin đối tượng sử dụng</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    function tangSoLuong() {
+        var input = document.getElementById('soLuong');
+        input.value = parseInt(input.value) + 1;
+    }
+    
+    function giamSoLuong() {
+        var input = document.getElementById('soLuong');
+        if (parseInt(input.value) > 1) {
+            input.value = parseInt(input.value) - 1;
+        }
+    }
+</script>
+}

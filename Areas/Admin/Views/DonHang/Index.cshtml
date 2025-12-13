@@ -1,0 +1,67 @@
+@{
+    ViewData["Title"] = "Quản lý đơn hàng";
+}
+
+<div class="mb-4">
+    <form method="get" class="d-flex gap-2 flex-wrap">
+        <select name="trangThai" class="form-select" style="width: 180px;">
+            <option value="">-- Tất cả trạng thái --</option>
+            <option value="Cho xu ly">Chờ xử lý</option>
+            <option value="Dang giao">Đang giao</option>
+            <option value="Hoan thanh">Hoàn thành</option>
+            <option value="Da huy">Đã hủy</option>
+        </select>
+        <input type="date" name="tuNgay" class="form-control" style="width: 160px;" />
+        <input type="date" name="denNgay" class="form-control" style="width: 160px;" />
+        <button type="submit" class="btn btn-primary"><i class="fas fa-filter"></i> Lọc</button>
+    </form>
+</div>
+
+<div class="admin-table">
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>Mã ĐH</th>
+                <th>Khách hàng</th>
+                <th>SĐT</th>
+                <th>Tổng tiền</th>
+                <th>Trạng thái</th>
+                <th>Ngày đặt</th>
+                <th>Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null)
+            {
+                var items = Model as IEnumerable<dynamic>;
+                @foreach (var item in items)
+                {
+                    <tr>
+                        <td><strong>#@item.MaDonHang</strong></td>
+                        <td>@(item.HoTen ?? "N/A")</td>
+                        <td>@item.SoDienThoai</td>
+                        <td class="text-danger fw-bold">@(((decimal?)item.TongTien)?.ToString("N0") ?? "0")đ</td>
+                        <td>
+                            @{
+                                var trangThai = (string)item.TrangThai;
+                            }
+                            @switch (trangThai)
+                            {
+                                case "Cho xu ly": <span class="badge bg-warning">Chờ xử lý</span> break;
+                                case "Dang giao": <span class="badge bg-info">Đang giao</span> break;
+                                case "Hoan thanh": <span class="badge bg-success">Hoàn thành</span> break;
+                                default: <span class="badge bg-danger">Đã hủy</span> break;
+                            }
+                        </td>
+                        <td>@((DateTime)item.NgayDatHang).ToString("dd/MM/yyyy HH:mm")</td>
+                        <td>
+                            <a asp-action="Details" asp-route-id="@item.MaDonHang" class="btn btn-sm btn-info">
+                                <i class="fas fa-eye"></i> Chi tiết
+                            </a>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>

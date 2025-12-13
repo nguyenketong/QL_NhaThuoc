@@ -1,0 +1,63 @@
+@model QL_NhaThuoc.ViewModels.PhoneLoginVM
+@{
+    ViewData["Title"] = "Đăng nhập bằng số điện thoại";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="card shadow">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-mobile-alt fa-3x text-primary mb-3"></i>
+                        <h3 class="card-title">Đăng nhập</h3>
+                        <p class="text-muted">Nhập số điện thoại để nhận mã OTP</p>
+                    </div>
+
+                    <form asp-action="PhoneLogin" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                        
+                        <div class="form-group mb-4">
+                            <label asp-for="PhoneNumber" class="form-label">
+                                <i class="fas fa-phone"></i> Số điện thoại
+                            </label>
+                            <input asp-for="PhoneNumber" 
+                                   class="form-control form-control-lg" 
+                                   placeholder="Ví dụ: 0912345678"
+                                   autofocus />
+                            <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-lg w-100 mb-3">
+                            <i class="fas fa-paper-plane"></i> Gửi mã OTP
+                        </button>
+
+                        <div class="text-center">
+                            <p class="mb-2">Hoặc đăng nhập bằng</p>
+                            <a asp-action="Login" class="btn btn-outline-secondary">
+                                <i class="fas fa-envelope"></i> Email & Mật khẩu
+                            </a>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="text-center">
+                            <p class="mb-0">Chưa có tài khoản? 
+                                <a asp-action="Register" class="text-primary fw-bold">Đăng ký ngay</a>
+                            </p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="alert alert-info mt-3">
+                <i class="fas fa-info-circle"></i>
+                <strong>Lưu ý:</strong> Mã OTP sẽ được gửi đến số điện thoại của bạn và có hiệu lực trong 5 phút.
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

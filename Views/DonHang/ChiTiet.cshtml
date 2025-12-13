@@ -1,0 +1,158 @@
+@{
+    ViewData["Title"] = "Chi tiết đơn hàng";
+    var donHang = Model as dynamic;
+    var chiTietList = ViewBag.ChiTietDonHangs as IEnumerable<dynamic>;
+}
+
+<div class="container my-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+            <li class="breadcrumb-item"><a asp-action="DanhSach">Đơn hàng</a></li>
+            <li class="breadcrumb-item active">Chi tiết #@donHang.MaDonHang</li>
+        </ol>
+    </nav>
+
+    <h1 class="mb-4">Chi tiết đơn hàng #@donHang.MaDonHang</h1>
+
+    @if (TempData["ThongBao"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show">
+            @TempData["ThongBao"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+    }
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Thông tin đơn hàng</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-2">
+                        <div class="col-sm-4"><strong>Mã đơn hàng:</strong></div>
+                        <div class="col-sm-8">#@donHang.MaDonHang</div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-sm-4"><strong>Ngày đặt:</strong></div>
+                        <div class="col-sm-8">@((DateTime)donHang.NgayDatHang).ToString("dd/MM/yyyy HH:mm")</div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-sm-4"><strong>Trạng thái:</strong></div>
+                        <div class="col-sm-8">
+                            @{
+                                var trangThai = (string)donHang.TrangThai;
+                            }
+                            @if (trangThai == "Cho xu ly")
+                            {
+                                <span class="badge bg-warning">Chờ xử lý</span>
+                            }
+                            else if (trangThai == "Dang giao")
+                            {
+                                <span class="badge bg-info">Đang giao</span>
+                            }
+                            else if (trangThai == "Hoan thanh")
+                            {
+                                <span class="badge bg-success">Hoàn thành</span>
+                            }
+                            else if (trangThai == "Da huy")
+                            {
+                                <span class="badge bg-danger">Đã hủy</span>
+                            }
+                        </div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-sm-4"><strong>Phương thức thanh toán:</strong></div>
+                        <div class="col-sm-8">@donHang.PhuongThucThanhToan</div>
+                    </div>
+                    <div class="row mb-2">
+                        <div class="col-sm-4"><strong>Địa chỉ giao hàng:</strong></div>
+                        <div class="col-sm-8">@donHang.DiaChiGiaoHang</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Sản phẩm đã đặt</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Sản phẩm</th>
+                                    <th class="text-end">Đơn giá</th>
+                                    <th class="text-center">Số lượng</th>
+                                    <th class="text-end">Thành tiền</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (chiTietList != null)
+                                {
+                                    @foreach (var ct in chiTietList)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <a asp-controller="Thuoc" asp-action="ChiTiet" 
+                                                   asp-route-id="@ct.MaThuoc">
+                                                    @ct.TenThuoc
+                                                </a>
+                                            </td>
+                                            <td class="text-end">@(((decimal?)ct.DonGia)?.ToString("N0")) đ</td>
+                                            <td class="text-center">@ct.SoLuong</td>
+                                            <td class="text-end">
+                                                <strong>@(((decimal?)ct.ThanhTien)?.ToString("N0")) đ</strong>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">Tổng đơn hàng</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Tạm tính:</span>
+                        <strong>@(((decimal?)donHang.TongTien)?.ToString("N0")) đ</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Phí vận chuyển:</span>
+                        <strong>Miễn phí</strong>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between">
+                        <strong>Tổng cộng:</strong>
+                        <strong class="text-danger fs-5">@(((decimal?)donHang.TongTien)?.ToString("N0")) đ</strong>
+                    </div>
+                </div>
+            </div>
+
+            @{
+                var currentTrangThai = (string)donHang.TrangThai;
+            }
+            @if (currentTrangThai == "Cho xu ly")
+            {
+                <form asp-action="Huy" method="post" onsubmit="return confirm('Bạn có chắc muốn hủy đơn hàng này?')">
+                    <input type="hidden" name="id" value="@donHang.MaDonHang" />
+                    <button type="submit" class="btn btn-danger w-100">
+                        <i class="bi bi-x-circle"></i> Hủy đơn hàng
+                    </button>
+                </form>
+            }
+
+            <a asp-action="DanhSach" class="btn btn-outline-secondary w-100 mt-2">
+                <i class="bi bi-arrow-left"></i> Quay lại danh sách
+            </a>
+        </div>
+    </div>
+</div>

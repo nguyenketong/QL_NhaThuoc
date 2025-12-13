@@ -1,0 +1,144 @@
+@model string
+@{
+    var hoTen = Context.Session.GetString("HoTen");
+    var soDienThoai = Context.Session.GetString("SoDienThoai");
+    var activeMenu = Model ?? "";
+}
+
+<div class="user-sidebar">
+    <!-- User Info Card -->
+    <div class="user-info-card">
+        <div class="user-avatar">
+            <i class="fas fa-user-circle"></i>
+        </div>
+        <div class="user-name">@(hoTen ?? soDienThoai)</div>
+        <div class="user-phone">@soDienThoai</div>
+    </div>
+
+    <!-- Menu -->
+    <div class="user-menu">
+        <a asp-action="Profile" class="menu-item @(activeMenu == "Profile" ? "active" : "")">
+            <i class="fas fa-user"></i>
+            <span>Thông tin cá nhân</span>
+            <i class="fas fa-chevron-right"></i>
+        </a>
+        <a asp-controller="DonHang" asp-action="DanhSach" class="menu-item @(activeMenu == "DonHang" ? "active" : "")">
+            <i class="fas fa-shopping-bag"></i>
+            <span>Đơn hàng của tôi</span>
+            <i class="fas fa-chevron-right"></i>
+        </a>
+        <a asp-action="DiaChi" class="menu-item @(activeMenu == "DiaChi" ? "active" : "")">
+            <i class="fas fa-map-marker-alt"></i>
+            <span>Quản lý sổ địa chỉ</span>
+            <i class="fas fa-chevron-right"></i>
+        </a>
+        <a asp-action="Logout" class="menu-item text-danger">
+            <i class="fas fa-sign-out-alt"></i>
+            <span>Đăng xuất</span>
+            <i class="fas fa-chevron-right"></i>
+        </a>
+    </div>
+</div>
+
+<style>
+    .user-sidebar {
+        background: var(--white);
+        border-radius: var(--radius);
+        overflow: hidden;
+        box-shadow: var(--shadow);
+    }
+
+    .user-info-card {
+        background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        padding: 30px 20px;
+        text-align: center;
+        color: var(--white);
+    }
+
+    .user-avatar {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 15px;
+        background: rgba(255,255,255,0.2);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2.5rem;
+    }
+
+    .user-name {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+
+    .user-phone {
+        font-size: 0.9rem;
+        opacity: 0.9;
+    }
+
+    .user-menu {
+        padding: 10px 0;
+    }
+
+    .menu-item {
+        display: flex;
+        align-items: center;
+        padding: 15px 20px;
+        color: var(--text-dark);
+        text-decoration: none;
+        transition: all 0.3s;
+        border-left: 3px solid transparent;
+    }
+
+    .menu-item:hover,
+    .menu-item.active {
+        background: var(--bg-light);
+        color: var(--primary-color);
+        border-left-color: var(--primary-color);
+    }
+
+    .menu-item i:first-child {
+        width: 25px;
+        font-size: 1.1rem;
+    }
+
+    .menu-item span {
+        flex: 1;
+        margin-left: 10px;
+    }
+
+    .menu-item i:last-child {
+        font-size: 0.8rem;
+        opacity: 0.5;
+    }
+
+    .profile-card {
+        background: var(--white);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+    }
+
+    .profile-header {
+        background: var(--bg-light);
+        padding: 20px 25px;
+        border-bottom: 1px solid #eee;
+    }
+
+    .profile-header h4 {
+        margin: 0;
+        color: var(--text-dark);
+        font-weight: 600;
+    }
+
+    .profile-header h4 i {
+        color: var(--primary-color);
+        margin-right: 10px;
+    }
+
+    .profile-body {
+        padding: 30px;
+    }
+</style>
