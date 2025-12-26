@@ -53,6 +53,11 @@ namespace QL_NhaThuoc.Areas.Admin.Controllers
                 // Gán ngày tạo
                 thuoc.NgayTao = DateTime.Now;
                 
+                // Xử lý checkbox - nếu không tick thì giá trị là null, cần set false
+                if (!thuoc.IsHot.HasValue) thuoc.IsHot = false;
+                if (!thuoc.IsNew.HasValue) thuoc.IsNew = false;
+                if (!thuoc.IsActive.HasValue) thuoc.IsActive = true; // Mặc định đang kinh doanh
+                
                 // Xử lý upload hình ảnh
                 if (hinhAnhFile != null && hinhAnhFile.Length > 0)
                 {
@@ -159,6 +164,9 @@ namespace QL_NhaThuoc.Areas.Admin.Controllers
             {
                 try
                 {
+                    // Lấy thuốc cũ từ DB để giữ lại hình ảnh nếu không upload mới
+                    var existingThuoc = await _context.THUOC.AsNoTracking().FirstOrDefaultAsync(t => t.MaThuoc == id);
+                    
                     // Xử lý upload hình ảnh mới
                     if (hinhAnhFile != null && hinhAnhFile.Length > 0)
                     {
@@ -171,6 +179,17 @@ namespace QL_NhaThuoc.Areas.Admin.Controllers
                         }
                         thuoc.HinhAnh = "/images/" + fileName;
                     }
+                    else if (existingThuoc != null && string.IsNullOrEmpty(thuoc.HinhAnh))
+                    {
+                        // Giữ lại hình ảnh cũ nếu không upload mới
+                        thuoc.HinhAnh = existingThuoc.HinhAnh;
+                    }
+                    
+                    // Xử lý checkbox - nếu không tick thì giá trị là null, cần set false
+                    // Checkbox chỉ gửi giá trị khi được tick
+                    if (!thuoc.IsHot.HasValue) thuoc.IsHot = false;
+                    if (!thuoc.IsNew.HasValue) thuoc.IsNew = false;
+                    if (!thuoc.IsActive.HasValue) thuoc.IsActive = false;
 
                     _context.Update(thuoc);
 

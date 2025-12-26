@@ -116,15 +116,18 @@
                             <label class="form-label">Đánh dấu sản phẩm</label>
                             <div class="d-flex gap-4 mt-2">
                                 <div class="form-check">
-                                    <input type="checkbox" name="IsHot" value="true" class="form-check-input" id="chkIsHot" @(Model.IsHot == true ? "checked" : "") />
+                                    <input type="checkbox" name="IsHot" value="true" class="form-check-input" id="chkIsHot" 
+                                           @(Model.IsHot == true ? "checked" : "") />
                                     <label class="form-check-label text-danger fw-bold" for="chkIsHot">🔥 HOT</label>
                                 </div>
                                 <div class="form-check">
-                                    <input type="checkbox" name="IsNew" value="true" class="form-check-input" id="chkIsNew" @(Model.IsNew == true ? "checked" : "") />
+                                    <input type="checkbox" name="IsNew" value="true" class="form-check-input" id="chkIsNew" 
+                                           @(Model.IsNew == true ? "checked" : "") />
                                     <label class="form-check-label text-success fw-bold" for="chkIsNew">🆕 MỚI</label>
                                 </div>
                                 <div class="form-check">
-                                    <input type="checkbox" name="IsActive" value="true" class="form-check-input" id="chkIsActive" @(Model.IsActive != false ? "checked" : "") />
+                                    <input type="checkbox" name="IsActive" value="true" class="form-check-input" id="chkIsActive" 
+                                           @(Model.IsActive != false ? "checked" : "") />
                                     <label class="form-check-label text-primary fw-bold" for="chkIsActive">✅ Kinh doanh</label>
                                 </div>
                             </div>

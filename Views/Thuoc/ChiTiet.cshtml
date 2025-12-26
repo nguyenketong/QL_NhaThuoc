@@ -1,9 +1,19 @@
 @model QL_NhaThuoc.Models.Thuoc
 @{
     ViewData["Title"] = Model.TenThuoc;
+    var ngungKinhDoanh = Model.IsActive != true; // Chỉ kinh doanh khi IsActive = true
 }
 
 <div class="container my-5">
+    <!-- Thông báo ngừng kinh doanh -->
+    @if (ngungKinhDoanh)
+    {
+        <div class="alert alert-danger alert-dismissible fade show mb-4" role="alert">
+            <i class="fas fa-ban me-2"></i>
+            <strong>Sản phẩm đã ngừng kinh doanh!</strong> Sản phẩm này hiện không còn được bán. Vui lòng chọn sản phẩm khác.
+        </div>
+    }
+
     <!-- Breadcrumb -->
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb">
@@ -141,7 +151,13 @@
             </table>
 
             <!-- Số lượng và nút mua -->
-            @if (hetHang)
+            @if (ngungKinhDoanh)
+            {
+                <div class="alert alert-secondary">
+                    <i class="fas fa-ban"></i> <strong>Sản phẩm đã ngừng kinh doanh.</strong> Không thể mua sản phẩm này.
+                </div>
+            }
+            else if (hetHang)
             {
                 <div class="alert alert-danger">
                     <i class="fas fa-exclamation-circle"></i> Sản phẩm hiện đã hết hàng. Vui lòng quay lại sau!
@@ -197,9 +213,20 @@
                         <ul class="list-group">
                             @foreach (var ct in Model.CT_ThanhPhans)
                             {
-                                <li class="list-group-item d-flex justify-content-between">
-                                    <span>@ct.ThanhPhan?.TenThanhPhan</span>
-                                    <span class="badge bg-info">@ct.HamLuong</span>
+                                <li class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <strong>@ct.ThanhPhan?.TenThanhPhan</strong>
+                                            @if (!string.IsNullOrEmpty(ct.ThanhPhan?.MoTa))
+                                            {
+                                                <p class="text-muted small mb-0 mt-1">@ct.ThanhPhan.MoTa</p>
+                                            }
+                                        </div>
+                                        @if (!string.IsNullOrEmpty(ct.HamLuong))
+                                        {
+                                            <span class="badge bg-info">@ct.HamLuong</span>
+                                        }
+                                    </div>
                                 </li>
                             }
                         </ul>
@@ -216,12 +243,20 @@
                             @foreach (var ct in Model.CT_TacDungPhus)
                             {
                                 <li class="list-group-item">
-                                    <i class="fas fa-exclamation-triangle text-warning"></i>
-                                    @ct.TacDungPhu?.TenTacDungPhu
-                                    @if (!string.IsNullOrEmpty(ct.MucDo))
-                                    {
-                                        <span class="badge bg-warning text-dark ms-2">@ct.MucDo</span>
-                                    }
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <i class="fas fa-exclamation-triangle text-warning me-2"></i>
+                                            <strong>@ct.TacDungPhu?.TenTacDungPhu</strong>
+                                            @if (!string.IsNullOrEmpty(ct.TacDungPhu?.MoTa))
+                                            {
+                                                <p class="text-muted small mb-0 mt-1">@ct.TacDungPhu.MoTa</p>
+                                            }
+                                        </div>
+                                        @if (!string.IsNullOrEmpty(ct.MucDo))
+                                        {
+                                            <span class="badge bg-warning text-dark">@ct.MucDo</span>
+                                        }
+                                    </div>
                                 </li>
                             }
                         </ul>
@@ -238,8 +273,12 @@
                             @foreach (var ct in Model.CT_DoiTuongs)
                             {
                                 <li class="list-group-item">
-                                    <i class="fas fa-user text-primary"></i>
-                                    @ct.DoiTuongSuDung?.TenDoiTuong
+                                    <i class="fas fa-user text-primary me-2"></i>
+                                    <strong>@ct.DoiTuongSuDung?.TenDoiTuong</strong>
+                                    @if (!string.IsNullOrEmpty(ct.DoiTuongSuDung?.MoTa))
+                                    {
+                                        <p class="text-muted small mb-0 mt-1">@ct.DoiTuongSuDung.MoTa</p>
+                                    }
                                 </li>
                             }
                         </ul>

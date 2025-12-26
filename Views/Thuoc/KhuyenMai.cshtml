@@ -1,98 +1,37 @@
 @model IEnumerable<QL_NhaThuoc.Models.Thuoc>
 @{
-    ViewData["Title"] = "Danh sách thuốc";
+    ViewData["Title"] = "Sản phẩm khuyến mãi";
 }
 
-<div class="container my-5">
-    <h2 class="mb-4">
-        <i class="fas fa-pills"></i> 
-        @if (ViewBag.TenNhom != null)
-        {
-            <text>@ViewBag.TenNhom</text>
-        }
-        else if (ViewBag.TenThuongHieu != null)
-        {
-            <text>@ViewBag.TenThuongHieu</text>
-        }
-        else if (ViewBag.TuKhoa != null)
-        {
-            <text>Kết quả tìm kiếm: "@ViewBag.TuKhoa"</text>
-        }
-        else
-        {
-            <text>Danh sách thuốc</text>
-        }
-    </h2>
+<div class="container my-4">
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+            <li class="breadcrumb-item active">Khuyến mãi</li>
+        </ol>
+    </nav>
 
-    <!-- Filter -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <form method="get" asp-action="DanhSach">
-                <div class="row g-3">
-                    <div class="col-md-3">
-                        <label class="form-label">Nhóm thuốc</label>
-                        <select name="maNhom" class="form-select">
-                            <option value="">Tất cả</option>
-                            @if (ViewBag.DanhSachNhom != null)
-                            {
-                                foreach (var nhom in ViewBag.DanhSachNhom as IEnumerable<QL_NhaThuoc.Models.NhomThuoc>)
-                                {
-                                    <option value="@nhom.MaNhomThuoc">@nhom.TenNhomThuoc</option>
-                                }
-                            }
-                        </select>
-                    </div>
-                    <div class="col-md-3">
-                        <label class="form-label">Thương hiệu</label>
-                        <select name="maThuongHieu" class="form-select">
-                            <option value="">Tất cả</option>
-                            @if (ViewBag.DanhSachThuongHieu != null)
-                            {
-                                foreach (var th in ViewBag.DanhSachThuongHieu as IEnumerable<QL_NhaThuoc.Models.ThuongHieu>)
-                                {
-                                    <option value="@th.MaThuongHieu">@th.TenThuongHieu</option>
-                                }
-                            }
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <label class="form-label">Giá từ</label>
-                        <input type="number" name="giaMin" class="form-control" placeholder="0">
-                    </div>
-                    <div class="col-md-2">
-                        <label class="form-label">Giá đến</label>
-                        <input type="number" name="giaMax" class="form-control" placeholder="1000000">
-                    </div>
-                    <div class="col-md-2">
-                        <label class="form-label">&nbsp;</label>
-                        <button type="submit" class="btn btn-primary w-100">
-                            <i class="fas fa-filter"></i> Lọc
-                        </button>
-                    </div>
-                </div>
-            </form>
-        </div>
+    <div class="text-center mb-4">
+        <h1 class="text-danger fw-bold"><i class="fas fa-tags me-2"></i>SẢN PHẨM KHUYẾN MÃI</h1>
+        <p class="text-muted">Săn deal hot - Giá siêu hời</p>
     </div>
 
-    <!-- Products Grid -->
-    <div class="row g-4">
-        @if (Model != null && Model.Any())
-        {
+    @if (Model.Any())
+    {
+        <div class="row g-3">
             @foreach (var thuoc in Model)
             {
-                var giaBan = thuoc.GiaBan ?? 0;
-                var phanTramGiam = (thuoc.PhanTramGiam.HasValue && thuoc.PhanTramGiam.Value > 0) 
-                    ? thuoc.PhanTramGiam.Value : 0;
-                var giaGoc = thuoc.GiaGoc ?? (phanTramGiam > 0 ? Math.Ceiling(giaBan * 100 / (100 - phanTramGiam)) : giaBan);
-                if (phanTramGiam == 0 && giaGoc > giaBan && giaGoc > 0)
-                {
-                    phanTramGiam = (int)((giaGoc - giaBan) * 100 / giaGoc);
-                }
+                var phanTramGiam = thuoc.PhanTramGiam ?? 0;
                 var isHot = thuoc.IsHot ?? false;
                 var isNew = thuoc.IsNew ?? false;
-                var ngungKinhDoanh = thuoc.IsActive != true; // Chỉ kinh doanh khi IsActive = true
+                var ngungKinhDoanh = thuoc.IsActive != true;
                 var hetHang = (thuoc.SoLuongTon ?? 0) <= 0;
                 var khongKhaDung = ngungKinhDoanh || hetHang;
+                var dangKhuyenMai = phanTramGiam > 0 
+                    && (!thuoc.NgayBatDauKM.HasValue || thuoc.NgayBatDauKM <= DateTime.Now)
+                    && (!thuoc.NgayKetThucKM.HasValue || thuoc.NgayKetThucKM >= DateTime.Now);
+                decimal giaGoc = thuoc.GiaGoc ?? thuoc.GiaBan ?? 0;
+                decimal giaBan = dangKhuyenMai ? (giaGoc * (100 - phanTramGiam) / 100) : (thuoc.GiaBan ?? 0);
                 
                 <div class="col-md-3">
                     <div class="product-card position-relative @(khongKhaDung ? "opacity-60" : "")">
@@ -141,8 +80,7 @@
                                 <small><i class="fas fa-building"></i> @(thuoc.ThuongHieu?.TenThuongHieu ?? "Đang cập nhật")</small>
                             </div>
                             <div class="mt-2">
-                                <a asp-action="ChiTiet" asp-route-id="@thuoc.MaThuoc" 
-                                   class="btn btn-outline-primary btn-sm">
+                                <a asp-action="ChiTiet" asp-route-id="@thuoc.MaThuoc" class="btn btn-outline-primary btn-sm">
                                     <i class="fas fa-info-circle"></i> Chi tiết
                                 </a>
                                 @if (ngungKinhDoanh)
@@ -168,14 +106,17 @@
                     </div>
                 </div>
             }
-        }
-        else
-        {
-            <div class="col-12">
-                <div class="alert alert-info text-center">
-                    <i class="fas fa-info-circle"></i> Không tìm thấy sản phẩm nào
-                </div>
-            </div>
-        }
-    </div>
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <i class="fas fa-tags fa-4x text-muted mb-3"></i>
+            <h4>Chưa có sản phẩm khuyến mãi</h4>
+            <p class="text-muted">Hãy quay lại sau để săn deal hot nhé!</p>
+            <a asp-controller="Thuoc" asp-action="DanhSach" class="btn btn-primary">
+                <i class="fas fa-shopping-bag me-1"></i> Xem tất cả sản phẩm
+            </a>
+        </div>
+    }
 </div>

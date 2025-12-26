@@ -39,7 +39,7 @@ namespace QL_NhaThuoc.Controllers
                     {
                         item.SoLuongTon = thuoc.SoLuongTon ?? 0;
                         item.HinhAnh = thuoc.HinhAnh;
-                        item.NgungKinhDoanh = thuoc.IsActive == false;
+                        item.NgungKinhDoanh = thuoc.IsActive != true; // Chỉ kinh doanh khi IsActive = true
                         // Nếu sản phẩm không khả dụng, bỏ chọn
                         if (item.KhongKhaDung)
                         {
@@ -69,8 +69,8 @@ namespace QL_NhaThuoc.Controllers
                 return Json(new { success = false, message = "Sản phẩm không tồn tại!" });
             }
 
-            // Kiểm tra ngừng kinh doanh
-            if (thuoc.IsActive == false)
+            // Kiểm tra ngừng kinh doanh (chỉ kinh doanh khi IsActive = true)
+            if (thuoc.IsActive != true)
             {
                 return Json(new { success = false, message = "Sản phẩm đã ngừng kinh doanh!" });
             }
@@ -93,15 +93,22 @@ namespace QL_NhaThuoc.Controllers
             }
 
             // Tính giá: kiểm tra khuyến mãi còn hiệu lực không
-            var giaBan = thuoc.GiaBan ?? 0;
-            var dangKhuyenMai = thuoc.PhanTramGiam.HasValue && thuoc.PhanTramGiam > 0
+            var phanTramGiam = thuoc.PhanTramGiam ?? 0;
+            var dangKhuyenMai = phanTramGiam > 0
                 && (!thuoc.NgayBatDauKM.HasValue || thuoc.NgayBatDauKM <= DateTime.Now)
                 && (!thuoc.NgayKetThucKM.HasValue || thuoc.NgayKetThucKM >= DateTime.Now);
             
-            // Nếu hết khuyến mãi, dùng giá gốc
-            if (!dangKhuyenMai && thuoc.GiaGoc.HasValue && thuoc.GiaGoc > 0)
+            decimal giaBan;
+            if (dangKhuyenMai)
             {
-                giaBan = thuoc.GiaGoc.Value;
+                // Đang khuyến mãi: tính giá giảm từ giá gốc
+                var giaGoc = thuoc.GiaGoc ?? thuoc.GiaBan ?? 0;
+                giaBan = giaGoc * (100 - phanTramGiam) / 100;
+            }
+            else
+            {
+                // Không khuyến mãi: dùng giá bán thường
+                giaBan = thuoc.GiaBan ?? 0;
             }
 
             if (item != null)
@@ -276,7 +283,7 @@ namespace QL_NhaThuoc.Controllers
                 if (thuoc != null)
                 {
                     item.SoLuongTon = thuoc.SoLuongTon ?? 0;
-                    item.NgungKinhDoanh = thuoc.IsActive == false;
+                    item.NgungKinhDoanh = thuoc.IsActive != true; // Chỉ kinh doanh khi IsActive = true
                 }
                 else
                 {
@@ -321,7 +328,7 @@ namespace QL_NhaThuoc.Controllers
                 if (thuoc != null)
                 {
                     item.SoLuongTon = thuoc.SoLuongTon ?? 0;
-                    item.NgungKinhDoanh = thuoc.IsActive == false;
+                    item.NgungKinhDoanh = thuoc.IsActive != true; // Chỉ kinh doanh khi IsActive = true
                 }
                 else
                 {

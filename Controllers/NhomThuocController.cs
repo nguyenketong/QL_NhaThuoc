@@ -16,18 +16,33 @@ namespace QL_NhaThuoc.Controllers
         // GET: NhomThuoc/DanhSach - EF + LINQ
         public async Task<IActionResult> DanhSach()
         {
-            var danhSachNhom = await _context.NHOM_THUOC
-                .Select(n => new
-                {
-                    n.MaNhomThuoc,
-                    n.TenNhomThuoc,
-                    n.MoTa,
-                    SoLuongThuoc = n.Thuocs != null ? n.Thuocs.Count : 0
-                })
+            // Chỉ lấy các nhóm cấp cha (MaDanhMucCha = null)
+            var nhomCha = await _context.NHOM_THUOC
+                .Where(n => n.MaDanhMucCha == null)
+                .Include(n => n.DanhMucCon)
+                .Include(n => n.Thuocs)
                 .OrderBy(n => n.TenNhomThuoc)
                 .ToListAsync();
 
-            return View(danhSachNhom);
+            // Tính số lượng sản phẩm cho mỗi nhóm cha (bao gồm cả sản phẩm của nhóm con)
+            foreach (var nhom in nhomCha)
+            {
+                var soLuongTrucTiep = nhom.Thuocs?.Count ?? 0;
+                var soLuongTuCon = 0;
+                
+                if (nhom.DanhMucCon != null)
+                {
+                    foreach (var con in nhom.DanhMucCon)
+                    {
+                        soLuongTuCon += await _context.THUOC.CountAsync(t => t.MaNhomThuoc == con.MaNhomThuoc);
+                    }
+                }
+                
+                // Lưu tổng số lượng vào ViewData
+                ViewData[$"SoLuong_{nhom.MaNhomThuoc}"] = soLuongTrucTiep + soLuongTuCon;
+            }
+
+            return View(nhomCha);
         }
 
         // GET: NhomThuoc/ChiTiet/5 - EF + LINQ với phân trang

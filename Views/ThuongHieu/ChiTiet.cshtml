@@ -82,56 +82,86 @@
         <div class="row g-3">
             @foreach (var thuoc in Model.Thuocs)
             {
-                var giaBan = thuoc.GiaBan ?? 0;
-                var phanTramGiam = (thuoc.PhanTramGiam.HasValue && thuoc.PhanTramGiam.Value > 0) 
-                    ? thuoc.PhanTramGiam.Value : 0;
-                var giaGoc = thuoc.GiaGoc ?? (phanTramGiam > 0 ? Math.Ceiling(giaBan * 100 / (100 - phanTramGiam)) : giaBan);
-                if (phanTramGiam == 0 && giaGoc > giaBan && giaGoc > 0)
-                {
-                    phanTramGiam = (int)((giaGoc - giaBan) * 100 / giaGoc);
-                }
+                var phanTramGiam = thuoc.PhanTramGiam ?? 0;
                 var isHot = thuoc.IsHot ?? false;
                 var isNew = thuoc.IsNew ?? false;
+                var ngungKinhDoanh = thuoc.IsActive != true;
+                var hetHang = (thuoc.SoLuongTon ?? 0) <= 0;
+                var khongKhaDung = ngungKinhDoanh || hetHang;
+                var dangKhuyenMai = phanTramGiam > 0 
+                    && (!thuoc.NgayBatDauKM.HasValue || thuoc.NgayBatDauKM <= DateTime.Now)
+                    && (!thuoc.NgayKetThucKM.HasValue || thuoc.NgayKetThucKM >= DateTime.Now);
+                decimal giaGoc = thuoc.GiaGoc ?? thuoc.GiaBan ?? 0;
+                decimal giaBan = dangKhuyenMai ? (giaGoc * (100 - phanTramGiam) / 100) : (thuoc.GiaBan ?? 0);
 
-                <div class="col-6 col-md-4 col-lg-3 col-xl-2-4">
-                    <div class="product-card-compact">
-                        <div class="product-badges">
-                            @if (phanTramGiam > 0)
+                <div class="col-md-3">
+                    <div class="product-card position-relative @(khongKhaDung ? "opacity-60" : "")">
+                        <div class="product-badges position-absolute" style="top: 10px; left: 10px; z-index: 2;">
+                            @if (ngungKinhDoanh)
                             {
-                                <span class="badge-discount">-@phanTramGiam%</span>
+                                <span class="badge bg-secondary">Ngừng kinh doanh</span>
                             }
-                            @if (isHot)
+                            else if (hetHang)
                             {
-                                <span class="badge-hot">HOT</span>
+                                <span class="badge bg-dark">Hết hàng</span>
                             }
-                            @if (isNew)
+                            else
                             {
-                                <span class="badge-new">Mới</span>
+                                @if (phanTramGiam > 0)
+                                {
+                                    <span class="badge bg-danger">-@phanTramGiam%</span>
+                                }
+                                @if (isHot)
+                                {
+                                    <span class="badge bg-warning text-dark">HOT</span>
+                                }
+                                @if (isNew)
+                                {
+                                    <span class="badge bg-success">Mới</span>
+                                }
                             }
                         </div>
-                        <a asp-controller="Thuoc" asp-action="ChiTiet" asp-route-id="@thuoc.MaThuoc" class="product-image-link">
-                            <img src="@(string.IsNullOrEmpty(thuoc.HinhAnh) ? "/images/no-image.svg" : thuoc.HinhAnh)"
-                                 alt="@thuoc.TenThuoc" class="product-image-compact"
-                                 onerror="this.src='/images/no-image.svg'">
-                        </a>
-                        <div class="product-info-compact">
-                            <a asp-controller="Thuoc" asp-action="ChiTiet" asp-route-id="@thuoc.MaThuoc" class="product-name-compact">
-                                @thuoc.TenThuoc
-                            </a>
-                            <div class="product-price-compact">
-                                <span class="price-current">@giaBan.ToString("N0")đ</span>
+                        <div class="product-image">
+                            <img src="@(string.IsNullOrEmpty(thuoc.HinhAnh) ? "/images/no-image.svg" : thuoc.HinhAnh)" 
+                                 alt="@thuoc.TenThuoc" onerror="this.src='/images/no-image.svg'" />
+                        </div>
+                        <div class="product-info">
+                            <h6 class="product-name">@thuoc.TenThuoc</h6>
+                            <div class="product-category">
+                                <small class="text-muted">@(thuoc.NhomThuoc?.TenNhomThuoc ?? "")</small>
+                            </div>
+                            <div class="product-price">
+                                <span class="price-new text-danger fw-bold">@giaBan.ToString("N0")đ</span>
                                 @if (phanTramGiam > 0 && giaGoc > giaBan)
                                 {
-                                    <span class="price-original">@giaGoc.ToString("N0")đ</span>
+                                    <span class="price-old text-muted text-decoration-line-through ms-2">@giaGoc.ToString("N0")đ</span>
                                 }
                             </div>
-                            <div class="product-actions-compact">
-                                <a asp-controller="Thuoc" asp-action="ChiTiet" asp-route-id="@thuoc.MaThuoc" class="btn-detail-compact">
-                                    <i class="fas fa-eye"></i> Chi tiết
+                            <div class="product-brand">
+                                <small><i class="fas fa-building"></i> @(thuoc.ThuongHieu?.TenThuongHieu ?? "Đang cập nhật")</small>
+                            </div>
+                            <div class="mt-2">
+                                <a asp-controller="Thuoc" asp-action="ChiTiet" asp-route-id="@thuoc.MaThuoc" class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-info-circle"></i> Chi tiết
                                 </a>
-                                <button type="button" class="btn-cart-compact" onclick="themVaoGioHang(@thuoc.MaThuoc)">
-                                    <i class="fas fa-cart-plus"></i> Thêm giỏ
-                                </button>
+                                @if (ngungKinhDoanh)
+                                {
+                                    <button type="button" class="btn btn-secondary btn-sm" disabled>
+                                        <i class="fas fa-ban"></i> Ngừng bán
+                                    </button>
+                                }
+                                else if (hetHang)
+                                {
+                                    <button type="button" class="btn btn-dark btn-sm" disabled>
+                                        <i class="fas fa-times-circle"></i> Hết hàng
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button type="button" class="btn btn-primary btn-sm" onclick="themVaoGioHang(@thuoc.MaThuoc, 1)">
+                                        <i class="fas fa-cart-plus"></i> Thêm
+                                    </button>
+                                }
                             </div>
                         </div>
                     </div>

@@ -16,28 +16,53 @@ namespace QL_NhaThuoc.Controllers
         // GET: Home/Index - EF + LINQ
         public async Task<IActionResult> Index()
         {
+            var now = DateTime.Now;
+            
             // Sản phẩm mới (chỉ lấy sản phẩm được đánh dấu IsNew = true)
             var sanPhamMoi = await _context.THUOC
                 .Include(t => t.NhomThuoc)
                 .Include(t => t.ThuongHieu)
                 .Where(t => t.IsNew == true && t.IsActive != false)
-                .OrderByDescending(t => t.NgayTao ?? DateTime.MinValue)
+                .OrderByDescending(t => t.NgayTao)
                 .Take(10)
                 .ToListAsync();
 
-            // Sản phẩm Hot/Khuyến mãi (chỉ lấy sản phẩm được đánh dấu IsHot = true hoặc đang khuyến mãi)
-            var sanPhamHot = await _context.THUOC
+            // Sản phẩm khuyến mãi (chỉ lấy sản phẩm đang có khuyến mãi - PhanTramGiam > 0 và trong thời gian KM)
+            var sanPhamKhuyenMai = await _context.THUOC
                 .Include(t => t.NhomThuoc)
                 .Include(t => t.ThuongHieu)
                 .Where(t => t.IsActive != false && 
-                    (t.IsHot == true || 
-                    (t.PhanTramGiam > 0 && 
-                     (t.NgayBatDauKM == null || t.NgayBatDauKM <= DateTime.Now) &&
-                     (t.NgayKetThucKM == null || t.NgayKetThucKM >= DateTime.Now))))
-                .OrderByDescending(t => t.PhanTramGiam ?? 0)
+                    t.PhanTramGiam > 0 && 
+                    (t.NgayBatDauKM == null || t.NgayBatDauKM <= now) &&
+                    (t.NgayKetThucKM == null || t.NgayKetThucKM >= now))
+                .OrderByDescending(t => t.PhanTramGiam)
                 .ThenByDescending(t => t.MaThuoc)
                 .Take(10)
                 .ToListAsync();
+
+            // Nếu chưa có sản phẩm khuyến mãi, lấy sản phẩm Hot hoặc ngẫu nhiên
+            if (!sanPhamKhuyenMai.Any())
+            {
+                sanPhamKhuyenMai = await _context.THUOC
+                    .Include(t => t.NhomThuoc)
+                    .Include(t => t.ThuongHieu)
+                    .Where(t => t.IsActive != false && t.IsHot == true)
+                    .OrderByDescending(t => t.MaThuoc)
+                    .Take(10)
+                    .ToListAsync();
+
+                // Nếu vẫn không có, lấy ngẫu nhiên
+                if (!sanPhamKhuyenMai.Any())
+                {
+                    sanPhamKhuyenMai = await _context.THUOC
+                        .Include(t => t.NhomThuoc)
+                        .Include(t => t.ThuongHieu)
+                        .Where(t => t.IsActive != false)
+                        .OrderBy(t => Guid.NewGuid())
+                        .Take(10)
+                        .ToListAsync();
+                }
+            }
 
             // Sản phẩm bán chạy (chỉ tính đơn hàng thành công)
             var sanPhamBanChay = await _context.CHI_TIET_DON_HANG
@@ -85,7 +110,7 @@ namespace QL_NhaThuoc.Controllers
                 .ToListAsync();
 
             ViewBag.SanPhamMoi = sanPhamMoi;
-            ViewBag.SanPhamHot = sanPhamHot;
+            ViewBag.SanPhamKhuyenMai = sanPhamKhuyenMai;
             ViewBag.SanPhamBanChay = sanPhamBanChay;
             ViewBag.NhomThuocs = nhomThuocs;
             ViewBag.ThuongHieus = thuongHieus;

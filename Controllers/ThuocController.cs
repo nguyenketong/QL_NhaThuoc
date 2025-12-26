@@ -141,5 +141,31 @@ namespace QL_NhaThuoc.Controllers
 
             return View("DanhSach", danhSachThuoc);
         }
+
+        // GET: Thuoc/KhuyenMai - Sản phẩm đang khuyến mãi hoặc Hot
+        public async Task<IActionResult> KhuyenMai()
+        {
+            var now = DateTime.Now;
+            
+            var danhSachKhuyenMai = await _context.THUOC
+                .Include(t => t.NhomThuoc)
+                .Include(t => t.ThuongHieu)
+                .Include(t => t.NuocSanXuat)
+                .Where(t => t.IsActive != false && 
+                    (t.IsHot == true ||
+                    (t.PhanTramGiam > 0 &&
+                    (t.NgayBatDauKM == null || t.NgayBatDauKM <= now) &&
+                    (t.NgayKetThucKM == null || t.NgayKetThucKM >= now))))
+                .OrderByDescending(t => t.PhanTramGiam ?? 0)
+                .ThenBy(t => t.TenThuoc)
+                .ToListAsync();
+
+            ViewBag.TieuDe = "Sản phẩm khuyến mãi";
+            ViewBag.IsKhuyenMai = true;
+            ViewBag.DanhSachNhom = await _context.NHOM_THUOC.OrderBy(n => n.TenNhomThuoc).ToListAsync();
+            ViewBag.DanhSachThuongHieu = await _context.THUONG_HIEU.OrderBy(th => th.TenThuongHieu).ToListAsync();
+
+            return View("KhuyenMai", danhSachKhuyenMai);
+        }
     }
 }
