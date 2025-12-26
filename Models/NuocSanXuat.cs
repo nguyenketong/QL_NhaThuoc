@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace QL_NhaThuoc.Models
 {
     public class NuocSanXuat
@@ -6,5 +8,8 @@ namespace QL_NhaThuoc.Models
         public string TenNuocSX { get; set; } = string.Empty;
         
         public ICollection<Thuoc>? Thuocs { get; set; }
+        
+        [NotMapped]
+        public int SoLuongThuoc { get; set; }
     }
 }

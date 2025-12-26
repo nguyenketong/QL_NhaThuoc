@@ -1,0 +1,200 @@
+@model QL_NhaThuoc.Models.BaiViet
+@{
+    ViewData["Title"] = Model.TieuDe;
+    var baiVietLienQuan = ViewBag.BaiVietLienQuan as List<QL_NhaThuoc.Models.BaiViet>;
+}
+
+<!-- Breadcrumb -->
+<section class="bg-light py-3">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+                <li class="breadcrumb-item"><a asp-controller="BaiViet" asp-action="GocSucKhoe">Góc sức khỏe</a></li>
+                <li class="breadcrumb-item active">@Model.TieuDe</li>
+            </ol>
+        </nav>
+    </div>
+</section>
+
+<section class="py-4">
+    <div class="container">
+        <div class="row">
+            <!-- Nội dung bài viết -->
+            <div class="col-lg-8">
+                <article class="article-detail">
+                    <h1 class="article-detail-title">@Model.TieuDe</h1>
+                    
+                    <div class="article-detail-meta">
+                        <span><i class="far fa-calendar-alt"></i> @(Model.NgayDang?.ToString("dd/MM/yyyy HH:mm") ?? "-")</span>
+                        <span><i class="far fa-eye"></i> @(Model.LuotXem ?? 0) lượt xem</span>
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(Model.HinhAnh))
+                    {
+                        <div class="article-detail-img">
+                            <img src="@Model.HinhAnh" alt="@Model.TieuDe" class="img-fluid rounded">
+                        </div>
+                    }
+
+                    @if (!string.IsNullOrEmpty(Model.MoTaNgan))
+                    {
+                        <div class="article-summary">
+                            <strong>@Model.MoTaNgan</strong>
+                        </div>
+                    }
+
+                    <div class="article-detail-content">
+                        @Html.Raw(Model.NoiDung ?? "<p>Nội dung đang được cập nhật...</p>")
+                    </div>
+
+                    <!-- Chia sẻ -->
+                    <div class="article-share">
+                        <span>Chia sẻ:</span>
+                        <a href="https://www.facebook.com/sharer/sharer.php?u=@Context.Request.Path" target="_blank" class="btn btn-sm btn-primary">
+                            <i class="fab fa-facebook-f"></i> Facebook
+                        </a>
+                        <a href="https://twitter.com/intent/tweet?url=@Context.Request.Path" target="_blank" class="btn btn-sm btn-info">
+                            <i class="fab fa-twitter"></i> Twitter
+                        </a>
+                    </div>
+                </article>
+
+                <div class="mt-4">
+                    <a asp-action="GocSucKhoe" class="btn btn-outline-primary">
+                        <i class="fas fa-arrow-left"></i> Quay lại danh sách
+                    </a>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <div class="sidebar-widget">
+                    <h5 class="widget-title">Bài viết liên quan</h5>
+                    @if (baiVietLienQuan != null && baiVietLienQuan.Any())
+                    {
+                        @foreach (var bv in baiVietLienQuan)
+                        {
+                            <div class="related-article">
+                                <a asp-action="ChiTiet" asp-route-id="@bv.MaBaiViet">
+                                    <img src="@(string.IsNullOrEmpty(bv.HinhAnh) ? "https://via.placeholder.com/80x60?text=Tin" : bv.HinhAnh)" 
+                                         alt="@bv.TieuDe" onerror="this.src='https://via.placeholder.com/80x60?text=Tin'">
+                                </a>
+                                <div class="related-content">
+                                    <small class="text-muted">@(bv.NgayDang?.ToString("dd/MM/yyyy") ?? "-")</small>
+                                    <a asp-action="ChiTiet" asp-route-id="@bv.MaBaiViet">@bv.TieuDe</a>
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p class="text-muted small">Chưa có bài viết liên quan</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+.article-detail {
+    background: #fff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+}
+.article-detail-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 15px;
+    line-height: 1.3;
+}
+.article-detail-meta {
+    display: flex;
+    gap: 20px;
+    color: #888;
+    font-size: 14px;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+}
+.article-detail-meta i {
+    margin-right: 5px;
+}
+.article-detail-img {
+    margin-bottom: 20px;
+}
+.article-detail-img img {
+    width: 100%;
+    border-radius: 10px;
+}
+.article-summary {
+    background: #f8f9fa;
+    padding: 15px 20px;
+    border-left: 4px solid #1a8ccc;
+    margin-bottom: 20px;
+    font-style: italic;
+    color: #555;
+}
+.article-detail-content {
+    font-size: 15px;
+    line-height: 1.8;
+    color: #444;
+}
+.article-detail-content p {
+    margin-bottom: 15px;
+}
+.article-share {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Sidebar */
+.sidebar-widget {
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+}
+.widget-title {
+    font-weight: 600;
+    color: #1a8ccc;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #1a8ccc;
+}
+.related-article {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+}
+.related-article:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+.related-article img {
+    width: 80px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 6px;
+}
+.related-content a {
+    display: block;
+    font-size: 13px;
+    color: #333;
+    text-decoration: none;
+    line-height: 1.4;
+}
+.related-content a:hover {
+    color: #1a8ccc;
+}
+</style>

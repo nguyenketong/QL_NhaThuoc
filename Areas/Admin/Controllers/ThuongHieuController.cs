@@ -1,9 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using QL_NhaThuoc.Data;
-using QL_NhaThuoc.Models;
 using QL_NhaThuoc.Filters;
-using System.Data;
+using QL_NhaThuoc.Models;
 
 namespace QL_NhaThuoc.Areas.Admin.Controllers
 {
@@ -12,170 +11,134 @@ namespace QL_NhaThuoc.Areas.Admin.Controllers
     public class ThuongHieuController : Controller
     {
         private readonly QL_NhaThuocDbContext _context;
-        private readonly string _connectionString;
+        private readonly IWebHostEnvironment _env;
 
-        public ThuongHieuController(QL_NhaThuocDbContext context, IConfiguration config)
+        public ThuongHieuController(QL_NhaThuocDbContext context, IWebHostEnvironment env)
         {
             _context = context;
-            _connectionString = config.GetConnectionString("DefaultConnection")!;
+            _env = env;
         }
 
-        // INDEX - Gọi sp_ThuongHieu_DanhSach
+        // GET: Admin/ThuongHieu - EF + LINQ
         public async Task<IActionResult> Index()
         {
-            var data = new List<dynamic>();
-
-            using (var connection = new SqlConnection(_connectionString))
-            {
-                await connection.OpenAsync();
-
-                using (var command = new SqlCommand("sp_ThuongHieu_DanhSach", connection))
+            var danhSach = await _context.THUONG_HIEU
+                .Select(th => new
                 {
-                    command.CommandType = CommandType.StoredProcedure;
+                    th.MaThuongHieu,
+                    th.TenThuongHieu,
+                    th.QuocGia,
+                    th.DiaChi,
+                    th.HinhAnh,
+                    SoLuongThuoc = th.Thuocs != null ? th.Thuocs.Count : 0
+                })
+                .OrderBy(th => th.TenThuongHieu)
+                .ToListAsync();
 
-                    using (var reader = await command.ExecuteReaderAsync())
-                    {
-                        while (await reader.ReadAsync())
-                        {
-                            data.Add(new
-                            {
-                                ThuongHieu = new ThuongHieu
-                                {
-                                    MaThuongHieu = reader.GetInt32(reader.GetOrdinal("MaThuongHieu")),
-                                    TenThuongHieu = reader.GetString(reader.GetOrdinal("TenThuongHieu")),
-                                    QuocGia = reader.IsDBNull(reader.GetOrdinal("QuocGia")) ? null : reader.GetString(reader.GetOrdinal("QuocGia"))
-                                },
-                                SoLuongThuoc = reader.GetInt32(reader.GetOrdinal("SoLuongThuoc"))
-                            });
-                        }
-                    }
-                }
-            }
-
-            return View(data);
+            return View(danhSach);
         }
 
-        public IActionResult Create() => View();
+        // GET: Admin/ThuongHieu/Create
+        public IActionResult Create()
+        {
+            return View();
+        }
 
+        // POST: Admin/ThuongHieu/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(ThuongHieu thuongHieu)
+        public async Task<IActionResult> Create(ThuongHieu thuongHieu, IFormFile? LogoFile)
         {
             if (ModelState.IsValid)
             {
-                using (var connection = new SqlConnection(_connectionString))
+                // Upload logo
+                if (LogoFile != null && LogoFile.Length > 0)
                 {
-                    await connection.OpenAsync();
+                    var uploadsFolder = Path.Combine(_env.WebRootPath, "images", "brands");
+                    if (!Directory.Exists(uploadsFolder))
+                        Directory.CreateDirectory(uploadsFolder);
 
-                    using (var command = new SqlCommand(
-                        "INSERT INTO THUONG_HIEU (TenThuongHieu, QuocGia) VALUES (@TenThuongHieu, @QuocGia)", connection))
+                    var fileName = Guid.NewGuid().ToString() + Path.GetExtension(LogoFile.FileName);
+                    var filePath = Path.Combine(uploadsFolder, fileName);
+
+                    using (var stream = new FileStream(filePath, FileMode.Create))
                     {
-                        command.Parameters.AddWithValue("@TenThuongHieu", thuongHieu.TenThuongHieu);
-                        command.Parameters.AddWithValue("@QuocGia", (object?)thuongHieu.QuocGia ?? DBNull.Value);
-
-                        await command.ExecuteNonQueryAsync();
+                        await LogoFile.CopyToAsync(stream);
                     }
+                    thuongHieu.HinhAnh = "/images/brands/" + fileName;
                 }
 
+                _context.THUONG_HIEU.Add(thuongHieu);
+                await _context.SaveChangesAsync();
                 TempData["ThongBao"] = "Thêm thương hiệu thành công!";
                 return RedirectToAction(nameof(Index));
             }
             return View(thuongHieu);
         }
 
+        // GET: Admin/ThuongHieu/Edit/5
         public async Task<IActionResult> Edit(int id)
         {
-            ThuongHieu? thuongHieu = null;
+            var thuongHieu = await _context.THUONG_HIEU.FindAsync(id);
+            if (thuongHieu == null)
+                return NotFound();
 
-            using (var connection = new SqlConnection(_connectionString))
-            {
-                await connection.OpenAsync();
-
-                using (var command = new SqlCommand(
-                    "SELECT * FROM THUONG_HIEU WHERE MaThuongHieu = @MaThuongHieu", connection))
-                {
-                    command.Parameters.AddWithValue("@MaThuongHieu", id);
-
-                    using (var reader = await command.ExecuteReaderAsync())
-                    {
-                        if (await reader.ReadAsync())
-                        {
-                            thuongHieu = new ThuongHieu
-                            {
-                                MaThuongHieu = reader.GetInt32(reader.GetOrdinal("MaThuongHieu")),
-                                TenThuongHieu = reader.GetString(reader.GetOrdinal("TenThuongHieu")),
-                                QuocGia = reader.IsDBNull(reader.GetOrdinal("QuocGia")) ? null : reader.GetString(reader.GetOrdinal("QuocGia"))
-                            };
-                        }
-                    }
-                }
-            }
-
-            if (thuongHieu == null) return NotFound();
             return View(thuongHieu);
         }
 
+        // POST: Admin/ThuongHieu/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, ThuongHieu thuongHieu)
+        public async Task<IActionResult> Edit(int id, ThuongHieu thuongHieu, IFormFile? LogoFile)
         {
-            if (id != thuongHieu.MaThuongHieu) return NotFound();
+            if (id != thuongHieu.MaThuongHieu)
+                return NotFound();
 
             if (ModelState.IsValid)
             {
-                using (var connection = new SqlConnection(_connectionString))
+                var existing = await _context.THUONG_HIEU.AsNoTracking().FirstOrDefaultAsync(t => t.MaThuongHieu == id);
+                
+                // Upload logo mới
+                if (LogoFile != null && LogoFile.Length > 0)
                 {
-                    await connection.OpenAsync();
+                    var uploadsFolder = Path.Combine(_env.WebRootPath, "images", "brands");
+                    if (!Directory.Exists(uploadsFolder))
+                        Directory.CreateDirectory(uploadsFolder);
 
-                    using (var command = new SqlCommand(
-                        "UPDATE THUONG_HIEU SET TenThuongHieu = @TenThuongHieu, QuocGia = @QuocGia WHERE MaThuongHieu = @MaThuongHieu", connection))
+                    var fileName = Guid.NewGuid().ToString() + Path.GetExtension(LogoFile.FileName);
+                    var filePath = Path.Combine(uploadsFolder, fileName);
+
+                    using (var stream = new FileStream(filePath, FileMode.Create))
                     {
-                        command.Parameters.AddWithValue("@MaThuongHieu", thuongHieu.MaThuongHieu);
-                        command.Parameters.AddWithValue("@TenThuongHieu", thuongHieu.TenThuongHieu);
-                        command.Parameters.AddWithValue("@QuocGia", (object?)thuongHieu.QuocGia ?? DBNull.Value);
-
-                        await command.ExecuteNonQueryAsync();
+                        await LogoFile.CopyToAsync(stream);
                     }
+                    thuongHieu.HinhAnh = "/images/brands/" + fileName;
+                }
+                else
+                {
+                    thuongHieu.HinhAnh = existing?.HinhAnh;
                 }
 
+                _context.Update(thuongHieu);
+                await _context.SaveChangesAsync();
                 TempData["ThongBao"] = "Cập nhật thương hiệu thành công!";
                 return RedirectToAction(nameof(Index));
             }
             return View(thuongHieu);
         }
 
+        // POST: Admin/ThuongHieu/Delete/5
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
-            using (var connection = new SqlConnection(_connectionString))
+            var thuongHieu = await _context.THUONG_HIEU.FindAsync(id);
+            if (thuongHieu != null)
             {
-                await connection.OpenAsync();
-
-                // Kiểm tra ràng buộc
-                using (var checkCommand = new SqlCommand(
-                    "SELECT COUNT(*) FROM THUOC WHERE MaThuongHieu = @MaThuongHieu", connection))
-                {
-                    checkCommand.Parameters.AddWithValue("@MaThuongHieu", id);
-                    var soThuocSuDung = (int)(await checkCommand.ExecuteScalarAsync())!;
-
-                    if (soThuocSuDung > 0)
-                    {
-                        TempData["LoiThongBao"] = $"Không thể xóa! Có {soThuocSuDung} thuốc đang sử dụng thương hiệu này.";
-                        return RedirectToAction(nameof(Index));
-                    }
-                }
-
-                // Xóa
-                using (var deleteCommand = new SqlCommand(
-                    "DELETE FROM THUONG_HIEU WHERE MaThuongHieu = @MaThuongHieu", connection))
-                {
-                    deleteCommand.Parameters.AddWithValue("@MaThuongHieu", id);
-                    await deleteCommand.ExecuteNonQueryAsync();
-                }
-
+                _context.THUONG_HIEU.Remove(thuongHieu);
+                await _context.SaveChangesAsync();
                 TempData["ThongBao"] = "Xóa thương hiệu thành công!";
             }
-
             return RedirectToAction(nameof(Index));
         }
     }

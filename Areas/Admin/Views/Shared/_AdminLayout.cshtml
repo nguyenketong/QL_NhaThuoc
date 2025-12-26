@@ -1,3 +1,7 @@
+@inject QL_NhaThuoc.Data.QL_NhaThuocDbContext _context
+@{
+    var soDonChoXuLy = _context.DON_HANG.Count(d => d.TrangThai == "Cho xu ly");
+}
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -154,9 +158,18 @@
             <div class="menu-header">Quản lý bán hàng</div>
             <a asp-area="Admin" asp-controller="DonHang" asp-action="Index" class="menu-item">
                 <i class="fas fa-shopping-cart"></i> Đơn hàng
+                @if (soDonChoXuLy > 0)
+                {
+                    <span class="badge bg-danger">@soDonChoXuLy</span>
+                }
             </a>
             <a asp-area="Admin" asp-controller="NguoiDung" asp-action="Index" class="menu-item">
                 <i class="fas fa-users"></i> Khách hàng
+            </a>
+            
+            <div class="menu-header">Nội dung</div>
+            <a asp-area="Admin" asp-controller="BaiViet" asp-action="Index" class="menu-item">
+                <i class="fas fa-newspaper"></i> Bài viết
             </a>
             
             <div class="menu-header">Hệ thống</div>
@@ -171,6 +184,16 @@
         <header class="admin-header">
             <h5 class="mb-0">@ViewData["Title"]</h5>
             <div class="d-flex align-items-center gap-3">
+                <!-- Thông báo đơn hàng mới -->
+                @if (soDonChoXuLy > 0)
+                {
+                    <a asp-area="Admin" asp-controller="DonHang" asp-action="Index" asp-route-trangThai="Cho xu ly" class="position-relative text-decoration-none" title="Đơn hàng chờ xử lý">
+                        <i class="fas fa-bell fs-5 text-warning"></i>
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 10px;">
+                            @(soDonChoXuLy > 9 ? "9+" : soDonChoXuLy.ToString())
+                        </span>
+                    </a>
+                }
                 <span class="text-muted">@DateTime.Now.ToString("dd/MM/yyyy")</span>
                 <div class="dropdown">
                     <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" data-bs-toggle="dropdown">

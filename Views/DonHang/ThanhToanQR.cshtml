@@ -1,0 +1,96 @@
+@model QL_NhaThuoc.Models.DonHang
+@{
+    ViewData["Title"] = "Thanh toán chuyển khoản";
+    var bankId = ViewBag.BankId as string ?? "970422";
+    var accountNo = ViewBag.AccountNo as string ?? "";
+    var accountName = ViewBag.AccountName as string ?? "";
+    var template = ViewBag.Template as string ?? "compact2";
+    var amount = (int)(Model.TongTien ?? 0);
+    var content = $"DH{Model.MaDonHang}";
+    var qrUrl = $"https://img.vietqr.io/image/{bankId}-{accountNo}-{template}.png?amount={amount}&addInfo={content}&accountName={Uri.EscapeDataString(accountName)}";
+}
+
+<div class="container my-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header bg-primary text-white text-center">
+                    <h4 class="mb-0"><i class="fas fa-qrcode"></i> Thanh toán chuyển khoản</h4>
+                </div>
+                <div class="card-body text-center">
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> Quét mã QR bằng app ngân hàng để thanh toán
+                    </div>
+                    
+                    <div class="qr-container mb-4">
+                        <img src="@qrUrl" alt="QR Code thanh toán" class="img-fluid" style="max-width: 300px; border: 3px solid #0d6efd; border-radius: 10px;">
+                    </div>
+
+                    <div class="bank-info text-start bg-light p-3 rounded mb-4">
+                        <h6 class="text-primary mb-3"><i class="fas fa-university"></i> Thông tin chuyển khoản:</h6>
+                        <table class="table table-sm table-borderless mb-0">
+                            <tr>
+                                <td class="text-muted" style="width: 140px;">Ngân hàng:</td>
+                                <td><strong>MB Bank</strong></td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted">Số tài khoản:</td>
+                                <td><strong class="text-primary">@accountNo</strong>
+                                    <button class="btn btn-sm btn-outline-primary ms-2" onclick="copyText('@accountNo')"><i class="fas fa-copy"></i></button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted">Chủ tài khoản:</td>
+                                <td><strong>@accountName</strong></td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted">Số tiền:</td>
+                                <td><strong class="text-danger fs-5">@amount.ToString("N0")đ</strong></td>
+                            </tr>
+                            <tr>
+                                <td class="text-muted">Nội dung CK:</td>
+                                <td><strong class="text-success">@content</strong>
+                                    <button class="btn btn-sm btn-outline-success ms-2" onclick="copyText('@content')"><i class="fas fa-copy"></i></button>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i> <strong>Lưu ý:</strong> Vui lòng nhập đúng nội dung chuyển khoản <strong>@content</strong> để đơn hàng được xác nhận nhanh chóng.
+                    </div>
+
+                    <div class="d-flex gap-2 justify-content-center">
+                        <a asp-action="ChiTiet" asp-route-id="@Model.MaDonHang" class="btn btn-primary">
+                            <i class="fas fa-eye"></i> Xem đơn hàng
+                        </a>
+                        <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="fas fa-home"></i> Về trang chủ
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-3">
+                <div class="card-body">
+                    <h6><i class="fas fa-mobile-alt text-primary"></i> Hướng dẫn thanh toán:</h6>
+                    <ol class="mb-0 small">
+                        <li>Mở app ngân hàng trên điện thoại</li>
+                        <li>Chọn chức năng <strong>Quét QR</strong></li>
+                        <li>Quét mã QR ở trên</li>
+                        <li>Kiểm tra thông tin và xác nhận thanh toán</li>
+                        <li>Đơn hàng sẽ được xử lý sau khi nhận được tiền</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function copyText(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        alert('Đã sao chép: ' + text);
+    });
+}
+</script>

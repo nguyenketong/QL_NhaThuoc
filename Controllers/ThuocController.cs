@@ -1,298 +1,145 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
-using System.Data;
+using Microsoft.EntityFrameworkCore;
+using QL_NhaThuoc.Data;
 
 namespace QL_NhaThuoc.Controllers
 {
     public class ThuocController : Controller
     {
-        private readonly string _connectionString;
-        private readonly ILogger<ThuocController> _logger;
+        private readonly QL_NhaThuocDbContext _context;
 
-        public ThuocController(IConfiguration configuration, ILogger<ThuocController> logger)
+        public ThuocController(QL_NhaThuocDbContext context)
         {
-            _connectionString = configuration.GetConnectionString("DefaultConnection")!;
-            _logger = logger;
+            _context = context;
         }
 
-        // Danh sach tat ca thuoc
+        // GET: Thuoc/DanhSach - EF + LINQ
         public async Task<IActionResult> DanhSach(int? maNhom, int? maThuongHieu, decimal? giaMin, decimal? giaMax, string? tuKhoa)
         {
-            var danhSachThuoc = new List<dynamic>();
+            var query = _context.THUOC
+                .Include(t => t.NhomThuoc)
+                .Include(t => t.ThuongHieu)
+                .Include(t => t.NuocSanXuat)
+                .AsQueryable();
 
-            using var connection = new SqlConnection(_connectionString);
-            await connection.OpenAsync();
+            // Lọc theo nhóm thuốc
+            if (maNhom.HasValue)
+                query = query.Where(t => t.MaNhomThuoc == maNhom.Value);
 
-            using var cmd = new SqlCommand("sp_Thuoc_DanhSach", connection);
-            cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("@MaNhom", (object?)maNhom ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("@MaThuongHieu", (object?)maThuongHieu ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("@GiaMin", (object?)giaMin ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("@GiaMax", (object?)giaMax ?? DBNull.Value);
-            cmd.Parameters.AddWithValue("@TuKhoa", (object?)tuKhoa ?? DBNull.Value);
+            // Lọc theo thương hiệu
+            if (maThuongHieu.HasValue)
+                query = query.Where(t => t.MaThuongHieu == maThuongHieu.Value);
 
-            using var reader = await cmd.ExecuteReaderAsync();
-            while (await reader.ReadAsync())
-            {
-                danhSachThuoc.Add(new
-                {
-                    MaThuoc = reader.GetInt32(reader.GetOrdinal("MaThuoc")),
-                    TenThuoc = reader.GetString(reader.GetOrdinal("TenThuoc")),
-                    MoTa = reader.IsDBNull(reader.GetOrdinal("MoTa")) ? "" : reader.GetString(reader.GetOrdinal("MoTa")),
-                    GiaBan = reader.IsDBNull(reader.GetOrdinal("GiaBan")) ? (decimal?)null : reader.GetDecimal(reader.GetOrdinal("GiaBan")),
-                    HinhAnh = reader.IsDBNull(reader.GetOrdinal("HinhAnh")) ? "" : reader.GetString(reader.GetOrdinal("HinhAnh")),
-                    TenNhomThuoc = reader.IsDBNull(reader.GetOrdinal("TenNhomThuoc")) ? "" : reader.GetString(reader.GetOrdinal("TenNhomThuoc")),
-                    TenThuongHieu = reader.IsDBNull(reader.GetOrdinal("TenThuongHieu")) ? "" : reader.GetString(reader.GetOrdinal("TenThuongHieu")),
-                    TenNuocSX = reader.IsDBNull(reader.GetOrdinal("TenNuocSX")) ? "" : reader.GetString(reader.GetOrdinal("TenNuocSX"))
-                });
-            }
+            // Lọc theo giá
+            if (giaMin.HasValue)
+                query = query.Where(t => t.GiaBan >= giaMin.Value);
 
-            // Truyen danh sach nhom thuoc va thuong hieu cho filter
-            ViewBag.DanhSachNhom = await LoadNhomThuocs(connection);
-            ViewBag.DanhSachThuongHieu = await LoadThuongHieus(connection);
+            if (giaMax.HasValue)
+                query = query.Where(t => t.GiaBan <= giaMax.Value);
+
+            // Tìm kiếm theo từ khóa
+            if (!string.IsNullOrEmpty(tuKhoa))
+                query = query.Where(t => t.TenThuoc.Contains(tuKhoa) || 
+                                         (t.MoTa != null && t.MoTa.Contains(tuKhoa)));
+
+            var danhSachThuoc = await query.OrderBy(t => t.TenThuoc).ToListAsync();
+
+            // Load danh sách nhóm và thương hiệu cho filter
+            ViewBag.DanhSachNhom = await _context.NHOM_THUOC.OrderBy(n => n.TenNhomThuoc).ToListAsync();
+            ViewBag.DanhSachThuongHieu = await _context.THUONG_HIEU.OrderBy(th => th.TenThuongHieu).ToListAsync();
 
             return View(danhSachThuoc);
         }
 
-        // Chi tiet thuoc
+
+        // GET: Thuoc/ChiTiet/5 - EF + LINQ
         public async Task<IActionResult> ChiTiet(int id)
         {
-            using var connection = new SqlConnection(_connectionString);
-            await connection.OpenAsync();
+            var thuoc = await _context.THUOC
+                .Include(t => t.NhomThuoc)
+                .Include(t => t.ThuongHieu)
+                .Include(t => t.NuocSanXuat)
+                .Include(t => t.CT_ThanhPhans!)
+                    .ThenInclude(ct => ct.ThanhPhan)
+                .Include(t => t.CT_TacDungPhus!)
+                    .ThenInclude(ct => ct.TacDungPhu)
+                .Include(t => t.CT_DoiTuongs!)
+                    .ThenInclude(ct => ct.DoiTuongSuDung)
+                .FirstOrDefaultAsync(t => t.MaThuoc == id);
 
-            using var cmd = new SqlCommand("sp_Thuoc_ChiTiet", connection);
-            cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("@MaThuoc", id);
-
-            dynamic? thuoc = null;
-            var thanhPhans = new List<dynamic>();
-            var tacDungPhus = new List<dynamic>();
-            var doiTuongs = new List<dynamic>();
-
-            using var reader = await cmd.ExecuteReaderAsync();
-            
-            // Thông tin thuốc
-            if (await reader.ReadAsync())
-            {
-                thuoc = new
-                {
-                    MaThuoc = reader.GetInt32(reader.GetOrdinal("MaThuoc")),
-                    TenThuoc = reader.GetString(reader.GetOrdinal("TenThuoc")),
-                    MoTa = reader.IsDBNull(reader.GetOrdinal("MoTa")) ? "" : reader.GetString(reader.GetOrdinal("MoTa")),
-                    GiaBan = reader.IsDBNull(reader.GetOrdinal("GiaBan")) ? (decimal?)null : reader.GetDecimal(reader.GetOrdinal("GiaBan")),
-                    DonViTinh = reader.IsDBNull(reader.GetOrdinal("DonViTinh")) ? "" : reader.GetString(reader.GetOrdinal("DonViTinh")),
-                    HinhAnh = reader.IsDBNull(reader.GetOrdinal("HinhAnh")) ? "" : reader.GetString(reader.GetOrdinal("HinhAnh")),
-                    TenNhomThuoc = reader.IsDBNull(reader.GetOrdinal("TenNhomThuoc")) ? "" : reader.GetString(reader.GetOrdinal("TenNhomThuoc")),
-                    TenThuongHieu = reader.IsDBNull(reader.GetOrdinal("TenThuongHieu")) ? "" : reader.GetString(reader.GetOrdinal("TenThuongHieu")),
-                    TenNuocSX = reader.IsDBNull(reader.GetOrdinal("TenNuocSX")) ? "" : reader.GetString(reader.GetOrdinal("TenNuocSX"))
-                };
-            }
-
-            if (thuoc == null) return NotFound();
-
-            // Thành phần
-            if (await reader.NextResultAsync())
-            {
-                while (await reader.ReadAsync())
-                {
-                    thanhPhans.Add(new
-                    {
-                        TenThanhPhan = reader.GetString(reader.GetOrdinal("TenThanhPhan")),
-                        HamLuong = reader.IsDBNull(reader.GetOrdinal("HamLuong")) ? "" : reader.GetString(reader.GetOrdinal("HamLuong"))
-                    });
-                }
-            }
-
-            // Tác dụng phụ
-            if (await reader.NextResultAsync())
-            {
-                while (await reader.ReadAsync())
-                {
-                    tacDungPhus.Add(new
-                    {
-                        TenTacDungPhu = reader.GetString(reader.GetOrdinal("TenTacDungPhu")),
-                        MucDo = reader.IsDBNull(reader.GetOrdinal("MucDo")) ? "" : reader.GetString(reader.GetOrdinal("MucDo"))
-                    });
-                }
-            }
-
-            // Đối tượng sử dụng
-            if (await reader.NextResultAsync())
-            {
-                while (await reader.ReadAsync())
-                {
-                    doiTuongs.Add(new
-                    {
-                        TenDoiTuong = reader.GetString(reader.GetOrdinal("TenDoiTuong"))
-                    });
-                }
-            }
-
-            ViewBag.ThanhPhans = thanhPhans;
-            ViewBag.TacDungPhus = tacDungPhus;
-            ViewBag.DoiTuongs = doiTuongs;
+            if (thuoc == null)
+                return NotFound();
 
             return View(thuoc);
         }
 
-        // Tim kiem thuoc
+        // GET: Thuoc/TimKiem - EF + LINQ
         [HttpGet]
         public async Task<IActionResult> TimKiem(string tuKhoa)
         {
             if (string.IsNullOrEmpty(tuKhoa))
-            {
                 return RedirectToAction(nameof(DanhSach));
-            }
 
-            var ketQua = new List<dynamic>();
-
-            using var connection = new SqlConnection(_connectionString);
-            await connection.OpenAsync();
-
-            using var cmd = new SqlCommand("sp_Thuoc_TimKiem", connection);
-            cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("@TuKhoa", tuKhoa);
-
-            using var reader = await cmd.ExecuteReaderAsync();
-            while (await reader.ReadAsync())
-            {
-                ketQua.Add(new
-                {
-                    MaThuoc = reader.GetInt32(reader.GetOrdinal("MaThuoc")),
-                    TenThuoc = reader.GetString(reader.GetOrdinal("TenThuoc")),
-                    MoTa = reader.IsDBNull(reader.GetOrdinal("MoTa")) ? "" : reader.GetString(reader.GetOrdinal("MoTa")),
-                    GiaBan = reader.IsDBNull(reader.GetOrdinal("GiaBan")) ? (decimal?)null : reader.GetDecimal(reader.GetOrdinal("GiaBan")),
-                    HinhAnh = reader.IsDBNull(reader.GetOrdinal("HinhAnh")) ? "" : reader.GetString(reader.GetOrdinal("HinhAnh")),
-                    TenNhomThuoc = reader.IsDBNull(reader.GetOrdinal("TenNhomThuoc")) ? "" : reader.GetString(reader.GetOrdinal("TenNhomThuoc")),
-                    TenThuongHieu = reader.IsDBNull(reader.GetOrdinal("TenThuongHieu")) ? "" : reader.GetString(reader.GetOrdinal("TenThuongHieu")),
-                    TenNuocSX = reader.IsDBNull(reader.GetOrdinal("TenNuocSX")) ? "" : reader.GetString(reader.GetOrdinal("TenNuocSX"))
-                });
-            }
+            var ketQua = await _context.THUOC
+                .Include(t => t.NhomThuoc)
+                .Include(t => t.ThuongHieu)
+                .Include(t => t.NuocSanXuat)
+                .Where(t => t.TenThuoc.Contains(tuKhoa) || 
+                           (t.MoTa != null && t.MoTa.Contains(tuKhoa)) ||
+                           (t.NhomThuoc != null && t.NhomThuoc.TenNhomThuoc.Contains(tuKhoa)) ||
+                           (t.ThuongHieu != null && t.ThuongHieu.TenThuongHieu.Contains(tuKhoa)))
+                .OrderBy(t => t.TenThuoc)
+                .ToListAsync();
 
             ViewBag.TuKhoa = tuKhoa;
-            ViewBag.DanhSachNhom = await LoadNhomThuocs(connection);
-            ViewBag.DanhSachThuongHieu = await LoadThuongHieus(connection);
+            ViewBag.DanhSachNhom = await _context.NHOM_THUOC.OrderBy(n => n.TenNhomThuoc).ToListAsync();
+            ViewBag.DanhSachThuongHieu = await _context.THUONG_HIEU.OrderBy(th => th.TenThuongHieu).ToListAsync();
+
             return View("DanhSach", ketQua);
         }
 
-        // Thuoc theo nhom
+        // GET: Thuoc/TheoNhom/5 - EF + LINQ
         public async Task<IActionResult> TheoNhom(int id)
         {
-            using var connection = new SqlConnection(_connectionString);
-            await connection.OpenAsync();
+            var nhomThuoc = await _context.NHOM_THUOC.FindAsync(id);
+            if (nhomThuoc == null)
+                return NotFound();
 
-            using var cmd = new SqlCommand("sp_NhomThuoc_ChiTiet", connection);
-            cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("@MaNhomThuoc", id);
+            var danhSachThuoc = await _context.THUOC
+                .Include(t => t.NhomThuoc)
+                .Include(t => t.ThuongHieu)
+                .Include(t => t.NuocSanXuat)
+                .Where(t => t.MaNhomThuoc == id)
+                .OrderBy(t => t.TenThuoc)
+                .ToListAsync();
 
-            string? tenNhom = null;
-            var danhSachThuoc = new List<dynamic>();
+            ViewBag.TenNhom = nhomThuoc.TenNhomThuoc;
+            ViewBag.DanhSachNhom = await _context.NHOM_THUOC.OrderBy(n => n.TenNhomThuoc).ToListAsync();
+            ViewBag.DanhSachThuongHieu = await _context.THUONG_HIEU.OrderBy(th => th.TenThuongHieu).ToListAsync();
 
-            using var reader = await cmd.ExecuteReaderAsync();
-            
-            // Thông tin nhóm
-            if (await reader.ReadAsync())
-            {
-                tenNhom = reader.GetString(reader.GetOrdinal("TenNhomThuoc"));
-            }
-
-            if (tenNhom == null) return NotFound();
-
-            // Danh sách thuốc
-            if (await reader.NextResultAsync())
-            {
-                while (await reader.ReadAsync())
-                {
-                    danhSachThuoc.Add(new
-                    {
-                        MaThuoc = reader.GetInt32(reader.GetOrdinal("MaThuoc")),
-                        TenThuoc = reader.GetString(reader.GetOrdinal("TenThuoc")),
-                        MoTa = reader.IsDBNull(reader.GetOrdinal("MoTa")) ? "" : reader.GetString(reader.GetOrdinal("MoTa")),
-                        GiaBan = reader.IsDBNull(reader.GetOrdinal("GiaBan")) ? (decimal?)null : reader.GetDecimal(reader.GetOrdinal("GiaBan")),
-                        HinhAnh = reader.IsDBNull(reader.GetOrdinal("HinhAnh")) ? "" : reader.GetString(reader.GetOrdinal("HinhAnh")),
-                        TenNhomThuoc = tenNhom,
-                        TenThuongHieu = reader.IsDBNull(reader.GetOrdinal("TenThuongHieu")) ? "" : reader.GetString(reader.GetOrdinal("TenThuongHieu")),
-                        TenNuocSX = reader.IsDBNull(reader.GetOrdinal("TenNuocSX")) ? "" : reader.GetString(reader.GetOrdinal("TenNuocSX"))
-                    });
-                }
-            }
-
-            ViewBag.TenNhom = tenNhom;
-            ViewBag.DanhSachNhom = await LoadNhomThuocs(connection);
-            ViewBag.DanhSachThuongHieu = await LoadThuongHieus(connection);
             return View("DanhSach", danhSachThuoc);
         }
 
-        // Thuoc theo thuong hieu
+        // GET: Thuoc/TheoThuongHieu/5 - EF + LINQ
         public async Task<IActionResult> TheoThuongHieu(int id)
         {
-            using var connection = new SqlConnection(_connectionString);
-            await connection.OpenAsync();
+            var thuongHieu = await _context.THUONG_HIEU.FindAsync(id);
+            if (thuongHieu == null)
+                return NotFound();
 
-            using var cmd = new SqlCommand("sp_ThuongHieu_ChiTiet", connection);
-            cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("@MaThuongHieu", id);
+            var danhSachThuoc = await _context.THUOC
+                .Include(t => t.NhomThuoc)
+                .Include(t => t.ThuongHieu)
+                .Include(t => t.NuocSanXuat)
+                .Where(t => t.MaThuongHieu == id)
+                .OrderBy(t => t.TenThuoc)
+                .ToListAsync();
 
-            string? tenThuongHieu = null;
-            var danhSachThuoc = new List<dynamic>();
+            ViewBag.TenThuongHieu = thuongHieu.TenThuongHieu;
+            ViewBag.DanhSachNhom = await _context.NHOM_THUOC.OrderBy(n => n.TenNhomThuoc).ToListAsync();
+            ViewBag.DanhSachThuongHieu = await _context.THUONG_HIEU.OrderBy(th => th.TenThuongHieu).ToListAsync();
 
-            using var reader = await cmd.ExecuteReaderAsync();
-            
-            // Thông tin thương hiệu
-            if (await reader.ReadAsync())
-            {
-                tenThuongHieu = reader.GetString(reader.GetOrdinal("TenThuongHieu"));
-            }
-
-            if (tenThuongHieu == null) return NotFound();
-
-            // Danh sách thuốc
-            if (await reader.NextResultAsync())
-            {
-                while (await reader.ReadAsync())
-                {
-                    danhSachThuoc.Add(new
-                    {
-                        MaThuoc = reader.GetInt32(reader.GetOrdinal("MaThuoc")),
-                        TenThuoc = reader.GetString(reader.GetOrdinal("TenThuoc")),
-                        MoTa = reader.IsDBNull(reader.GetOrdinal("MoTa")) ? "" : reader.GetString(reader.GetOrdinal("MoTa")),
-                        GiaBan = reader.IsDBNull(reader.GetOrdinal("GiaBan")) ? (decimal?)null : reader.GetDecimal(reader.GetOrdinal("GiaBan")),
-                        HinhAnh = reader.IsDBNull(reader.GetOrdinal("HinhAnh")) ? "" : reader.GetString(reader.GetOrdinal("HinhAnh")),
-                        TenNhomThuoc = "",
-                        TenThuongHieu = tenThuongHieu,
-                        TenNuocSX = ""
-                    });
-                }
-            }
-
-            ViewBag.TenThuongHieu = tenThuongHieu;
-            ViewBag.DanhSachNhom = await LoadNhomThuocs(connection);
-            ViewBag.DanhSachThuongHieu = await LoadThuongHieus(connection);
             return View("DanhSach", danhSachThuoc);
-        }
-
-        private async Task<List<dynamic>> LoadNhomThuocs(SqlConnection connection)
-        {
-            var list = new List<dynamic>();
-            using var cmd = new SqlCommand("SELECT MaNhomThuoc, TenNhomThuoc FROM NHOM_THUOC ORDER BY TenNhomThuoc", connection);
-            using var reader = await cmd.ExecuteReaderAsync();
-            while (await reader.ReadAsync())
-            {
-                list.Add(new { MaNhomThuoc = reader.GetInt32(0), TenNhomThuoc = reader.GetString(1) });
-            }
-            return list;
-        }
-
-        private async Task<List<dynamic>> LoadThuongHieus(SqlConnection connection)
-        {
-            var list = new List<dynamic>();
-            using var cmd = new SqlCommand("SELECT MaThuongHieu, TenThuongHieu FROM THUONG_HIEU ORDER BY TenThuongHieu", connection);
-            using var reader = await cmd.ExecuteReaderAsync();
-            while (await reader.ReadAsync())
-            {
-                list.Add(new { MaThuongHieu = reader.GetInt32(0), TenThuongHieu = reader.GetString(1) });
-            }
-            return list;
         }
     }
 }

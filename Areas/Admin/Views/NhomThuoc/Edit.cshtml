@@ -1,26 +1,39 @@
-@model NhomThuoc
+@model QL_NhaThuoc.Models.NhomThuoc
 @{
     ViewData["Title"] = "Sửa nhóm thuốc";
+    var danhMucChaList = ViewBag.DanhMucChaList as List<QL_NhaThuoc.Models.NhomThuoc> ?? new List<QL_NhaThuoc.Models.NhomThuoc>();
 }
 
-<div class="row">
-    <div class="col-lg-6">
-        <div class="card border-0 shadow-sm">
-            <div class="card-body">
-                <form asp-action="Edit" method="post">
-                    <input type="hidden" asp-for="MaNhomThuoc" />
-                    <div class="mb-3">
-                        <label class="form-label">Tên nhóm thuốc <span class="text-danger">*</span></label>
-                        <input asp-for="TenNhomThuoc" class="form-control" required />
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Mô tả</label>
-                        <textarea asp-for="MoTa" class="form-control" rows="3"></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Cập nhật</button>
-                    <a asp-action="Index" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Quay lại</a>
-                </form>
+<div class="card">
+    <div class="card-body">
+        <form asp-action="Edit" method="post">
+            <input type="hidden" asp-for="MaNhomThuoc" />
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Tên nhóm thuốc <span class="text-danger">*</span></label>
+                    <input asp-for="TenNhomThuoc" class="form-control" required />
+                    <span asp-validation-for="TenNhomThuoc" class="text-danger"></span>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Danh mục cha</label>
+                    <select asp-for="MaDanhMucCha" class="form-select">
+                        <option value="">-- Không có (Danh mục gốc) --</option>
+                        @foreach (var dm in danhMucChaList)
+                        {
+                            <option value="@dm.MaNhomThuoc" selected="@(Model.MaDanhMucCha == dm.MaNhomThuoc)">@dm.TenNhomThuoc</option>
+                        }
+                    </select>
+                    <small class="text-muted">Để trống nếu đây là danh mục cha</small>
+                </div>
+                <div class="col-12 mb-3">
+                    <label class="form-label">Mô tả</label>
+                    <textarea asp-for="MoTa" class="form-control" rows="3"></textarea>
+                </div>
             </div>
-        </div>
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-success"><i class="fas fa-save"></i> Cập nhật</button>
+                <a asp-action="Index" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Quay lại</a>
+            </div>
+        </form>
     </div>
 </div>

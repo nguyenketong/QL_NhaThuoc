@@ -4196,11 +4196,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc.csproj",
+      "projectUniqueName": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc.csproj",
       "projectName": "QL_NhaThuoc",
-      "projectPath": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc.csproj",
+      "projectPath": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc.csproj",
       "packagesPath": "C:\\Users\\KE TONG\\.nuget\\packages\\",
-      "outputPath": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\obj\\",
+      "outputPath": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\DevExpress 24.1\\Components\\Offline Packages"

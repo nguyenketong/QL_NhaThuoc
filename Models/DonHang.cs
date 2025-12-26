@@ -9,6 +9,7 @@ namespace QL_NhaThuoc.Models
         public string? TrangThai { get; set; }
         public string? PhuongThucThanhToan { get; set; }
         public string? DiaChiGiaoHang { get; set; }
+        public bool DaThanhToan { get; set; } = false; // Đã thanh toán chưa
         
         // Navigation properties
         public NguoiDung? NguoiDung { get; set; }

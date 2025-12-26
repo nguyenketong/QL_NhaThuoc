@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using QL_NhaThuoc.Data;
 using QL_NhaThuoc.Filters;
-using System.Data;
 
 namespace QL_NhaThuoc.Areas.Admin.Controllers
 {
@@ -9,122 +9,194 @@ namespace QL_NhaThuoc.Areas.Admin.Controllers
     [AdminAuthorize]
     public class DonHangController : Controller
     {
-        private readonly string _connectionString;
+        private readonly QL_NhaThuocDbContext _context;
 
-        public DonHangController(IConfiguration configuration)
+        public DonHangController(QL_NhaThuocDbContext context)
         {
-            _connectionString = configuration.GetConnectionString("DefaultConnection")!;
+            _context = context;
         }
 
-        // Danh sách đơn hàng
-        public async Task<IActionResult> Index(string? trangThai, DateTime? tuNgay, DateTime? denNgay)
+        // GET: Admin/DonHang - EF + LINQ
+        public async Task<IActionResult> Index(string? trangThai)
         {
-            var danhSach = new List<dynamic>();
+            var query = _context.DON_HANG
+                .Include(dh => dh.NguoiDung)
+                .Include(dh => dh.ChiTietDonHangs)
+                .AsQueryable();
 
-            using var connection = new SqlConnection(_connectionString);
-            await connection.OpenAsync();
-
-            using var cmd = new SqlCommand("sp_Admin_DonHang_DanhSach", connection);
-            cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("@TrangThai", (object?)trangThai ?? DBNull.Value);
-
-            using var reader = await cmd.ExecuteReaderAsync();
-            while (await reader.ReadAsync())
+            if (!string.IsNullOrEmpty(trangThai))
             {
-                var ngayDatHang = reader.GetDateTime(reader.GetOrdinal("NgayDatHang"));
-                
-                // Filter theo ngày
-                if (tuNgay.HasValue && ngayDatHang < tuNgay.Value) continue;
-                if (denNgay.HasValue && ngayDatHang > denNgay.Value) continue;
-
-                danhSach.Add(new
-                {
-                    MaDonHang = reader.GetInt32(reader.GetOrdinal("MaDonHang")),
-                    NgayDatHang = ngayDatHang,
-                    TrangThai = reader.IsDBNull(reader.GetOrdinal("TrangThai")) ? "" : reader.GetString(reader.GetOrdinal("TrangThai")),
-                    TongTien = reader.IsDBNull(reader.GetOrdinal("TongTien")) ? 0 : reader.GetDecimal(reader.GetOrdinal("TongTien")),
-                    PhuongThucThanhToan = reader.IsDBNull(reader.GetOrdinal("PhuongThucThanhToan")) ? "" : reader.GetString(reader.GetOrdinal("PhuongThucThanhToan")),
-                    DiaChiGiaoHang = reader.IsDBNull(reader.GetOrdinal("DiaChiGiaoHang")) ? "" : reader.GetString(reader.GetOrdinal("DiaChiGiaoHang")),
-                    HoTen = reader.IsDBNull(reader.GetOrdinal("HoTen")) ? "" : reader.GetString(reader.GetOrdinal("HoTen")),
-                    SoDienThoai = reader.IsDBNull(reader.GetOrdinal("SoDienThoai")) ? "" : reader.GetString(reader.GetOrdinal("SoDienThoai")),
-                    SoSanPham = reader.GetInt32(reader.GetOrdinal("SoSanPham"))
-                });
+                query = query.Where(dh => dh.TrangThai == trangThai);
             }
 
+            var danhSach = await query
+                .OrderByDescending(dh => dh.NgayDatHang)
+                .Select(dh => new
+                {
+                    dh.MaDonHang,
+                    HoTen = dh.NguoiDung != null ? dh.NguoiDung.HoTen : "",
+                    SoDienThoai = dh.NguoiDung != null ? dh.NguoiDung.SoDienThoai : "",
+                    dh.NgayDatHang,
+                    dh.TongTien,
+                    dh.TrangThai,
+                    SoSanPham = dh.ChiTietDonHangs != null ? dh.ChiTietDonHangs.Count : 0
+                })
+                .ToListAsync();
+
+            ViewBag.TrangThaiFilter = trangThai;
             return View(danhSach);
         }
 
-        // Chi tiết đơn hàng
+        // GET: Admin/DonHang/Details/5 - EF + LINQ
         public async Task<IActionResult> Details(int id)
         {
-            using var connection = new SqlConnection(_connectionString);
-            await connection.OpenAsync();
+            var donHang = await _context.DON_HANG
+                .Include(dh => dh.NguoiDung)
+                .Include(dh => dh.ChiTietDonHangs!)
+                    .ThenInclude(ct => ct.Thuoc)
+                .FirstOrDefaultAsync(dh => dh.MaDonHang == id);
 
-            using var cmd = new SqlCommand("sp_DonHang_ChiTiet", connection);
-            cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("@MaDonHang", id);
+            if (donHang == null)
+                return NotFound();
 
-            dynamic? donHang = null;
-            var chiTietList = new List<dynamic>();
-
-            using var reader = await cmd.ExecuteReaderAsync();
-            
-            // Đọc thông tin đơn hàng
-            if (await reader.ReadAsync())
-            {
-                donHang = new
-                {
-                    MaDonHang = reader.GetInt32(reader.GetOrdinal("MaDonHang")),
-                    NgayDatHang = reader.GetDateTime(reader.GetOrdinal("NgayDatHang")),
-                    TrangThai = reader.IsDBNull(reader.GetOrdinal("TrangThai")) ? "" : reader.GetString(reader.GetOrdinal("TrangThai")),
-                    TongTien = reader.IsDBNull(reader.GetOrdinal("TongTien")) ? 0 : reader.GetDecimal(reader.GetOrdinal("TongTien")),
-                    PhuongThucThanhToan = reader.IsDBNull(reader.GetOrdinal("PhuongThucThanhToan")) ? "" : reader.GetString(reader.GetOrdinal("PhuongThucThanhToan")),
-                    DiaChiGiaoHang = reader.IsDBNull(reader.GetOrdinal("DiaChiGiaoHang")) ? "" : reader.GetString(reader.GetOrdinal("DiaChiGiaoHang")),
-                    HoTen = reader.IsDBNull(reader.GetOrdinal("HoTen")) ? "" : reader.GetString(reader.GetOrdinal("HoTen")),
-                    SoDienThoai = reader.IsDBNull(reader.GetOrdinal("SoDienThoai")) ? "" : reader.GetString(reader.GetOrdinal("SoDienThoai")),
-                    DiaChi = reader.IsDBNull(reader.GetOrdinal("DiaChi")) ? "" : reader.GetString(reader.GetOrdinal("DiaChi"))
-                };
-            }
-
-            if (donHang == null) return NotFound();
-
-            // Đọc chi tiết đơn hàng
-            if (await reader.NextResultAsync())
-            {
-                while (await reader.ReadAsync())
-                {
-                    chiTietList.Add(new
-                    {
-                        MaChiTiet = reader.GetInt32(reader.GetOrdinal("MaChiTiet")),
-                        SoLuong = reader.GetInt32(reader.GetOrdinal("SoLuong")),
-                        DonGia = reader.IsDBNull(reader.GetOrdinal("DonGia")) ? 0 : reader.GetDecimal(reader.GetOrdinal("DonGia")),
-                        ThanhTien = reader.IsDBNull(reader.GetOrdinal("ThanhTien")) ? 0 : reader.GetDecimal(reader.GetOrdinal("ThanhTien")),
-                        MaThuoc = reader.GetInt32(reader.GetOrdinal("MaThuoc")),
-                        TenThuoc = reader.GetString(reader.GetOrdinal("TenThuoc")),
-                        HinhAnh = reader.IsDBNull(reader.GetOrdinal("HinhAnh")) ? "" : reader.GetString(reader.GetOrdinal("HinhAnh")),
-                        DonViTinh = reader.IsDBNull(reader.GetOrdinal("DonViTinh")) ? "" : reader.GetString(reader.GetOrdinal("DonViTinh"))
-                    });
-                }
-            }
-
-            ViewBag.ChiTietDonHangs = chiTietList;
             return View(donHang);
         }
 
-        // Cập nhật trạng thái
+        // POST: Admin/DonHang/CapNhatTrangThai - EF + LINQ
         [HttpPost]
-        public async Task<IActionResult> UpdateStatus(int id, string trangThai)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CapNhatTrangThai(int id, string trangThai)
         {
-            using var connection = new SqlConnection(_connectionString);
-            await connection.OpenAsync();
+            var donHang = await _context.DON_HANG
+                .Include(dh => dh.ChiTietDonHangs)
+                .FirstOrDefaultAsync(dh => dh.MaDonHang == id);
+                
+            if (donHang != null)
+            {
+                var trangThaiHienTai = donHang.TrangThai;
 
-            using var cmd = new SqlCommand("sp_Admin_DonHang_CapNhatTrangThai", connection);
-            cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("@MaDonHang", id);
-            cmd.Parameters.AddWithValue("@TrangThai", trangThai);
-            await cmd.ExecuteNonQueryAsync();
+                // Quy tắc 1: Đã hủy không thể chuyển về bất kỳ trạng thái nào
+                if (trangThaiHienTai == "Da huy")
+                {
+                    TempData["LoiThongBao"] = "Đơn hàng đã hủy không thể thay đổi trạng thái!";
+                    return RedirectToAction(nameof(Details), new { id });
+                }
 
-            TempData["ThongBao"] = "Cập nhật trạng thái thành công!";
+                // Quy tắc 2: Hoàn thành không thể chuyển về bất kỳ trạng thái nào
+                if (trangThaiHienTai == "Hoan thanh")
+                {
+                    TempData["LoiThongBao"] = "Đơn hàng đã hoàn thành không thể thay đổi trạng thái!";
+                    return RedirectToAction(nameof(Details), new { id });
+                }
+
+                // Quy tắc 3: Đang giao không được chuyển sang Đã hủy
+                if (trangThaiHienTai == "Dang giao" && trangThai == "Da huy")
+                {
+                    TempData["LoiThongBao"] = "Đơn hàng đang giao không thể hủy!";
+                    return RedirectToAction(nameof(Details), new { id });
+                }
+
+                // Quy tắc 4: Đã xác nhận thanh toán thì không thể hủy
+                if (donHang.DaThanhToan && trangThai == "Da huy")
+                {
+                    TempData["LoiThongBao"] = "Đơn hàng đã thanh toán không thể hủy!";
+                    return RedirectToAction(nameof(Details), new { id });
+                }
+
+                // Quy tắc 5: Chuyển khoản chưa thanh toán không cho chuyển sang Đang giao/Hoàn thành
+                if (donHang.PhuongThucThanhToan == "Chuyển khoản" && !donHang.DaThanhToan)
+                {
+                    if (trangThai == "Dang giao" || trangThai == "Hoan thanh")
+                    {
+                        TempData["LoiThongBao"] = "Vui lòng xác nhận đã nhận tiền chuyển khoản trước!";
+                        return RedirectToAction(nameof(Details), new { id });
+                    }
+                }
+
+                // Trừ tồn kho khi chuyển từ "Chờ xử lý" sang "Đang giao" hoặc "Hoàn thành"
+                if (trangThaiHienTai == "Cho xu ly" && (trangThai == "Dang giao" || trangThai == "Hoan thanh"))
+                {
+                    if (donHang.ChiTietDonHangs != null)
+                    {
+                        foreach (var ct in donHang.ChiTietDonHangs)
+                        {
+                            var thuoc = await _context.THUOC.FindAsync(ct.MaThuoc);
+                            if (thuoc != null)
+                            {
+                                // Trừ số lượng tồn kho
+                                thuoc.SoLuongTon = (thuoc.SoLuongTon ?? 0) - ct.SoLuong;
+                                // Cộng số lượng đã bán
+                                thuoc.SoLuongDaBan = (thuoc.SoLuongDaBan ?? 0) + ct.SoLuong;
+                            }
+                        }
+                    }
+                }
+
+                donHang.TrangThai = trangThai;
+                
+                // Tạo thông báo cho user
+                var thongBao = new Models.ThongBao
+                {
+                    MaNguoiDung = donHang.MaNguoiDung,
+                    MaDonHang = donHang.MaDonHang,
+                    LoaiThongBao = "DonHang",
+                    DuongDan = $"/DonHang/ChiTiet/{donHang.MaDonHang}",
+                    NgayTao = DateTime.Now
+                };
+
+                switch (trangThai)
+                {
+                    case "Dang giao":
+                        thongBao.TieuDe = $"Đơn hàng #{donHang.MaDonHang} đang giao";
+                        thongBao.NoiDung = "Đơn hàng của bạn đã được giao cho đơn vị vận chuyển. Vui lòng chú ý điện thoại!";
+                        break;
+                    case "Hoan thanh":
+                        thongBao.TieuDe = $"Đơn hàng #{donHang.MaDonHang} hoàn thành";
+                        thongBao.NoiDung = "Đơn hàng đã giao thành công. Cảm ơn bạn đã mua hàng!";
+                        break;
+                    case "Da huy":
+                        thongBao.TieuDe = $"Đơn hàng #{donHang.MaDonHang} đã hủy";
+                        thongBao.NoiDung = "Đơn hàng của bạn đã bị hủy. Liên hệ hotline nếu cần hỗ trợ.";
+                        break;
+                    default:
+                        thongBao.TieuDe = $"Đơn hàng #{donHang.MaDonHang} cập nhật";
+                        thongBao.NoiDung = $"Trạng thái đơn hàng đã được cập nhật thành: {trangThai}";
+                        break;
+                }
+
+                _context.THONG_BAO.Add(thongBao);
+                await _context.SaveChangesAsync();
+                TempData["ThongBao"] = "Cập nhật trạng thái đơn hàng thành công!";
+            }
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
+        // POST: Admin/DonHang/XacNhanThanhToan - Xác nhận đã nhận tiền chuyển khoản
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> XacNhanThanhToan(int id)
+        {
+            var donHang = await _context.DON_HANG.FindAsync(id);
+            if (donHang != null && donHang.PhuongThucThanhToan == "Chuyển khoản")
+            {
+                donHang.DaThanhToan = true;
+                
+                // Tạo thông báo cho user
+                var thongBao = new Models.ThongBao
+                {
+                    MaNguoiDung = donHang.MaNguoiDung,
+                    MaDonHang = donHang.MaDonHang,
+                    TieuDe = $"Đơn hàng #{donHang.MaDonHang} đã xác nhận thanh toán",
+                    NoiDung = "Chúng tôi đã nhận được tiền chuyển khoản của bạn. Đơn hàng sẽ sớm được xử lý!",
+                    LoaiThongBao = "DonHang",
+                    DuongDan = $"/DonHang/ChiTiet/{donHang.MaDonHang}",
+                    NgayTao = DateTime.Now
+                };
+
+                _context.THONG_BAO.Add(thongBao);
+                await _context.SaveChangesAsync();
+                TempData["ThongBao"] = "Đã xác nhận thanh toán thành công!";
+            }
             return RedirectToAction(nameof(Details), new { id });
         }
     }

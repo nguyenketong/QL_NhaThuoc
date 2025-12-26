@@ -53,7 +53,7 @@
                                 default: <span class="badge bg-danger">Đã hủy</span> break;
                             }
                         </td>
-                        <td>@((DateTime)item.NgayDatHang).ToString("dd/MM/yyyy HH:mm")</td>
+                        <td>@(((DateTime)item.NgayDatHang).ToString("dd/MM/yyyy HH:mm"))</td>
                         <td>
                             <a asp-action="Details" asp-route-id="@item.MaDonHang" class="btn btn-sm btn-info">
                                 <i class="fas fa-eye"></i> Chi tiết

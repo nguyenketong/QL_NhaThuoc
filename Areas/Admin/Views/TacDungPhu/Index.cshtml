@@ -1,3 +1,4 @@
+@model IEnumerable<QL_NhaThuoc.Models.TacDungPhu>
 @{
     ViewData["Title"] = "Quản lý tác dụng phụ";
 }
@@ -13,27 +14,34 @@
                 <th>ID</th>
                 <th>Tên tác dụng phụ</th>
                 <th>Mô tả</th>
-                <th>Số lượng thuốc</th>
                 <th width="150">Thao tác</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var item in Model)
+            @if (Model != null && Model.Any())
+            {
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.MaTacDungPhu</td>
+                        <td><strong>@item.TenTacDungPhu</strong></td>
+                        <td>@item.MoTa</td>
+                        <td>
+                            <a asp-action="Edit" asp-route-id="@item.MaTacDungPhu" class="btn btn-sm btn-warning">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <form asp-action="Delete" asp-route-id="@item.MaTacDungPhu" method="post" class="d-inline"
+                                  onsubmit="return confirm('Xóa tác dụng phụ này?')">
+                                <button type="submit" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            }
+            else
             {
                 <tr>
-                    <td>@item.TacDungPhu.MaTacDungPhu</td>
-                    <td><strong>@item.TacDungPhu.TenTacDungPhu</strong></td>
-                    <td>@item.TacDungPhu.MoTa</td>
-                    <td><span class="badge bg-info">@item.SoLuongThuoc sản phẩm</span></td>
-                    <td>
-                        <a asp-action="Edit" asp-route-id="@item.TacDungPhu.MaTacDungPhu" class="btn btn-sm btn-warning">
-                            <i class="fas fa-edit"></i>
-                        </a>
-                        <form asp-action="Delete" asp-route-id="@item.TacDungPhu.MaTacDungPhu" method="post" class="d-inline"
-                              onsubmit="return confirm('Xóa tác dụng phụ này?')">
-                            <button type="submit" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
-                        </form>
-                    </td>
+                    <td colspan="4" class="text-center text-muted py-4">Chưa có tác dụng phụ nào</td>
                 </tr>
             }
         </tbody>

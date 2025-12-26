@@ -1,13 +1,12 @@
-@model List<QL_NhaThuoc.Controllers.GioHangController.GioHangItem>
+@model List<QL_NhaThuoc.ViewModels.GioHangItem>
 @{
     ViewData["Title"] = "Thanh toán";
-    var tongTien = Model.Sum(g => g.ThanhTien);
+    var tongTien = Model?.Sum(g => g.ThanhTien) ?? 0;
+    var nguoiDung = ViewBag.NguoiDung as QL_NhaThuoc.Models.NguoiDung;
 }
 
 <div class="container my-4">
-    <h1 class="mb-4">
-        <i class="bi bi-credit-card"></i> Thanh toán đơn hàng
-    </h1>
+    <h1 class="mb-4"><i class="bi bi-credit-card"></i> Thanh toán đơn hàng</h1>
 
     @if (TempData["LoiThongBao"] != null)
     {
@@ -19,106 +18,169 @@
 
     <div class="row">
         <div class="col-lg-8">
-            <form asp-action="XuLyThanhToan" method="post">
+            <form asp-action="DatHang" method="post" id="formDatHang">
                 <div class="card mb-4">
-                    <div class="card-header">
-                        <h5 class="mb-0">Thông tin giao hàng</h5>
-                    </div>
+                    <div class="card-header"><h5 class="mb-0"><i class="fas fa-truck"></i> Địa chỉ giao hàng</h5></div>
                     <div class="card-body">
-                        <div class="mb-3">
-                            <label class="form-label">Họ và tên</label>
-                            <input type="text" class="form-control" value="@Context.Session.GetString("HoTen")" readonly>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Số điện thoại</label>
-                            <input type="text" class="form-control" value="@Context.Session.GetString("SoDienThoai")" readonly>
-                        </div>
-                        <div class="mb-3">
-                            <label for="diaChiGiaoHang" class="form-label">Địa chỉ giao hàng <span class="text-danger">*</span></label>
-                            <textarea id="diaChiGiaoHang" name="diaChiGiaoHang" class="form-control" rows="3" required 
-                                      placeholder="Nhập địa chỉ chi tiết để giao hàng"></textarea>
+                        <input type="hidden" name="hinhThucNhanHang" value="Giao hàng tận nơi">
+                        <div id="addressSection">
+                            <p class="text-muted small mb-2">Thông tin người nhận</p>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <input type="text" class="form-control" id="hoTenNguoiNhan" placeholder="Họ và tên *" value="@(nguoiDung?.HoTen ?? "")" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <input type="text" class="form-control" id="soDienThoaiNguoiNhan" placeholder="Số điện thoại *" value="@(nguoiDung?.SoDienThoai ?? "")" required>
+                                </div>
+                            </div>
+                            <p class="text-muted small mb-2">Địa chỉ nhận hàng</p>
+                            <div class="row mb-3">
+                                <div class="col-md-4">
+                                    <select class="form-select" id="tinhThanhPho" required><option value="">Chọn Tỉnh/Thành phố</option></select>
+                                </div>
+                                <div class="col-md-4">
+                                    <select class="form-select" id="quanHuyen" disabled required><option value="">Chọn Quận/Huyện</option></select>
+                                </div>
+                                <div class="col-md-4">
+                                    <select class="form-select" id="phuongXa" disabled required><option value="">Chọn Phường/Xã</option></select>
+                                </div>
+                            </div>
+                            <input type="text" class="form-control mb-3" id="diaChiChiTiet" placeholder="Số nhà, tên đường... *" required>
+                            <input type="hidden" name="diaChiGiaoHang" id="diaChiGiaoHang">
                         </div>
                     </div>
                 </div>
 
                 <div class="card mb-4">
-                    <div class="card-header">
-                        <h5 class="mb-0">Phương thức thanh toán</h5>
-                    </div>
+                    <div class="card-header"><h5 class="mb-0"><i class="fas fa-credit-card"></i> Phương thức thanh toán</h5></div>
                     <div class="card-body">
-                        <div class="form-check mb-3">
-                            <input class="form-check-input" type="radio" name="phuongThucThanhToan" 
-                                   id="tienMat" value="Tiền mặt" checked>
-                            <label class="form-check-label" for="tienMat">
-                                <i class="bi bi-cash"></i> Thanh toán khi nhận hàng (COD)
+                        <div class="form-check mb-3 p-3 border rounded">
+                            <input class="form-check-input" type="radio" name="phuongThucThanhToan" id="tienMat" value="Tiền mặt" checked>
+                            <label class="form-check-label d-flex align-items-center gap-2" for="tienMat">
+                                <i class="fas fa-money-bill-wave text-success fs-4"></i>
+                                <strong>Thanh toán khi nhận hàng (COD)</strong>
                             </label>
                         </div>
-                        <div class="form-check mb-3">
-                            <input class="form-check-input" type="radio" name="phuongThucThanhToan" 
-                                   id="chuyenKhoan" value="Chuyển khoản">
-                            <label class="form-check-label" for="chuyenKhoan">
-                                <i class="bi bi-bank"></i> Chuyển khoản ngân hàng
-                            </label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="phuongThucThanhToan" 
-                                   id="viDienTu" value="Ví điện tử">
-                            <label class="form-check-label" for="viDienTu">
-                                <i class="bi bi-wallet2"></i> Ví điện tử (Momo, ZaloPay)
+                        <div class="form-check p-3 border rounded">
+                            <input class="form-check-input" type="radio" name="phuongThucThanhToan" id="chuyenKhoan" value="Chuyển khoản">
+                            <label class="form-check-label d-flex align-items-center gap-2" for="chuyenKhoan">
+                                <i class="fas fa-university text-primary fs-4"></i>
+                                <strong>Chuyển khoản ngân hàng</strong>
                             </label>
                         </div>
                     </div>
                 </div>
 
                 <div class="d-flex justify-content-between">
-                    <a asp-action="Index" class="btn btn-outline-secondary">
-                        <i class="bi bi-arrow-left"></i> Quay lại giỏ hàng
-                    </a>
-                    <button type="submit" class="btn btn-primary btn-lg">
-                        <i class="bi bi-check-circle"></i> Đặt hàng
-                    </button>
+                    <a asp-action="Index" class="btn btn-outline-secondary btn-lg"><i class="bi bi-arrow-left"></i> Quay lại</a>
+                    <button type="submit" class="btn btn-primary btn-lg" onclick="return xacNhanDatHang()"><i class="bi bi-check-circle"></i> Đặt hàng</button>
                 </div>
             </form>
         </div>
 
         <div class="col-lg-4">
-            <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">Đơn hàng của bạn</h5>
-                </div>
+            <div class="card sticky-top" style="top: 100px;">
+                <div class="card-header bg-primary text-white"><h5 class="mb-0">Đơn hàng của bạn</h5></div>
                 <div class="card-body">
-                    <div class="mb-3">
-                        @foreach (var item in Model)
-                        {
-                            <div class="d-flex justify-content-between mb-2">
-                                <div>
-                                    <strong>@item.TenThuoc</strong>
-                                    <br>
-                                    <small class="text-muted">x @item.SoLuong</small>
-                                </div>
-                                <div class="text-end">
-                                    @item.ThanhTien.ToString("N0") đ
-                                </div>
+                    @foreach (var item in Model ?? new List<QL_NhaThuoc.ViewModels.GioHangItem>())
+                    {
+                        <div class="d-flex gap-2 mb-2">
+                            <img src="@(string.IsNullOrEmpty(item.HinhAnh) ? "/images/no-image.svg" : item.HinhAnh)" class="rounded" style="width:50px;height:50px;object-fit:contain;" onerror="this.src='/images/no-image.svg'">
+                            <div class="flex-grow-1">
+                                <strong class="small">@item.TenThuoc</strong>
+                                <div class="d-flex justify-content-between"><small>x@item.SoLuong</small><strong class="text-danger small">@item.ThanhTien.ToString("N0")đ</strong></div>
                             </div>
-                            <hr>
-                        }
-                    </div>
-                    
-                    <div class="d-flex justify-content-between mb-2">
-                        <span>Tạm tính:</span>
-                        <strong>@tongTien.ToString("N0") đ</strong>
-                    </div>
-                    <div class="d-flex justify-content-between mb-2">
-                        <span>Phí vận chuyển:</span>
-                        <strong>Miễn phí</strong>
-                    </div>
+                        </div>
+                    }
                     <hr>
-                    <div class="d-flex justify-content-between">
-                        <strong>Tổng cộng:</strong>
-                        <strong class="text-danger fs-4">@tongTien.ToString("N0") đ</strong>
-                    </div>
+                    <div class="d-flex justify-content-between"><span>Tạm tính:</span><strong>@tongTien.ToString("N0")đ</strong></div>
+                    <div class="d-flex justify-content-between"><span>Phí ship:</span><strong class="text-success">Miễn phí</strong></div>
+                    <hr>
+                    <div class="d-flex justify-content-between"><strong>Tổng:</strong><strong class="text-danger fs-4">@tongTien.ToString("N0")đ</strong></div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+
+@section Scripts {
+<script>
+    const API_URL = 'https://provinces.open-api.vn/api';
+
+    // Load tỉnh/thành phố khi trang load
+    document.addEventListener('DOMContentLoaded', loadTinhThanhPho);
+
+    async function loadTinhThanhPho() {
+        const sel = document.getElementById('tinhThanhPho');
+        sel.innerHTML = '<option value="">Đang tải...</option>';
+        try {
+            const res = await fetch(`${API_URL}/p/`);
+            const data = await res.json();
+            sel.innerHTML = '<option value="">Chọn Tỉnh/Thành phố</option>';
+            data.forEach(t => sel.innerHTML += `<option value="${t.code}" data-name="${t.name}">${t.name}</option>`);
+        } catch(e) { 
+            console.error(e);
+            sel.innerHTML = '<option value="">Lỗi tải dữ liệu</option>';
+        }
+    }
+
+    document.getElementById('tinhThanhPho').addEventListener('change', async function() {
+        const qh = document.getElementById('quanHuyen');
+        const px = document.getElementById('phuongXa');
+        qh.innerHTML = '<option value="">Chọn Quận/Huyện</option>';
+        px.innerHTML = '<option value="">Chọn Phường/Xã</option>';
+        qh.disabled = true;
+        px.disabled = true;
+        
+        if (!this.value) return;
+        
+        qh.innerHTML = '<option value="">Đang tải...</option>';
+        try {
+            const res = await fetch(`${API_URL}/p/${this.value}?depth=2`);
+            const data = await res.json();
+            qh.innerHTML = '<option value="">Chọn Quận/Huyện</option>';
+            qh.disabled = false;
+            data.districts.forEach(d => qh.innerHTML += `<option value="${d.code}" data-name="${d.name}">${d.name}</option>`);
+        } catch(e) { console.error(e); }
+    });
+
+    document.getElementById('quanHuyen').addEventListener('change', async function() {
+        const px = document.getElementById('phuongXa');
+        px.innerHTML = '<option value="">Chọn Phường/Xã</option>';
+        px.disabled = true;
+        
+        if (!this.value) return;
+        
+        px.innerHTML = '<option value="">Đang tải...</option>';
+        try {
+            const res = await fetch(`${API_URL}/d/${this.value}?depth=2`);
+            const data = await res.json();
+            px.innerHTML = '<option value="">Chọn Phường/Xã</option>';
+            px.disabled = false;
+            data.wards.forEach(w => px.innerHTML += `<option value="${w.code}" data-name="${w.name}">${w.name}</option>`);
+        } catch(e) { console.error(e); }
+    });
+
+    function xacNhanDatHang() {
+        const hoTen = document.getElementById('hoTenNguoiNhan').value.trim();
+        const sdt = document.getElementById('soDienThoaiNguoiNhan').value.trim();
+        const tinh = document.getElementById('tinhThanhPho');
+        const quan = document.getElementById('quanHuyen');
+        const phuong = document.getElementById('phuongXa');
+        const chiTiet = document.getElementById('diaChiChiTiet').value.trim();
+
+        if (!hoTen || !sdt || !tinh.value || !quan.value || !phuong.value || !chiTiet) {
+            alert('Vui lòng điền đầy đủ thông tin địa chỉ!');
+            return false;
+        }
+
+        const tinhName = tinh.options[tinh.selectedIndex].dataset.name;
+        const quanName = quan.options[quan.selectedIndex].dataset.name;
+        const phuongName = phuong.options[phuong.selectedIndex].dataset.name;
+        
+        document.getElementById('diaChiGiaoHang').value = `${hoTen} - ${sdt}, ${chiTiet}, ${phuongName}, ${quanName}, ${tinhName}`;
+        return true;
+    }
+</script>
+}

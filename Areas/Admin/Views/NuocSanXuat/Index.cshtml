@@ -1,9 +1,10 @@
+@model IEnumerable<QL_NhaThuoc.Models.NuocSanXuat>
 @{
-    ViewData["Title"] = "Quan ly nuoc san xuat";
+    ViewData["Title"] = "Quản lý nước sản xuất";
 }
 
 <div class="d-flex justify-content-end mb-4">
-    <a asp-action="Create" class="btn btn-success"><i class="fas fa-plus"></i> Them nuoc SX</a>
+    <a asp-action="Create" class="btn btn-success"><i class="fas fa-plus"></i> Thêm nước SX</a>
 </div>
 
 <div class="admin-table">
@@ -11,27 +12,36 @@
         <thead>
             <tr>
                 <th>ID</th>
-                <th>Ten nuoc san xuat</th>
-                <th>So luong thuoc</th>
-                <th width="150">Thao tac</th>
+                <th>Tên nước sản xuất</th>
+                <th>Số lượng thuốc</th>
+                <th width="150">Thao tác</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var item in Model)
+            @if (Model != null && Model.Any())
+            {
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.MaNuocSX</td>
+                        <td><strong>@item.TenNuocSX</strong></td>
+                        <td><span class="badge bg-info">@item.SoLuongThuoc sản phẩm</span></td>
+                        <td>
+                            <a asp-action="Edit" asp-route-id="@item.MaNuocSX" class="btn btn-sm btn-warning">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <form asp-action="Delete" asp-route-id="@item.MaNuocSX" method="post" class="d-inline"
+                                  onsubmit="return confirm('Xóa nước sản xuất này?')">
+                                <button type="submit" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            }
+            else
             {
                 <tr>
-                    <td>@item.NuocSanXuat.MaNuocSX</td>
-                    <td><strong>@item.NuocSanXuat.TenNuocSX</strong></td>
-                    <td><span class="badge bg-info">@item.SoLuongThuoc san pham</span></td>
-                    <td>
-                        <a asp-action="Edit" asp-route-id="@item.NuocSanXuat.MaNuocSX" class="btn btn-sm btn-warning">
-                            <i class="fas fa-edit"></i>
-                        </a>
-                        <form asp-action="Delete" asp-route-id="@item.NuocSanXuat.MaNuocSX" method="post" class="d-inline"
-                              onsubmit="return confirm('Xoa nuoc san xuat nay?')">
-                            <button type="submit" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
-                        </form>
-                    </td>
+                    <td colspan="4" class="text-center text-muted py-4">Chưa có nước sản xuất nào</td>
                 </tr>
             }
         </tbody>

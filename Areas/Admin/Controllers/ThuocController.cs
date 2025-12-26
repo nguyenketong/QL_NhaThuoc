@@ -1,9 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.Data.SqlClient;
-using QL_NhaThuoc.Models;
+using Microsoft.EntityFrameworkCore;
+using QL_NhaThuoc.Data;
 using QL_NhaThuoc.Filters;
-using System.Data;
+using QL_NhaThuoc.Models;
 
 namespace QL_NhaThuoc.Areas.Admin.Controllers
 {
@@ -11,381 +11,276 @@ namespace QL_NhaThuoc.Areas.Admin.Controllers
     [AdminAuthorize]
     public class ThuocController : Controller
     {
-        private readonly string _connectionString;
+        private readonly QL_NhaThuocDbContext _context;
+        private readonly IWebHostEnvironment _env;
 
-        public ThuocController(IConfiguration configuration)
+        public ThuocController(QL_NhaThuocDbContext context, IWebHostEnvironment env)
         {
-            _connectionString = configuration.GetConnectionString("DefaultConnection")!;
+            _context = context;
+            _env = env;
         }
 
-        // Danh sách thuốc
-        public async Task<IActionResult> Index(string? search, int? nhomId)
+        // GET: Admin/Thuoc - EF + LINQ
+        public async Task<IActionResult> Index()
         {
-            var danhSach = new List<dynamic>();
-            
-            using var connection = new SqlConnection(_connectionString);
-            await connection.OpenAsync();
+            var danhSach = await _context.THUOC
+                .Include(t => t.NhomThuoc)
+                .Include(t => t.ThuongHieu)
+                .Include(t => t.NuocSanXuat)
+                .OrderByDescending(t => t.MaThuoc)
+                .ToListAsync();
 
-            using var cmd = new SqlCommand("sp_Admin_Thuoc_DanhSach", connection);
-            cmd.CommandType = CommandType.StoredProcedure;
-
-            using var reader = await cmd.ExecuteReaderAsync();
-            while (await reader.ReadAsync())
-            {
-                var thuoc = new
-                {
-                    MaThuoc = reader.GetInt32(reader.GetOrdinal("MaThuoc")),
-                    TenThuoc = reader.GetString(reader.GetOrdinal("TenThuoc")),
-                    GiaBan = reader.IsDBNull(reader.GetOrdinal("GiaBan")) ? (decimal?)null : reader.GetDecimal(reader.GetOrdinal("GiaBan")),
-                    DonViTinh = reader.IsDBNull(reader.GetOrdinal("DonViTinh")) ? "" : reader.GetString(reader.GetOrdinal("DonViTinh")),
-                    HinhAnh = reader.IsDBNull(reader.GetOrdinal("HinhAnh")) ? "" : reader.GetString(reader.GetOrdinal("HinhAnh")),
-                    MaNhomThuoc = reader.IsDBNull(reader.GetOrdinal("MaNhomThuoc")) ? (int?)null : reader.GetInt32(reader.GetOrdinal("MaNhomThuoc")),
-                    TenNhomThuoc = reader.IsDBNull(reader.GetOrdinal("TenNhomThuoc")) ? "" : reader.GetString(reader.GetOrdinal("TenNhomThuoc")),
-                    TenThuongHieu = reader.IsDBNull(reader.GetOrdinal("TenThuongHieu")) ? "" : reader.GetString(reader.GetOrdinal("TenThuongHieu")),
-                    TenNuocSX = reader.IsDBNull(reader.GetOrdinal("TenNuocSX")) ? "" : reader.GetString(reader.GetOrdinal("TenNuocSX"))
-                };
-
-                // Filter theo search và nhomId
-                if (!string.IsNullOrEmpty(search) && !thuoc.TenThuoc.Contains(search, StringComparison.OrdinalIgnoreCase))
-                    continue;
-                if (nhomId.HasValue && thuoc.MaNhomThuoc != nhomId)
-                    continue;
-
-                danhSach.Add(thuoc);
-            }
-
-            // Load danh sách nhóm thuốc cho filter
-            ViewBag.NhomThuocs = await LoadNhomThuocs(connection);
-            
             return View(danhSach);
         }
 
-        // Thêm thuốc - GET
+        // GET: Admin/Thuoc/Create
         public async Task<IActionResult> Create()
         {
-            using var connection = new SqlConnection(_connectionString);
-            await connection.OpenAsync();
-            await LoadDropdowns(connection);
-            await LoadChiTietDropdowns(connection);
+            await LoadDropdowns();
             return View();
         }
 
-        // Thêm thuốc - POST
+        // POST: Admin/Thuoc/Create - EF + LINQ
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Thuoc thuoc, int[]? ThanhPhanIds, string[]? HamLuongs, int[]? TacDungPhuIds, string[]? MucDos, int[]? DoiTuongIds)
+        public async Task<IActionResult> Create(Thuoc thuoc, IFormFile? hinhAnhFile,
+            int[]? ThanhPhanIds, string[]? HamLuongs,
+            int[]? TacDungPhuIds, string[]? MucDos,
+            int[]? DoiTuongIds)
         {
             if (ModelState.IsValid)
             {
-                using var connection = new SqlConnection(_connectionString);
-                await connection.OpenAsync();
+                // Gán ngày tạo
+                thuoc.NgayTao = DateTime.Now;
+                
+                // Xử lý upload hình ảnh
+                if (hinhAnhFile != null && hinhAnhFile.Length > 0)
+                {
+                    var fileName = Guid.NewGuid() + Path.GetExtension(hinhAnhFile.FileName);
+                    var filePath = Path.Combine(_env.WebRootPath, "images", fileName);
+                    
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await hinhAnhFile.CopyToAsync(stream);
+                    }
+                    thuoc.HinhAnh = "/images/" + fileName;
+                }
 
-                // Thêm thuốc
-                using var cmd = new SqlCommand("sp_Admin_Thuoc_Them", connection);
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("@TenThuoc", thuoc.TenThuoc);
-                cmd.Parameters.AddWithValue("@MaNhomThuoc", (object?)thuoc.MaNhomThuoc ?? DBNull.Value);
-                cmd.Parameters.AddWithValue("@MaNuocSX", (object?)thuoc.MaNuocSX ?? DBNull.Value);
-                cmd.Parameters.AddWithValue("@MaThuongHieu", (object?)thuoc.MaThuongHieu ?? DBNull.Value);
-                cmd.Parameters.AddWithValue("@GiaBan", (object?)thuoc.GiaBan ?? DBNull.Value);
-                cmd.Parameters.AddWithValue("@DonViTinh", (object?)thuoc.DonViTinh ?? DBNull.Value);
-                cmd.Parameters.AddWithValue("@MoTa", (object?)thuoc.MoTa ?? DBNull.Value);
-                cmd.Parameters.AddWithValue("@HinhAnh", (object?)thuoc.HinhAnh ?? DBNull.Value);
+                _context.THUOC.Add(thuoc);
+                await _context.SaveChangesAsync();
 
-                var result = await cmd.ExecuteScalarAsync();
-                var maThuocMoi = Convert.ToInt32(result);
-
-                // Thêm thành phần
+                // Lưu thành phần
                 if (ThanhPhanIds != null)
                 {
                     for (int i = 0; i < ThanhPhanIds.Length; i++)
                     {
                         if (ThanhPhanIds[i] > 0)
                         {
-                            using var cmdTP = new SqlCommand("INSERT INTO CT_THANH_PHAN (MaThuoc, MaThanhPhan, HamLuong) VALUES (@MaThuoc, @MaThanhPhan, @HamLuong)", connection);
-                            cmdTP.Parameters.AddWithValue("@MaThuoc", maThuocMoi);
-                            cmdTP.Parameters.AddWithValue("@MaThanhPhan", ThanhPhanIds[i]);
-                            cmdTP.Parameters.AddWithValue("@HamLuong", HamLuongs != null && i < HamLuongs.Length ? (object)HamLuongs[i] : DBNull.Value);
-                            await cmdTP.ExecuteNonQueryAsync();
+                            _context.CT_THANH_PHAN.Add(new CT_ThanhPhan
+                            {
+                                MaThuoc = thuoc.MaThuoc,
+                                MaThanhPhan = ThanhPhanIds[i],
+                                HamLuong = HamLuongs != null && i < HamLuongs.Length ? HamLuongs[i] : null
+                            });
                         }
                     }
                 }
 
-                // Thêm tác dụng phụ
+                // Lưu tác dụng phụ
                 if (TacDungPhuIds != null)
                 {
                     for (int i = 0; i < TacDungPhuIds.Length; i++)
                     {
                         if (TacDungPhuIds[i] > 0)
                         {
-                            using var cmdTDP = new SqlCommand("INSERT INTO CT_TAC_DUNG_PHU (MaThuoc, MaTacDungPhu, MucDo) VALUES (@MaThuoc, @MaTacDungPhu, @MucDo)", connection);
-                            cmdTDP.Parameters.AddWithValue("@MaThuoc", maThuocMoi);
-                            cmdTDP.Parameters.AddWithValue("@MaTacDungPhu", TacDungPhuIds[i]);
-                            cmdTDP.Parameters.AddWithValue("@MucDo", MucDos != null && i < MucDos.Length ? (object)MucDos[i] : DBNull.Value);
-                            await cmdTDP.ExecuteNonQueryAsync();
+                            _context.CT_TAC_DUNG_PHU.Add(new CT_TacDungPhu
+                            {
+                                MaThuoc = thuoc.MaThuoc,
+                                MaTacDungPhu = TacDungPhuIds[i],
+                                MucDo = MucDos != null && i < MucDos.Length ? MucDos[i] : null
+                            });
                         }
                     }
                 }
 
-                // Thêm đối tượng sử dụng
+                // Lưu đối tượng sử dụng
                 if (DoiTuongIds != null)
                 {
                     foreach (var doiTuongId in DoiTuongIds)
                     {
-                        if (doiTuongId > 0)
+                        _context.CT_DOI_TUONG.Add(new CT_DoiTuong
                         {
-                            using var cmdDT = new SqlCommand("INSERT INTO CT_DOI_TUONG (MaThuoc, MaDoiTuong) VALUES (@MaThuoc, @MaDoiTuong)", connection);
-                            cmdDT.Parameters.AddWithValue("@MaThuoc", maThuocMoi);
-                            cmdDT.Parameters.AddWithValue("@MaDoiTuong", doiTuongId);
-                            await cmdDT.ExecuteNonQueryAsync();
-                        }
+                            MaThuoc = thuoc.MaThuoc,
+                            MaDoiTuong = doiTuongId
+                        });
                     }
                 }
+
+                await _context.SaveChangesAsync();
 
                 TempData["ThongBao"] = "Thêm thuốc thành công!";
                 return RedirectToAction(nameof(Index));
             }
 
-            using var conn = new SqlConnection(_connectionString);
-            await conn.OpenAsync();
-            await LoadDropdowns(conn);
-            await LoadChiTietDropdowns(conn);
+            await LoadDropdowns();
             return View(thuoc);
         }
 
 
-        // Sửa thuốc - GET
+        // GET: Admin/Thuoc/Edit/5
         public async Task<IActionResult> Edit(int id)
         {
-            using var connection = new SqlConnection(_connectionString);
-            await connection.OpenAsync();
+            var thuoc = await _context.THUOC
+                .Include(t => t.CT_ThanhPhans)
+                .Include(t => t.CT_TacDungPhus)
+                .Include(t => t.CT_DoiTuongs)
+                .FirstOrDefaultAsync(t => t.MaThuoc == id);
+                
+            if (thuoc == null)
+                return NotFound();
 
-            Thuoc? thuoc = null;
-            var selectedDoiTuongs = new List<int>();
-
-            // Lấy thông tin thuốc
-            using (var cmd = new SqlCommand("SELECT * FROM THUOC WHERE MaThuoc = @MaThuoc", connection))
-            {
-                cmd.Parameters.AddWithValue("@MaThuoc", id);
-                using var reader = await cmd.ExecuteReaderAsync();
-                if (await reader.ReadAsync())
-                {
-                    thuoc = new Thuoc
-                    {
-                        MaThuoc = reader.GetInt32(reader.GetOrdinal("MaThuoc")),
-                        TenThuoc = reader.GetString(reader.GetOrdinal("TenThuoc")),
-                        MoTa = reader.IsDBNull(reader.GetOrdinal("MoTa")) ? null : reader.GetString(reader.GetOrdinal("MoTa")),
-                        GiaBan = reader.IsDBNull(reader.GetOrdinal("GiaBan")) ? null : reader.GetDecimal(reader.GetOrdinal("GiaBan")),
-                        DonViTinh = reader.IsDBNull(reader.GetOrdinal("DonViTinh")) ? null : reader.GetString(reader.GetOrdinal("DonViTinh")),
-                        HinhAnh = reader.IsDBNull(reader.GetOrdinal("HinhAnh")) ? null : reader.GetString(reader.GetOrdinal("HinhAnh")),
-                        MaNhomThuoc = reader.IsDBNull(reader.GetOrdinal("MaNhomThuoc")) ? 0 : reader.GetInt32(reader.GetOrdinal("MaNhomThuoc")),
-                        MaThuongHieu = reader.IsDBNull(reader.GetOrdinal("MaThuongHieu")) ? null : reader.GetInt32(reader.GetOrdinal("MaThuongHieu")),
-                        MaNuocSX = reader.IsDBNull(reader.GetOrdinal("MaNuocSX")) ? null : reader.GetInt32(reader.GetOrdinal("MaNuocSX"))
-                    };
-                }
-            }
-
-            if (thuoc == null) return NotFound();
-
-            // Lấy đối tượng sử dụng đã chọn
-            using (var cmd = new SqlCommand("SELECT MaDoiTuong FROM CT_DOI_TUONG WHERE MaThuoc = @MaThuoc", connection))
-            {
-                cmd.Parameters.AddWithValue("@MaThuoc", id);
-                using var reader = await cmd.ExecuteReaderAsync();
-                while (await reader.ReadAsync())
-                {
-                    selectedDoiTuongs.Add(reader.GetInt32(0));
-                }
-            }
-
-            await LoadDropdowns(connection);
-            await LoadChiTietDropdowns(connection);
-            ViewBag.SelectedDoiTuongs = selectedDoiTuongs;
-
+            await LoadDropdowns();
+            ViewBag.SelectedDoiTuongs = thuoc.CT_DoiTuongs?.Select(ct => ct.MaDoiTuong).ToList() ?? new List<int>();
             return View(thuoc);
         }
 
-        // Sửa thuốc - POST
+        // POST: Admin/Thuoc/Edit/5 - EF + LINQ
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Thuoc thuoc, int[]? ThanhPhanIds, string[]? HamLuongs, int[]? TacDungPhuIds, string[]? MucDos, int[]? DoiTuongIds)
+        public async Task<IActionResult> Edit(int id, Thuoc thuoc, IFormFile? hinhAnhFile,
+            int[]? ThanhPhanIds, string[]? HamLuongs,
+            int[]? TacDungPhuIds, string[]? MucDos,
+            int[]? DoiTuongIds)
         {
-            if (id != thuoc.MaThuoc) return NotFound();
+            if (id != thuoc.MaThuoc)
+                return NotFound();
 
             if (ModelState.IsValid)
             {
-                using var connection = new SqlConnection(_connectionString);
-                await connection.OpenAsync();
-
-                // Cập nhật thuốc
-                using var cmd = new SqlCommand("sp_Admin_Thuoc_Sua", connection);
-                cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.AddWithValue("@MaThuoc", thuoc.MaThuoc);
-                cmd.Parameters.AddWithValue("@TenThuoc", thuoc.TenThuoc);
-                cmd.Parameters.AddWithValue("@MaNhomThuoc", (object?)thuoc.MaNhomThuoc ?? DBNull.Value);
-                cmd.Parameters.AddWithValue("@MaNuocSX", (object?)thuoc.MaNuocSX ?? DBNull.Value);
-                cmd.Parameters.AddWithValue("@MaThuongHieu", (object?)thuoc.MaThuongHieu ?? DBNull.Value);
-                cmd.Parameters.AddWithValue("@GiaBan", (object?)thuoc.GiaBan ?? DBNull.Value);
-                cmd.Parameters.AddWithValue("@DonViTinh", (object?)thuoc.DonViTinh ?? DBNull.Value);
-                cmd.Parameters.AddWithValue("@MoTa", (object?)thuoc.MoTa ?? DBNull.Value);
-                cmd.Parameters.AddWithValue("@HinhAnh", (object?)thuoc.HinhAnh ?? DBNull.Value);
-                await cmd.ExecuteNonQueryAsync();
-
-                // Xóa dữ liệu cũ
-                using (var cmdDel = new SqlCommand("DELETE FROM CT_THANH_PHAN WHERE MaThuoc = @MaThuoc; DELETE FROM CT_TAC_DUNG_PHU WHERE MaThuoc = @MaThuoc; DELETE FROM CT_DOI_TUONG WHERE MaThuoc = @MaThuoc;", connection))
+                try
                 {
-                    cmdDel.Parameters.AddWithValue("@MaThuoc", id);
-                    await cmdDel.ExecuteNonQueryAsync();
-                }
-
-                // Thêm thành phần mới
-                if (ThanhPhanIds != null)
-                {
-                    for (int i = 0; i < ThanhPhanIds.Length; i++)
+                    // Xử lý upload hình ảnh mới
+                    if (hinhAnhFile != null && hinhAnhFile.Length > 0)
                     {
-                        if (ThanhPhanIds[i] > 0)
+                        var fileName = Guid.NewGuid() + Path.GetExtension(hinhAnhFile.FileName);
+                        var filePath = Path.Combine(_env.WebRootPath, "images", fileName);
+                        
+                        using (var stream = new FileStream(filePath, FileMode.Create))
                         {
-                            using var cmdTP = new SqlCommand("INSERT INTO CT_THANH_PHAN (MaThuoc, MaThanhPhan, HamLuong) VALUES (@MaThuoc, @MaThanhPhan, @HamLuong)", connection);
-                            cmdTP.Parameters.AddWithValue("@MaThuoc", id);
-                            cmdTP.Parameters.AddWithValue("@MaThanhPhan", ThanhPhanIds[i]);
-                            cmdTP.Parameters.AddWithValue("@HamLuong", HamLuongs != null && i < HamLuongs.Length ? (object)HamLuongs[i] : DBNull.Value);
-                            await cmdTP.ExecuteNonQueryAsync();
+                            await hinhAnhFile.CopyToAsync(stream);
+                        }
+                        thuoc.HinhAnh = "/images/" + fileName;
+                    }
+
+                    _context.Update(thuoc);
+
+                    // Xóa dữ liệu cũ
+                    var oldThanhPhans = await _context.CT_THANH_PHAN.Where(ct => ct.MaThuoc == id).ToListAsync();
+                    _context.CT_THANH_PHAN.RemoveRange(oldThanhPhans);
+
+                    var oldTacDungPhus = await _context.CT_TAC_DUNG_PHU.Where(ct => ct.MaThuoc == id).ToListAsync();
+                    _context.CT_TAC_DUNG_PHU.RemoveRange(oldTacDungPhus);
+
+                    var oldDoiTuongs = await _context.CT_DOI_TUONG.Where(ct => ct.MaThuoc == id).ToListAsync();
+                    _context.CT_DOI_TUONG.RemoveRange(oldDoiTuongs);
+
+                    // Thêm thành phần mới
+                    if (ThanhPhanIds != null)
+                    {
+                        for (int i = 0; i < ThanhPhanIds.Length; i++)
+                        {
+                            if (ThanhPhanIds[i] > 0)
+                            {
+                                _context.CT_THANH_PHAN.Add(new CT_ThanhPhan
+                                {
+                                    MaThuoc = id,
+                                    MaThanhPhan = ThanhPhanIds[i],
+                                    HamLuong = HamLuongs != null && i < HamLuongs.Length ? HamLuongs[i] : null
+                                });
+                            }
                         }
                     }
-                }
 
-                // Thêm tác dụng phụ mới
-                if (TacDungPhuIds != null)
-                {
-                    for (int i = 0; i < TacDungPhuIds.Length; i++)
+                    // Thêm tác dụng phụ mới
+                    if (TacDungPhuIds != null)
                     {
-                        if (TacDungPhuIds[i] > 0)
+                        for (int i = 0; i < TacDungPhuIds.Length; i++)
                         {
-                            using var cmdTDP = new SqlCommand("INSERT INTO CT_TAC_DUNG_PHU (MaThuoc, MaTacDungPhu, MucDo) VALUES (@MaThuoc, @MaTacDungPhu, @MucDo)", connection);
-                            cmdTDP.Parameters.AddWithValue("@MaThuoc", id);
-                            cmdTDP.Parameters.AddWithValue("@MaTacDungPhu", TacDungPhuIds[i]);
-                            cmdTDP.Parameters.AddWithValue("@MucDo", MucDos != null && i < MucDos.Length ? (object)MucDos[i] : DBNull.Value);
-                            await cmdTDP.ExecuteNonQueryAsync();
+                            if (TacDungPhuIds[i] > 0)
+                            {
+                                _context.CT_TAC_DUNG_PHU.Add(new CT_TacDungPhu
+                                {
+                                    MaThuoc = id,
+                                    MaTacDungPhu = TacDungPhuIds[i],
+                                    MucDo = MucDos != null && i < MucDos.Length ? MucDos[i] : null
+                                });
+                            }
                         }
                     }
-                }
 
-                // Thêm đối tượng sử dụng mới
-                if (DoiTuongIds != null)
-                {
-                    foreach (var doiTuongId in DoiTuongIds)
+                    // Thêm đối tượng sử dụng mới
+                    if (DoiTuongIds != null)
                     {
-                        if (doiTuongId > 0)
+                        foreach (var doiTuongId in DoiTuongIds)
                         {
-                            using var cmdDT = new SqlCommand("INSERT INTO CT_DOI_TUONG (MaThuoc, MaDoiTuong) VALUES (@MaThuoc, @MaDoiTuong)", connection);
-                            cmdDT.Parameters.AddWithValue("@MaThuoc", id);
-                            cmdDT.Parameters.AddWithValue("@MaDoiTuong", doiTuongId);
-                            await cmdDT.ExecuteNonQueryAsync();
+                            _context.CT_DOI_TUONG.Add(new CT_DoiTuong
+                            {
+                                MaThuoc = id,
+                                MaDoiTuong = doiTuongId
+                            });
                         }
                     }
-                }
 
-                TempData["ThongBao"] = "Cập nhật thuốc thành công!";
-                return RedirectToAction(nameof(Index));
+                    await _context.SaveChangesAsync();
+
+                    TempData["ThongBao"] = "Cập nhật thuốc thành công!";
+                    return RedirectToAction(nameof(Index));
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!await _context.THUOC.AnyAsync(t => t.MaThuoc == id))
+                        return NotFound();
+                    throw;
+                }
             }
 
-            using var conn = new SqlConnection(_connectionString);
-            await conn.OpenAsync();
-            await LoadDropdowns(conn);
-            await LoadChiTietDropdowns(conn);
+            await LoadDropdowns();
             return View(thuoc);
         }
 
-        // Xóa thuốc
+        // POST: Admin/Thuoc/Delete/5 - EF + LINQ
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
-            using var connection = new SqlConnection(_connectionString);
-            await connection.OpenAsync();
-
-            using var cmd = new SqlCommand("sp_Admin_Thuoc_Xoa", connection);
-            cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("@MaThuoc", id);
-            await cmd.ExecuteNonQueryAsync();
-
-            TempData["ThongBao"] = "Xóa thuốc thành công!";
+            var thuoc = await _context.THUOC.FindAsync(id);
+            if (thuoc != null)
+            {
+                _context.THUOC.Remove(thuoc);
+                await _context.SaveChangesAsync();
+                TempData["ThongBao"] = "Xóa thuốc thành công!";
+            }
             return RedirectToAction(nameof(Index));
         }
 
-        private async Task<List<dynamic>> LoadNhomThuocs(SqlConnection connection)
+        private async Task LoadDropdowns()
         {
-            var list = new List<dynamic>();
-            using var cmd = new SqlCommand("SELECT MaNhomThuoc, TenNhomThuoc FROM NHOM_THUOC ORDER BY TenNhomThuoc", connection);
-            using var reader = await cmd.ExecuteReaderAsync();
-            while (await reader.ReadAsync())
-            {
-                list.Add(new { MaNhomThuoc = reader.GetInt32(0), TenNhomThuoc = reader.GetString(1) });
-            }
-            return list;
-        }
+            ViewBag.NhomThuocs = new SelectList(
+                await _context.NHOM_THUOC.OrderBy(n => n.TenNhomThuoc).ToListAsync(),
+                "MaNhomThuoc", "TenNhomThuoc");
 
-        private async Task LoadDropdowns(SqlConnection connection)
-        {
-            var nhomThuocs = new List<SelectListItem>();
-            var thuongHieus = new List<SelectListItem>();
-            var nuocSXs = new List<SelectListItem>();
+            ViewBag.ThuongHieus = new SelectList(
+                await _context.THUONG_HIEU.OrderBy(th => th.TenThuongHieu).ToListAsync(),
+                "MaThuongHieu", "TenThuongHieu");
 
-            using (var cmd = new SqlCommand("SELECT MaNhomThuoc, TenNhomThuoc FROM NHOM_THUOC ORDER BY TenNhomThuoc", connection))
-            using (var reader = await cmd.ExecuteReaderAsync())
-            {
-                while (await reader.ReadAsync())
-                    nhomThuocs.Add(new SelectListItem { Value = reader.GetInt32(0).ToString(), Text = reader.GetString(1) });
-            }
+            ViewBag.NuocSXs = new SelectList(
+                await _context.NUOC_SAN_XUAT.OrderBy(n => n.TenNuocSX).ToListAsync(),
+                "MaNuocSX", "TenNuocSX");
 
-            using (var cmd = new SqlCommand("SELECT MaThuongHieu, TenThuongHieu FROM THUONG_HIEU ORDER BY TenThuongHieu", connection))
-            using (var reader = await cmd.ExecuteReaderAsync())
-            {
-                while (await reader.ReadAsync())
-                    thuongHieus.Add(new SelectListItem { Value = reader.GetInt32(0).ToString(), Text = reader.GetString(1) });
-            }
-
-            using (var cmd = new SqlCommand("SELECT MaNuocSX, TenNuocSX FROM NUOC_SAN_XUAT ORDER BY TenNuocSX", connection))
-            using (var reader = await cmd.ExecuteReaderAsync())
-            {
-                while (await reader.ReadAsync())
-                    nuocSXs.Add(new SelectListItem { Value = reader.GetInt32(0).ToString(), Text = reader.GetString(1) });
-            }
-
-            ViewBag.NhomThuocs = new SelectList(nhomThuocs, "Value", "Text");
-            ViewBag.ThuongHieus = new SelectList(thuongHieus, "Value", "Text");
-            ViewBag.NuocSXs = new SelectList(nuocSXs, "Value", "Text");
-        }
-
-        private async Task LoadChiTietDropdowns(SqlConnection connection)
-        {
-            var thanhPhans = new List<dynamic>();
-            var tacDungPhus = new List<dynamic>();
-            var doiTuongs = new List<dynamic>();
-
-            using (var cmd = new SqlCommand("SELECT MaThanhPhan, TenThanhPhan FROM THANH_PHAN ORDER BY TenThanhPhan", connection))
-            using (var reader = await cmd.ExecuteReaderAsync())
-            {
-                while (await reader.ReadAsync())
-                    thanhPhans.Add(new { MaThanhPhan = reader.GetInt32(0), TenThanhPhan = reader.GetString(1) });
-            }
-
-            using (var cmd = new SqlCommand("SELECT MaTacDungPhu, TenTacDungPhu FROM TAC_DUNG_PHU ORDER BY TenTacDungPhu", connection))
-            using (var reader = await cmd.ExecuteReaderAsync())
-            {
-                while (await reader.ReadAsync())
-                    tacDungPhus.Add(new { MaTacDungPhu = reader.GetInt32(0), TenTacDungPhu = reader.GetString(1) });
-            }
-
-            using (var cmd = new SqlCommand("SELECT MaDoiTuong, TenDoiTuong FROM DOI_TUONG_SU_DUNG ORDER BY TenDoiTuong", connection))
-            using (var reader = await cmd.ExecuteReaderAsync())
-            {
-                while (await reader.ReadAsync())
-                    doiTuongs.Add(new { MaDoiTuong = reader.GetInt32(0), TenDoiTuong = reader.GetString(1) });
-            }
-
-            ViewBag.ThanhPhans = thanhPhans;
-            ViewBag.TacDungPhus = tacDungPhus;
-            ViewBag.DoiTuongs = doiTuongs;
+            // Load thành phần, tác dụng phụ, đối tượng sử dụng
+            ViewBag.ThanhPhans = await _context.THANH_PHAN.OrderBy(tp => tp.TenThanhPhan).ToListAsync();
+            ViewBag.TacDungPhus = await _context.TAC_DUNG_PHU.OrderBy(tdp => tdp.TenTacDungPhu).ToListAsync();
+            ViewBag.DoiTuongs = await _context.DOI_TUONG_SU_DUNG.OrderBy(dt => dt.TenDoiTuong).ToListAsync();
         }
     }
 }

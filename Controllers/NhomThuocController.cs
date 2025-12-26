@@ -1,92 +1,97 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
-using System.Data;
+using Microsoft.EntityFrameworkCore;
+using QL_NhaThuoc.Data;
 
 namespace QL_NhaThuoc.Controllers
 {
     public class NhomThuocController : Controller
     {
-        private readonly string _connectionString;
+        private readonly QL_NhaThuocDbContext _context;
 
-        public NhomThuocController(IConfiguration configuration)
+        public NhomThuocController(QL_NhaThuocDbContext context)
         {
-            _connectionString = configuration.GetConnectionString("DefaultConnection")!;
+            _context = context;
         }
 
-        // Danh sach tat ca nhom thuoc
+        // GET: NhomThuoc/DanhSach - EF + LINQ
         public async Task<IActionResult> DanhSach()
         {
-            var danhSachNhom = new List<dynamic>();
-
-            using var connection = new SqlConnection(_connectionString);
-            await connection.OpenAsync();
-
-            using var cmd = new SqlCommand("sp_NhomThuoc_DanhSach", connection);
-            cmd.CommandType = CommandType.StoredProcedure;
-
-            using var reader = await cmd.ExecuteReaderAsync();
-            while (await reader.ReadAsync())
-            {
-                danhSachNhom.Add(new
+            var danhSachNhom = await _context.NHOM_THUOC
+                .Select(n => new
                 {
-                    MaNhomThuoc = reader.GetInt32(reader.GetOrdinal("MaNhomThuoc")),
-                    TenNhomThuoc = reader.GetString(reader.GetOrdinal("TenNhomThuoc")),
-                    MoTa = reader.IsDBNull(reader.GetOrdinal("MoTa")) ? "" : reader.GetString(reader.GetOrdinal("MoTa")),
-                    SoLuongThuoc = reader.GetInt32(reader.GetOrdinal("SoLuongThuoc"))
-                });
-            }
+                    n.MaNhomThuoc,
+                    n.TenNhomThuoc,
+                    n.MoTa,
+                    SoLuongThuoc = n.Thuocs != null ? n.Thuocs.Count : 0
+                })
+                .OrderBy(n => n.TenNhomThuoc)
+                .ToListAsync();
 
             return View(danhSachNhom);
         }
 
-        // Chi tiet nhom thuoc va cac thuoc trong nhom
-        public async Task<IActionResult> ChiTiet(int id)
+        // GET: NhomThuoc/ChiTiet/5 - EF + LINQ với phân trang
+        // Nếu là danh mục cha, hiển thị tất cả sản phẩm của danh mục cha + các danh mục con
+        public async Task<IActionResult> ChiTiet(int id, int page = 1, string? sapXep = null)
         {
-            using var connection = new SqlConnection(_connectionString);
-            await connection.OpenAsync();
+            // Load nhóm thuốc hiện tại
+            var nhomThuoc = await _context.NHOM_THUOC
+                .FirstOrDefaultAsync(n => n.MaNhomThuoc == id);
 
-            using var cmd = new SqlCommand("sp_NhomThuoc_ChiTiet", connection);
-            cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("@MaNhomThuoc", id);
+            if (nhomThuoc == null)
+            {
+                TempData["Error"] = "Không tìm thấy nhóm thuốc này!";
+                return RedirectToAction("DanhSach");
+            }
 
-            dynamic? nhomThuoc = null;
-            var danhSachThuoc = new List<dynamic>();
+            // Load danh mục con riêng
+            var danhMucCon = await _context.NHOM_THUOC
+                .Where(n => n.MaDanhMucCha == id)
+                .ToListAsync();
 
-            using var reader = await cmd.ExecuteReaderAsync();
+            // Lấy danh sách ID của nhóm hiện tại và tất cả danh mục con
+            var nhomIds = new List<int> { id };
+            nhomIds.AddRange(danhMucCon.Select(n => n.MaNhomThuoc));
+
+            // Load tất cả sản phẩm vào memory trước, sau đó lọc
+            var allThuocs = await _context.THUOC
+                .Include(t => t.ThuongHieu)
+                .ToListAsync();
+
+            // Lọc theo nhóm trong memory
+            var filteredThuocs = allThuocs.Where(t => nhomIds.Contains(t.MaNhomThuoc)).ToList();
+
+            // Sắp xếp trong memory
+            var sortedThuocs = sapXep switch
+            {
+                "gia-tang" => filteredThuocs.OrderBy(t => t.GiaBan).ToList(),
+                "gia-giam" => filteredThuocs.OrderByDescending(t => t.GiaBan).ToList(),
+                "ten-az" => filteredThuocs.OrderBy(t => t.TenThuoc).ToList(),
+                "ten-za" => filteredThuocs.OrderByDescending(t => t.TenThuoc).ToList(),
+                "moi-nhat" => filteredThuocs.OrderByDescending(t => t.NgayTao).ToList(),
+                _ => filteredThuocs.OrderByDescending(t => t.MaThuoc).ToList()
+            };
+
+            // Phân trang trong memory
+            int pageSize = 12;
+            int totalItems = sortedThuocs.Count;
+            int totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
             
-            // Thông tin nhóm
-            if (await reader.ReadAsync())
-            {
-                nhomThuoc = new
-                {
-                    MaNhomThuoc = reader.GetInt32(reader.GetOrdinal("MaNhomThuoc")),
-                    TenNhomThuoc = reader.GetString(reader.GetOrdinal("TenNhomThuoc")),
-                    MoTa = reader.IsDBNull(reader.GetOrdinal("MoTa")) ? "" : reader.GetString(reader.GetOrdinal("MoTa"))
-                };
-            }
+            var thuocs = sortedThuocs
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
 
-            if (nhomThuoc == null) return NotFound();
+            nhomThuoc.Thuocs = thuocs;
+            nhomThuoc.DanhMucCon = danhMucCon;
 
-            // Danh sách thuốc
-            if (await reader.NextResultAsync())
-            {
-                while (await reader.ReadAsync())
-                {
-                    danhSachThuoc.Add(new
-                    {
-                        MaThuoc = reader.GetInt32(reader.GetOrdinal("MaThuoc")),
-                        TenThuoc = reader.GetString(reader.GetOrdinal("TenThuoc")),
-                        MoTa = reader.IsDBNull(reader.GetOrdinal("MoTa")) ? "" : reader.GetString(reader.GetOrdinal("MoTa")),
-                        GiaBan = reader.IsDBNull(reader.GetOrdinal("GiaBan")) ? (decimal?)null : reader.GetDecimal(reader.GetOrdinal("GiaBan")),
-                        HinhAnh = reader.IsDBNull(reader.GetOrdinal("HinhAnh")) ? "" : reader.GetString(reader.GetOrdinal("HinhAnh")),
-                        TenThuongHieu = reader.IsDBNull(reader.GetOrdinal("TenThuongHieu")) ? "" : reader.GetString(reader.GetOrdinal("TenThuongHieu")),
-                        TenNuocSX = reader.IsDBNull(reader.GetOrdinal("TenNuocSX")) ? "" : reader.GetString(reader.GetOrdinal("TenNuocSX"))
-                    });
-                }
-            }
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = totalPages;
+            ViewBag.TotalItems = totalItems;
+            ViewBag.SapXep = sapXep;
+            ViewBag.DanhMucCon = danhMucCon;
 
-            ViewBag.NhomThuoc = nhomThuoc;
-            return View(danhSachThuoc);
+            return View(nhomThuoc);
         }
     }
 }

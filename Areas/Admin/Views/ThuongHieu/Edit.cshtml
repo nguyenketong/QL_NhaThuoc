@@ -4,22 +4,43 @@
 }
 
 <div class="row">
-    <div class="col-lg-6">
+    <div class="col-lg-8">
         <div class="card border-0 shadow-sm">
             <div class="card-body">
-                <form asp-action="Edit" method="post">
+                <form asp-action="Edit" method="post" enctype="multipart/form-data">
                     <input type="hidden" asp-for="MaThuongHieu" />
-                    <div class="mb-3">
-                        <label class="form-label">Tên thương hiệu <span class="text-danger">*</span></label>
-                        <input asp-for="TenThuongHieu" class="form-control" required />
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Địa chỉ</label>
-                        <input asp-for="DiaChi" class="form-control" />
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Quốc gia</label>
-                        <input asp-for="QuocGia" class="form-control" />
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Tên thương hiệu <span class="text-danger">*</span></label>
+                            <input asp-for="TenThuongHieu" class="form-control" required />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Quốc gia</label>
+                            <input asp-for="QuocGia" class="form-control" />
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label class="form-label">Địa chỉ</label>
+                            <input asp-for="DiaChi" class="form-control" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Logo thương hiệu</label>
+                            <input type="file" name="LogoFile" class="form-control" accept="image/*" onchange="previewLogo(this)">
+                            <small class="text-muted">Để trống nếu không muốn thay đổi</small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Logo hiện tại</label>
+                            <div id="logoPreview" class="border rounded p-3 text-center" style="height: 100px;">
+                                @if (!string.IsNullOrEmpty(Model.HinhAnh))
+                                {
+                                    <img src="@Model.HinhAnh" style="max-height: 80px; max-width: 100%;" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                                    <span class="text-muted" style="display:none;">Không tải được hình</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Chưa có logo</span>
+                                }
+                            </div>
+                        </div>
                     </div>
                     <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Cập nhật</button>
                     <a asp-action="Index" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Quay lại</a>
@@ -28,3 +49,16 @@
         </div>
     </div>
 </div>
+
+<script>
+function previewLogo(input) {
+    var preview = document.getElementById('logoPreview');
+    if (input.files && input.files[0]) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            preview.innerHTML = '<img src="' + e.target.result + '" style="max-height: 80px; max-width: 100%;">';
+        }
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+</script>

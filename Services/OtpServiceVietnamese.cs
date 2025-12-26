@@ -1,6 +1,8 @@
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using QL_NhaThuoc.Data;
 using QL_NhaThuoc.Models;
+using System.Data;
 
 namespace QL_NhaThuoc.Services
 {
@@ -9,29 +11,56 @@ namespace QL_NhaThuoc.Services
         private readonly QL_NhaThuocDbContext _context;
         private readonly ISmsService _smsService;
         private readonly ILogger<OtpServiceVietnamese> _logger;
+        private readonly string _connectionString;
 
-        public OtpServiceVietnamese(QL_NhaThuocDbContext context, ISmsService smsService, ILogger<OtpServiceVietnamese> logger)
+        public OtpServiceVietnamese(QL_NhaThuocDbContext context, ISmsService smsService, 
+            ILogger<OtpServiceVietnamese> logger, IConfiguration configuration)
         {
             _context = context;
             _smsService = smsService;
             _logger = logger;
+            _connectionString = configuration.GetConnectionString("DefaultConnection")!;
         }
 
         public async Task<(bool Success, string Message)> GenerateAndSendOtpAsync(string phoneNumber)
         {
             try
             {
-                // Tim nguoi dung theo so dien thoai
-                var nguoiDung = await _context.NGUOI_DUNG
-                    .FirstOrDefaultAsync(u => u.SoDienThoai == phoneNumber);
+                // Tìm người dùng theo số điện thoại - Stored Procedure
+                NguoiDung? nguoiDung = null;
+                
+                using (var connection = new SqlConnection(_connectionString))
+                {
+                    await connection.OpenAsync();
+                    using var cmd = new SqlCommand("sp_NguoiDung_TimTheoDienThoai", connection);
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@SoDienThoai", phoneNumber);
 
-                // Neu chua co tai khoan, tu dong tao moi
+                    using var reader = await cmd.ExecuteReaderAsync();
+                    if (await reader.ReadAsync())
+                    {
+                        nguoiDung = new NguoiDung
+                        {
+                            MaNguoiDung = reader.GetInt32(reader.GetOrdinal("MaNguoiDung")),
+                            SoDienThoai = reader.IsDBNull(reader.GetOrdinal("SoDienThoai")) ? null : reader.GetString(reader.GetOrdinal("SoDienThoai")),
+                            HoTen = reader.IsDBNull(reader.GetOrdinal("HoTen")) ? null : reader.GetString(reader.GetOrdinal("HoTen")),
+                            DiaChi = reader.IsDBNull(reader.GetOrdinal("DiaChi")) ? null : reader.GetString(reader.GetOrdinal("DiaChi")),
+                            VaiTro = reader.IsDBNull(reader.GetOrdinal("VaiTro")) ? null : reader.GetString(reader.GetOrdinal("VaiTro")),
+                            OTP = reader.IsDBNull(reader.GetOrdinal("OTP")) ? null : reader.GetString(reader.GetOrdinal("OTP")),
+                            OTP_Expire = reader.IsDBNull(reader.GetOrdinal("OTP_Expire")) ? null : reader.GetDateTime(reader.GetOrdinal("OTP_Expire")),
+                            NgayTao = reader.IsDBNull(reader.GetOrdinal("NgayTao")) ? null : reader.GetDateTime(reader.GetOrdinal("NgayTao"))
+                        };
+                    }
+                }
+
+                // Nếu chưa có tài khoản, tự động tạo mới
                 if (nguoiDung == null)
                 {
                     nguoiDung = new NguoiDung
                     {
                         SoDienThoai = phoneNumber,
-                        HoTen = phoneNumber, // Dung so dien thoai lam ten nguoi dung
+                        HoTen = phoneNumber,
+                        VaiTro = "KhachHang",
                         NgayTao = DateTime.Now
                     };
                     _context.NGUOI_DUNG.Add(nguoiDung);
@@ -40,33 +69,37 @@ namespace QL_NhaThuoc.Services
                     _logger.LogInformation($"Auto-created new user for phone: {phoneNumber}");
                 }
 
-                // Tao ma OTP 6 chu so
+                // Tạo mã OTP 6 chữ số
                 var otp = GenerateOtp();
-
-                // Thoi gian het han: 5 phut
                 var otpExpiry = DateTime.Now.AddMinutes(5);
 
-                // Cap nhat OTP vao database (ghi de OTP cu)
-                nguoiDung.OTP = otp;
-                nguoiDung.OTP_Expire = otpExpiry;
+                // Cập nhật OTP vào database - Stored Procedure
+                using (var connection = new SqlConnection(_connectionString))
+                {
+                    await connection.OpenAsync();
+                    using var cmd = new SqlCommand("sp_NguoiDung_CapNhatOTP", connection);
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@MaNguoiDung", nguoiDung.MaNguoiDung);
+                    cmd.Parameters.AddWithValue("@OTP", otp);
+                    cmd.Parameters.AddWithValue("@OTP_Expire", otpExpiry);
+                    await cmd.ExecuteNonQueryAsync();
+                }
 
-                await _context.SaveChangesAsync();
-
-                // Gui OTP qua SMS
+                // Gửi OTP qua SMS
                 var smsSent = await _smsService.SendOtpAsync(phoneNumber, otp);
                 if (!smsSent)
                 {
-                    return (false, "Khong the gui SMS. Vui long thu lai");
+                    return (false, "Không thể gửi SMS. Vui lòng thử lại");
                 }
 
                 _logger.LogInformation($"OTP generated for {phoneNumber}: {otp}, expires at {otpExpiry}");
 
-                return (true, "Ma OTP da duoc gui den so dien thoai cua ban");
+                return (true, "Mã OTP đã được gửi đến số điện thoại của bạn");
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Error generating OTP for {phoneNumber}");
-                return (false, "Da xay ra loi. Vui long thu lai");
+                return (false, "Đã xảy ra lỗi. Vui lòng thử lại");
             }
         }
 
@@ -74,43 +107,61 @@ namespace QL_NhaThuoc.Services
         {
             try
             {
-                var nguoiDung = await _context.NGUOI_DUNG
-                    .FirstOrDefaultAsync(u => u.SoDienThoai == phoneNumber);
+                // Tìm người dùng theo số điện thoại - Stored Procedure
+                NguoiDung? nguoiDung = null;
+                
+                using (var connection = new SqlConnection(_connectionString))
+                {
+                    await connection.OpenAsync();
+                    using var cmd = new SqlCommand("sp_NguoiDung_TimTheoDienThoai", connection);
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@SoDienThoai", phoneNumber);
+
+                    using var reader = await cmd.ExecuteReaderAsync();
+                    if (await reader.ReadAsync())
+                    {
+                        nguoiDung = new NguoiDung
+                        {
+                            MaNguoiDung = reader.GetInt32(reader.GetOrdinal("MaNguoiDung")),
+                            SoDienThoai = reader.IsDBNull(reader.GetOrdinal("SoDienThoai")) ? null : reader.GetString(reader.GetOrdinal("SoDienThoai")),
+                            HoTen = reader.IsDBNull(reader.GetOrdinal("HoTen")) ? null : reader.GetString(reader.GetOrdinal("HoTen")),
+                            DiaChi = reader.IsDBNull(reader.GetOrdinal("DiaChi")) ? null : reader.GetString(reader.GetOrdinal("DiaChi")),
+                            VaiTro = reader.IsDBNull(reader.GetOrdinal("VaiTro")) ? null : reader.GetString(reader.GetOrdinal("VaiTro")),
+                            OTP = reader.IsDBNull(reader.GetOrdinal("OTP")) ? null : reader.GetString(reader.GetOrdinal("OTP")),
+                            OTP_Expire = reader.IsDBNull(reader.GetOrdinal("OTP_Expire")) ? null : reader.GetDateTime(reader.GetOrdinal("OTP_Expire")),
+                            NgayTao = reader.IsDBNull(reader.GetOrdinal("NgayTao")) ? null : reader.GetDateTime(reader.GetOrdinal("NgayTao"))
+                        };
+                    }
+                }
 
                 if (nguoiDung == null)
                 {
-                    return (false, "So dien thoai khong ton tai", null);
+                    return (false, "Số điện thoại không tồn tại", null);
                 }
 
-                // Kiem tra OTP co ton tai khong
                 if (string.IsNullOrEmpty(nguoiDung.OTP))
                 {
-                    return (false, "Vui long yeu cau ma OTP moi", null);
+                    return (false, "Vui lòng yêu cầu mã OTP mới", null);
                 }
 
-                // Kiem tra OTP da het han chua
                 if (nguoiDung.OTP_Expire == null || nguoiDung.OTP_Expire < DateTime.Now)
                 {
-                    return (false, "Ma OTP da het han. Vui long yeu cau ma moi", null);
+                    return (false, "Mã OTP đã hết hạn. Vui lòng yêu cầu mã mới", null);
                 }
 
-                // Kiem tra OTP co dung khong
                 if (nguoiDung.OTP != otp)
                 {
-                    return (false, "Ma OTP khong chinh xac", null);
+                    return (false, "Mã OTP không chính xác", null);
                 }
-
-                // OTP hop le - giu lai ca OTP va OTP_Expire trong database de xem lich su
-                // Khong xoa gi ca, chi log thanh cong
 
                 _logger.LogInformation($"OTP verified successfully for {phoneNumber}");
 
-                return (true, "Dang nhap thanh cong", nguoiDung);
+                return (true, "Đăng nhập thành công", nguoiDung);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Error verifying OTP for {phoneNumber}");
-                return (false, "Da xay ra loi. Vui long thu lai", null);
+                return (false, "Đã xảy ra lỗi. Vui lòng thử lại", null);
             }
         }
 

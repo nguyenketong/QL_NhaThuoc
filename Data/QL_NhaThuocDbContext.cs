@@ -24,6 +24,8 @@ namespace QL_NhaThuoc.Data
         public DbSet<NguoiDung> NGUOI_DUNG { get; set; }
         public DbSet<DonHang> DON_HANG { get; set; }
         public DbSet<ChiTietDonHang> CHI_TIET_DON_HANG { get; set; }
+        public DbSet<BaiViet> BAI_VIET { get; set; }
+        public DbSet<ThongBao> THONG_BAO { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -43,6 +45,8 @@ namespace QL_NhaThuoc.Data
             modelBuilder.Entity<NguoiDung>().ToTable("NGUOI_DUNG");
             modelBuilder.Entity<DonHang>().ToTable("DON_HANG");
             modelBuilder.Entity<ChiTietDonHang>().ToTable("CHI_TIET_DON_HANG");
+            modelBuilder.Entity<BaiViet>().ToTable("BAIVIET");
+            modelBuilder.Entity<ThongBao>().ToTable("THONG_BAO");
 
             // Configure primary keys
             modelBuilder.Entity<NhomThuoc>().HasKey(e => e.MaNhomThuoc);
@@ -55,6 +59,8 @@ namespace QL_NhaThuoc.Data
             modelBuilder.Entity<NguoiDung>().HasKey(e => e.MaNguoiDung);
             modelBuilder.Entity<DonHang>().HasKey(e => e.MaDonHang);
             modelBuilder.Entity<ChiTietDonHang>().HasKey(e => e.MaChiTiet);
+            modelBuilder.Entity<BaiViet>().HasKey(e => e.MaBaiViet);
+            modelBuilder.Entity<ThongBao>().HasKey(e => e.MaThongBao);
 
             // Configure composite keys for junction tables
             modelBuilder.Entity<CT_ThanhPhan>()
@@ -65,6 +71,13 @@ namespace QL_NhaThuoc.Data
 
             modelBuilder.Entity<CT_TacDungPhu>()
                 .HasKey(e => new { e.MaThuoc, e.MaTacDungPhu });
+
+            // Configure self-referencing relationship for NhomThuoc (danh mục cha-con)
+            modelBuilder.Entity<NhomThuoc>()
+                .HasOne(n => n.DanhMucCha)
+                .WithMany(n => n.DanhMucCon)
+                .HasForeignKey(n => n.MaDanhMucCha)
+                .OnDelete(DeleteBehavior.Restrict);
 
             // Configure relationships - THUOC
             modelBuilder.Entity<Thuoc>()
@@ -148,6 +161,19 @@ namespace QL_NhaThuoc.Data
             modelBuilder.Entity<NguoiDung>()
                 .HasIndex(nd => nd.SoDienThoai)
                 .IsUnique();
+
+            // Configure relationships - THONG_BAO
+            modelBuilder.Entity<ThongBao>()
+                .HasOne(tb => tb.NguoiDung)
+                .WithMany()
+                .HasForeignKey(tb => tb.MaNguoiDung)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<ThongBao>()
+                .HasOne(tb => tb.DonHang)
+                .WithMany()
+                .HasForeignKey(tb => tb.MaDonHang)
+                .OnDelete(DeleteBehavior.SetNull);
 
             // Configure default values
             modelBuilder.Entity<NguoiDung>()

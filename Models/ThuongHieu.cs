@@ -6,6 +6,7 @@ namespace QL_NhaThuoc.Models
         public string TenThuongHieu { get; set; } = string.Empty;
         public string? DiaChi { get; set; }
         public string? QuocGia { get; set; }
+        public string? HinhAnh { get; set; }
         
         public ICollection<Thuoc>? Thuocs { get; set; }
     }

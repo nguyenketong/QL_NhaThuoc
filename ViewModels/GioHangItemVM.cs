@@ -1,31 +1,20 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace QL_NhaThuoc.ViewModels
 {
-    /// <summary>
-    /// ViewModel cho item trong giỏ hàng
-    /// </summary>
-    public class GioHangItemVM
+    public class GioHangItem
     {
         public int MaThuoc { get; set; }
-
-        [Required]
-        [StringLength(150)]
-        public string TenThuoc { get; set; } = string.Empty;
-
-        [Required]
-        [Range(0, double.MaxValue)]
-        public decimal GiaBan { get; set; }
-
-        [Required]
-        [Range(1, 1000, ErrorMessage = "Số lượng phải từ 1 đến 1000")]
-        public int SoLuong { get; set; }
-
+        public string TenThuoc { get; set; } = "";
         public string? HinhAnh { get; set; }
-
-        public string? DonViTinh { get; set; }
-
-        // Tính toán
+        public decimal GiaBan { get; set; }
+        public int SoLuong { get; set; }
+        public int SoLuongTon { get; set; } // Số lượng còn trong kho
+        public bool NgungKinhDoanh { get; set; } // Sản phẩm ngừng kinh doanh
+        public bool DuocChon { get; set; } = true; // Mặc định được chọn
         public decimal ThanhTien => GiaBan * SoLuong;
+        
+        // Kiểm tra sắp hết hàng (≤5)
+        public bool SapHetHang => !NgungKinhDoanh && SoLuongTon > 0 && SoLuongTon <= 5;
+        public bool HetHang => SoLuongTon <= 0;
+        public bool KhongKhaDung => HetHang || NgungKinhDoanh; // Không thể mua
     }
 }

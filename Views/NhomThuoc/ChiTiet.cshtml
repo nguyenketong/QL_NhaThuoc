@@ -1,70 +1,447 @@
+@model QL_NhaThuoc.Models.NhomThuoc
 @{
-    ViewData["Title"] = "Chi tiết nhóm thuốc";
-    var nhomThuoc = ViewBag.NhomThuoc as dynamic;
+    ViewData["Title"] = Model?.TenNhomThuoc ?? "Chi tiết nhóm thuốc";
+    var currentPage = ViewBag.CurrentPage ?? 1;
+    var totalPages = ViewBag.TotalPages ?? 1;
+    var totalItems = ViewBag.TotalItems ?? 0;
+    var sapXep = ViewBag.SapXep as string;
+    var danhMucCon = ViewBag.DanhMucCon as List<QL_NhaThuoc.Models.NhomThuoc>;
 }
 
 <div class="container my-4">
-    <nav aria-label="breadcrumb">
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
-            <li class="breadcrumb-item"><a asp-action="DanhSach">Nhóm thuốc</a></li>
-            <li class="breadcrumb-item active">@nhomThuoc?.TenNhomThuoc</li>
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index" class="text-decoration-none"><i class="fas fa-home"></i> Trang chủ</a></li>
+            <li class="breadcrumb-item"><a asp-action="DanhSach" class="text-decoration-none">Danh mục sản phẩm</a></li>
+            @if (Model?.DanhMucCha != null)
+            {
+                <li class="breadcrumb-item"><a asp-action="ChiTiet" asp-route-id="@Model.DanhMucCha.MaNhomThuoc" class="text-decoration-none">@Model.DanhMucCha.TenNhomThuoc</a></li>
+            }
+            <li class="breadcrumb-item active">@Model?.TenNhomThuoc</li>
         </ol>
     </nav>
 
-    <div class="card mb-4">
-        <div class="card-body">
-            <h1 class="card-title">@nhomThuoc?.TenNhomThuoc</h1>
-            @if (!string.IsNullOrEmpty((string)nhomThuoc?.MoTa))
-            {
-                <p class="card-text">@nhomThuoc.MoTa</p>
-            }
+    <!-- Category Header -->
+    <div class="category-header mb-4">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="category-title mb-2">
+                    <i class="fas fa-pills text-primary me-2"></i>@Model?.TenNhomThuoc
+                </h1>
+                @if (!string.IsNullOrEmpty(Model?.MoTa))
+                {
+                    <p class="text-muted mb-0">@Model.MoTa</p>
+                }
+            </div>
+            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                <span class="badge bg-primary fs-6 px-3 py-2">
+                    <i class="fas fa-box me-1"></i> @totalItems sản phẩm
+                </span>
+            </div>
         </div>
     </div>
 
-    <div class="row">
-        @if (Model != null)
-        {
-            var items = Model as IEnumerable<dynamic>;
-            @foreach (var thuoc in items)
+    <!-- Danh mục con (nếu có) -->
+    @if (danhMucCon != null && danhMucCon.Any())
+    {
+        <div class="subcategory-bar mb-4">
+            <div class="d-flex flex-wrap gap-2 align-items-center">
+                <span class="text-muted me-2"><i class="fas fa-folder-open"></i> Danh mục con:</span>
+                @foreach (var dm in danhMucCon)
+                {
+                    <a asp-action="ChiTiet" asp-route-id="@dm.MaNhomThuoc" class="btn btn-outline-primary btn-sm">
+                        @dm.TenNhomThuoc
+                    </a>
+                }
+            </div>
+        </div>
+    }
+
+    @if (Model?.Thuocs != null && Model.Thuocs.Any())
+    {
+        <!-- Filter & Sort Bar -->
+        <div class="filter-bar bg-light rounded p-3 mb-4">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <span class="text-muted">
+                        Hiển thị @((currentPage - 1) * 12 + 1) - @Math.Min(currentPage * 12, totalItems) trong @totalItems sản phẩm
+                    </span>
+                </div>
+                <div class="col-md-6 text-md-end mt-2 mt-md-0">
+                    <div class="d-inline-flex align-items-center">
+                        <label class="me-2 text-muted">Sắp xếp:</label>
+                        <select class="form-select form-select-sm" style="width: auto;" onchange="sortProducts(this.value)" id="sortSelect">
+                            <option value="">Mặc định</option>
+                            <option value="moi-nhat">Mới nhất</option>
+                            <option value="gia-tang">Giá tăng dần</option>
+                            <option value="gia-giam">Giá giảm dần</option>
+                            <option value="ten-az">Tên A-Z</option>
+                            <option value="ten-za">Tên Z-A</option>
+                        </select>
+                        <script>document.getElementById('sortSelect').value = '@(sapXep ?? "")';</script>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Products Grid -->
+        <div class="row g-3">
+            @foreach (var thuoc in Model.Thuocs)
             {
-                <div class="col-md-4 col-lg-3 mb-4">
-                    <div class="card h-100 shadow-sm">
-                        <img src="@(string.IsNullOrEmpty((string)thuoc.HinhAnh) ? "/images/no-image.svg" : thuoc.HinhAnh)" 
-                             class="card-img-top" alt="@thuoc.TenThuoc" style="height: 200px; object-fit: cover;"
-                             onerror="this.src='/images/no-image.svg'">
-                        <div class="card-body">
-                            <h6 class="card-title">@thuoc.TenThuoc</h6>
-                            @if (!string.IsNullOrEmpty((string)thuoc.TenThuongHieu))
+                var giaBan = thuoc.GiaBan ?? 0;
+                var phanTramGiam = (thuoc.PhanTramGiam.HasValue && thuoc.PhanTramGiam.Value > 0) 
+                    ? thuoc.PhanTramGiam.Value : 0;
+                var giaGoc = thuoc.GiaGoc ?? (phanTramGiam > 0 ? Math.Ceiling(giaBan * 100 / (100 - phanTramGiam)) : giaBan);
+                if (phanTramGiam == 0 && giaGoc > giaBan && giaGoc > 0)
+                {
+                    phanTramGiam = (int)((giaGoc - giaBan) * 100 / giaGoc);
+                }
+                var isHot = thuoc.IsHot ?? false;
+                var isNew = thuoc.IsNew ?? false;
+                
+                <div class="col-6 col-md-4 col-lg-3 col-xl-2-4">
+                    <div class="product-card-compact">
+                        <!-- Badges -->
+                        <div class="product-badges">
+                            @if (phanTramGiam > 0)
                             {
-                                <p class="text-muted small mb-1">@thuoc.TenThuongHieu</p>
+                                <span class="badge-discount">-@phanTramGiam%</span>
                             }
-                            <p class="text-danger fw-bold">@(((decimal?)thuoc.GiaBan ?? 0).ToString("N0")) đ</p>
+                            @if (isHot)
+                            {
+                                <span class="badge-hot">HOT</span>
+                            }
+                            @if (isNew)
+                            {
+                                <span class="badge-new">Mới</span>
+                            }
                         </div>
-                        <div class="card-footer bg-transparent">
-                            <div class="d-grid gap-2">
-                                <a asp-controller="Thuoc" asp-action="ChiTiet" asp-route-id="@thuoc.MaThuoc" 
-                                   class="btn btn-outline-primary btn-sm">
-                                    <i class="bi bi-eye"></i> Chi tiết
+                        
+                        <!-- Image -->
+                        <a asp-controller="Thuoc" asp-action="ChiTiet" asp-route-id="@thuoc.MaThuoc" class="product-image-link">
+                            <img src="@(string.IsNullOrEmpty(thuoc.HinhAnh) ? "/images/no-image.svg" : thuoc.HinhAnh)" 
+                                 alt="@thuoc.TenThuoc" class="product-image-compact"
+                                 onerror="this.src='/images/no-image.svg'">
+                        </a>
+                        
+                        <!-- Info -->
+                        <div class="product-info-compact">
+                            @if (thuoc.ThuongHieu != null)
+                            {
+                                <span class="product-brand">@thuoc.ThuongHieu.TenThuongHieu</span>
+                            }
+                            <a asp-controller="Thuoc" asp-action="ChiTiet" asp-route-id="@thuoc.MaThuoc" class="product-name-compact">
+                                @thuoc.TenThuoc
+                            </a>
+                            
+                            <!-- Price -->
+                            <div class="product-price-compact">
+                                <span class="price-current">@giaBan.ToString("N0")đ</span>
+                                @if (phanTramGiam > 0 && giaGoc > giaBan)
+                                {
+                                    <span class="price-original">@giaGoc.ToString("N0")đ</span>
+                                }
+                            </div>
+                            
+                            <!-- Buttons -->
+                            <div class="product-actions-compact">
+                                <a asp-controller="Thuoc" asp-action="ChiTiet" asp-route-id="@thuoc.MaThuoc" class="btn-detail-compact">
+                                    <i class="fas fa-eye"></i> Chi tiết
                                 </a>
-                                <button type="button" class="btn btn-primary btn-sm" 
-                                        onclick="themVaoGioHang(@thuoc.MaThuoc)">
-                                    <i class="bi bi-cart-plus"></i> Thêm vào giỏ
+                                <button type="button" class="btn-cart-compact" onclick="themVaoGioHang(@thuoc.MaThuoc)">
+                                    <i class="fas fa-cart-plus"></i> Thêm giỏ
                                 </button>
                             </div>
                         </div>
                     </div>
                 </div>
             }
-            
-            @if (!items.Any())
-            {
-                <div class="col-12">
-                    <div class="alert alert-info">
-                        <i class="bi bi-info-circle"></i> Nhóm thuốc này chưa có sản phẩm nào.
-                    </div>
-                </div>
-            }
+        </div>
+
+        <!-- Pagination -->
+        @if (totalPages > 1)
+        {
+            <nav class="mt-4">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item @(currentPage == 1 ? "disabled" : "")">
+                        <a class="page-link" asp-action="ChiTiet" asp-route-id="@Model.MaNhomThuoc" asp-route-page="@(currentPage - 1)" asp-route-sapXep="@sapXep">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    </li>
+                    @for (int i = 1; i <= totalPages; i++)
+                    {
+                        if (i == 1 || i == totalPages || (i >= currentPage - 2 && i <= currentPage + 2))
+                        {
+                            <li class="page-item @(i == currentPage ? "active" : "")">
+                                <a class="page-link" asp-action="ChiTiet" asp-route-id="@Model.MaNhomThuoc" asp-route-page="@i" asp-route-sapXep="@sapXep">@i</a>
+                            </li>
+                        }
+                        else if (i == currentPage - 3 || i == currentPage + 3)
+                        {
+                            <li class="page-item disabled"><span class="page-link">...</span></li>
+                        }
+                    }
+                    <li class="page-item @(currentPage == totalPages ? "disabled" : "")">
+                        <a class="page-link" asp-action="ChiTiet" asp-route-id="@Model.MaNhomThuoc" asp-route-page="@(currentPage + 1)" asp-route-sapXep="@sapXep">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
         }
-    </div>
+    }
+    else
+    {
+        <!-- Empty State -->
+        <div class="empty-state text-center py-5">
+            <div class="empty-icon mb-4">
+                <i class="fas fa-box-open fa-5x text-muted"></i>
+            </div>
+            <h3 class="text-muted mb-3">Chưa có sản phẩm</h3>
+            <p class="text-muted mb-4">Nhóm thuốc "@Model?.TenNhomThuoc" hiện chưa có sản phẩm nào.<br>Vui lòng quay lại sau hoặc xem các danh mục khác.</p>
+            <div class="d-flex justify-content-center gap-3">
+                <a asp-action="DanhSach" class="btn btn-outline-primary">
+                    <i class="fas fa-th-list me-2"></i>Xem danh mục khác
+                </a>
+                <a asp-controller="Thuoc" asp-action="DanhSach" class="btn btn-primary">
+                    <i class="fas fa-pills me-2"></i>Xem tất cả sản phẩm
+                </a>
+            </div>
+        </div>
+    }
 </div>
+
+<script>
+function sortProducts(value) {
+    var url = new URL(window.location.href);
+    if (value) {
+        url.searchParams.set('sapXep', value);
+    } else {
+        url.searchParams.delete('sapXep');
+    }
+    url.searchParams.set('page', '1');
+    window.location.href = url.toString();
+}
+
+function themVaoGioHang(maThuoc) {
+    fetch('/GioHang/ThemSanPham', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ maThuoc: maThuoc, soLuong: 1 })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById('cart-count').textContent = data.soLuong;
+            alert('Đã thêm sản phẩm vào giỏ hàng!');
+        } else {
+            alert(data.message || 'Có lỗi xảy ra!');
+        }
+    })
+    .catch(() => alert('Có lỗi xảy ra!'));
+}
+</script>
+
+<style>
+/* Category Header */
+.category-header {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 25px;
+    border-radius: 12px;
+    border-left: 4px solid #1a8ccc;
+}
+.category-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #333;
+}
+
+/* Filter Bar */
+.filter-bar {
+    border: 1px solid #dee2e6;
+}
+
+/* Product Card Compact */
+.product-card-compact {
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+.product-card-compact:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+/* Badges */
+.product-badges {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.badge-discount {
+    background: #dc3545;
+    color: #fff;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+}
+.badge-hot {
+    background: #ff6b35;
+    color: #fff;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 600;
+}
+.badge-new {
+    background: #28a745;
+    color: #fff;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+/* Product Image */
+.product-image-link {
+    display: block;
+    padding: 15px;
+    background: #f8f9fa;
+}
+.product-image-compact {
+    width: 100%;
+    height: 140px;
+    object-fit: contain;
+    transition: transform 0.3s;
+}
+.product-card-compact:hover .product-image-compact {
+    transform: scale(1.05);
+}
+
+/* Product Info */
+.product-info-compact {
+    padding: 12px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+.product-brand {
+    font-size: 11px;
+    color: #1a8ccc;
+    font-weight: 500;
+    margin-bottom: 4px;
+}
+.product-name-compact {
+    font-size: 13px;
+    font-weight: 600;
+    color: #333;
+    text-decoration: none;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.4;
+    min-height: 36px;
+    margin-bottom: 8px;
+}
+.product-name-compact:hover {
+    color: #1a8ccc;
+}
+
+/* Price */
+.product-price-compact {
+    margin-bottom: 10px;
+}
+.price-current {
+    font-size: 15px;
+    font-weight: 700;
+    color: #dc3545;
+}
+.price-original {
+    font-size: 12px;
+    color: #999;
+    text-decoration: line-through;
+    margin-left: 6px;
+}
+
+/* Actions */
+.product-actions-compact {
+    display: flex;
+    gap: 6px;
+    margin-top: auto;
+}
+.btn-detail-compact, .btn-cart-compact {
+    flex: 1;
+    padding: 6px 8px;
+    font-size: 11px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+    text-decoration: none;
+}
+.btn-detail-compact {
+    background: #e9ecef;
+    color: #333;
+}
+.btn-detail-compact:hover {
+    background: #1a8ccc;
+    color: #fff;
+}
+.btn-cart-compact {
+    background: #28a745;
+    color: #fff;
+}
+.btn-cart-compact:hover {
+    background: #218838;
+}
+
+/* Empty State */
+.empty-state {
+    background: #f8f9fa;
+    border-radius: 15px;
+    padding: 60px 20px;
+}
+.empty-icon {
+    opacity: 0.5;
+}
+
+/* 5 columns on xl */
+@@media (min-width: 1200px) {
+    .col-xl-2-4 {
+        flex: 0 0 20%;
+        max-width: 20%;
+    }
+}
+
+/* Responsive */
+@@media (max-width: 576px) {
+    .product-image-compact {
+        height: 100px;
+    }
+    .product-name-compact {
+        font-size: 12px;
+        min-height: 32px;
+    }
+    .price-current {
+        font-size: 13px;
+    }
+    .btn-detail-compact, .btn-cart-compact {
+        font-size: 10px;
+        padding: 5px 4px;
+    }
+}
+</style>

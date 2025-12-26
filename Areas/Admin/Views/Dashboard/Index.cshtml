@@ -26,7 +26,7 @@
         <div class="stat-card">
             <div class="stat-icon orange"><i class="fas fa-users"></i></div>
             <div>
-                <div class="stat-value">@ViewBag.TongNguoiDung</div>
+                <div class="stat-value">@ViewBag.TongKhachHang</div>
                 <div class="stat-label">Khách hàng</div>
             </div>
         </div>
@@ -42,12 +42,38 @@
     </div>
 </div>
 
-<!-- Order Status -->
+<!-- Charts Row -->
+<div class="row g-4 mb-4">
+    <!-- Biểu đồ doanh thu 7 ngày -->
+    <div class="col-lg-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white">
+                <h6 class="mb-0"><i class="fas fa-chart-line text-primary"></i> Doanh thu 7 ngày gần nhất</h6>
+            </div>
+            <div class="card-body">
+                <canvas id="revenueChart" height="120"></canvas>
+            </div>
+        </div>
+    </div>
+    <!-- Biểu đồ đơn hàng theo trạng thái -->
+    <div class="col-lg-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white">
+                <h6 class="mb-0"><i class="fas fa-chart-pie text-success"></i> Đơn hàng theo trạng thái</h6>
+            </div>
+            <div class="card-body">
+                <canvas id="orderStatusChart" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Order Status Cards -->
 <div class="row g-4 mb-4">
     <div class="col-md-3">
         <div class="card border-0 shadow-sm">
             <div class="card-body text-center">
-                <h3 class="text-warning">@ViewBag.DonChoXuLy</h3>
+                <h3 class="text-warning">@ViewBag.ChoXuLy</h3>
                 <small class="text-muted">Chờ xử lý</small>
             </div>
         </div>
@@ -55,7 +81,7 @@
     <div class="col-md-3">
         <div class="card border-0 shadow-sm">
             <div class="card-body text-center">
-                <h3 class="text-info">@ViewBag.DonDangGiao</h3>
+                <h3 class="text-info">@ViewBag.DangGiao</h3>
                 <small class="text-muted">Đang giao</small>
             </div>
         </div>
@@ -63,7 +89,7 @@
     <div class="col-md-3">
         <div class="card border-0 shadow-sm">
             <div class="card-body text-center">
-                <h3 class="text-success">@ViewBag.DonHoanThanh</h3>
+                <h3 class="text-success">@ViewBag.HoanThanh</h3>
                 <small class="text-muted">Hoàn thành</small>
             </div>
         </div>
@@ -71,7 +97,7 @@
     <div class="col-md-3">
         <div class="card border-0 shadow-sm">
             <div class="card-body text-center">
-                <h3 class="text-danger">@ViewBag.DonDaHuy</h3>
+                <h3 class="text-danger">@ViewBag.DaHuy</h3>
                 <small class="text-muted">Đã hủy</small>
             </div>
         </div>
@@ -103,7 +129,7 @@
                         {
                             <tr>
                                 <td><strong>#@dh.MaDonHang</strong></td>
-                                <td>@(dh.NguoiDung?.HoTen ?? dh.NguoiDung?.SoDienThoai)</td>
+                                <td>@dh.HoTen</td>
                                 <td>@(((decimal)(dh.TongTien ?? 0)).ToString("N0"))đ</td>
                                 <td>
                                     @if (dh.TrangThai == "Cho xu ly")
@@ -139,13 +165,13 @@
                 <h6 class="mb-0"><i class="fas fa-fire text-danger"></i> Top bán chạy</h6>
             </div>
             <div class="p-3">
-                @if (ViewBag.TopThuoc != null)
+                @if (ViewBag.TopThuocBanChay != null)
                 {
-                    @foreach (var item in ViewBag.TopThuoc)
+                    @foreach (var item in ViewBag.TopThuocBanChay)
                     {
                         <div class="d-flex justify-content-between align-items-center mb-3">
                             <span>@item.TenThuoc</span>
-                            <span class="badge bg-primary">@item.SoLuong</span>
+                            <span class="badge bg-primary">@item.TongBan</span>
                         </div>
                     }
                 }
@@ -153,3 +179,62 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // Biểu đồ doanh thu 7 ngày
+    var revenueCtx = document.getElementById('revenueChart').getContext('2d');
+    new Chart(revenueCtx, {
+        type: 'line',
+        data: {
+            labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.ChartLabels ?? new List<string>())),
+            datasets: [{
+                label: 'Doanh thu (VNĐ)',
+                data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(ViewBag.ChartData ?? new List<decimal>())),
+                borderColor: '#0d6efd',
+                backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return value.toLocaleString('vi-VN') + 'đ';
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Biểu đồ đơn hàng theo trạng thái
+    var orderCtx = document.getElementById('orderStatusChart').getContext('2d');
+    new Chart(orderCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Chờ xử lý', 'Đang giao', 'Hoàn thành', 'Đã hủy'],
+            datasets: [{
+                data: [@(ViewBag.ChoXuLy ?? 0), @(ViewBag.DangGiao ?? 0), @(ViewBag.HoanThanh ?? 0), @(ViewBag.DaHuy ?? 0)],
+                backgroundColor: ['#ffc107', '#17a2b8', '#28a745', '#dc3545']
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+</script>
+}

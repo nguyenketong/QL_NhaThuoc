@@ -1,0 +1,104 @@
+@model QL_NhaThuoc.Models.BaiViet
+@{
+    ViewData["Title"] = "Thêm bài viết";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0"><i class="fas fa-plus-circle text-primary"></i> Thêm bài viết mới</h4>
+    <a asp-action="Index" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Quay lại
+    </a>
+</div>
+
+<form asp-action="Create" method="post" enctype="multipart/form-data">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-primary text-white">
+                    <i class="fas fa-edit"></i> Nội dung bài viết
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">Tiêu đề <span class="text-danger">*</span></label>
+                        <input asp-for="TieuDe" class="form-control" required placeholder="Nhập tiêu đề bài viết..." />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Mô tả ngắn</label>
+                        <textarea asp-for="MoTaNgan" class="form-control" rows="3" 
+                                  placeholder="Mô tả ngắn hiển thị ở trang chủ..."></textarea>
+                        <small class="text-muted">Tối đa 500 ký tự</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Nội dung chi tiết</label>
+                        <textarea asp-for="NoiDung" class="form-control" rows="10" 
+                                  placeholder="Nội dung chi tiết bài viết..."></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-success text-white">
+                    <i class="fas fa-image"></i> Hình ảnh
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label class="form-label">Chọn hình ảnh</label>
+                        <input type="file" name="hinhAnhFile" class="form-control" accept="image/*" 
+                               onchange="previewImage(this)" />
+                    </div>
+                    <div id="imagePreview" class="text-center mt-3" style="display:none;">
+                        <img id="preview" src="" class="img-fluid rounded" style="max-height: 200px;" />
+                    </div>
+                    <div class="mb-3 mt-3">
+                        <label class="form-label">Hoặc nhập URL</label>
+                        <input asp-for="HinhAnh" class="form-control" placeholder="https://..." />
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-info text-white">
+                    <i class="fas fa-cog"></i> Tùy chọn
+                </div>
+                <div class="card-body">
+                    <div class="form-check mb-3">
+                        <input type="checkbox" name="IsNoiBat" value="true" class="form-check-input" id="chkNoiBat" />
+                        <label class="form-check-label" for="chkNoiBat">
+                            <i class="fas fa-star text-warning"></i> Bài viết nổi bật
+                        </label>
+                        <small class="d-block text-muted">Hiển thị ở vị trí lớn trên trang chủ</small>
+                    </div>
+                    <div class="form-check">
+                        <input type="checkbox" name="IsActive" value="true" class="form-check-input" id="chkActive" checked />
+                        <label class="form-check-label" for="chkActive">
+                            <i class="fas fa-eye text-success"></i> Hiển thị bài viết
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="fas fa-save"></i> Lưu bài viết
+                </button>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+<script>
+function previewImage(input) {
+    if (input.files && input.files[0]) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('preview').src = e.target.result;
+            document.getElementById('imagePreview').style.display = 'block';
+        }
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+</script>
+}

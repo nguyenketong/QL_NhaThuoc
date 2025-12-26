@@ -1,3 +1,4 @@
+@model IEnumerable<QL_NhaThuoc.Models.Thuoc>
 @{
     ViewData["Title"] = "Danh sách thuốc";
 }
@@ -34,8 +35,7 @@
                             <option value="">Tất cả</option>
                             @if (ViewBag.DanhSachNhom != null)
                             {
-                                var nhomList = ViewBag.DanhSachNhom as IEnumerable<dynamic>;
-                                @foreach (var nhom in nhomList)
+                                foreach (var nhom in ViewBag.DanhSachNhom as IEnumerable<QL_NhaThuoc.Models.NhomThuoc>)
                                 {
                                     <option value="@nhom.MaNhomThuoc">@nhom.TenNhomThuoc</option>
                                 }
@@ -48,8 +48,7 @@
                             <option value="">Tất cả</option>
                             @if (ViewBag.DanhSachThuongHieu != null)
                             {
-                                var thList = ViewBag.DanhSachThuongHieu as IEnumerable<dynamic>;
-                                @foreach (var th in thList)
+                                foreach (var th in ViewBag.DanhSachThuongHieu as IEnumerable<QL_NhaThuoc.Models.ThuongHieu>)
                                 {
                                     <option value="@th.MaThuongHieu">@th.TenThuongHieu</option>
                                 }
@@ -77,27 +76,58 @@
 
     <!-- Products Grid -->
     <div class="row g-4">
-        @if (Model != null)
+        @if (Model != null && Model.Any())
         {
-            var items = Model as IEnumerable<dynamic>;
-            @foreach (var thuoc in items)
+            @foreach (var thuoc in Model)
             {
+                var giaBan = thuoc.GiaBan ?? 0;
+                var phanTramGiam = (thuoc.PhanTramGiam.HasValue && thuoc.PhanTramGiam.Value > 0) 
+                    ? thuoc.PhanTramGiam.Value : 0;
+                var giaGoc = thuoc.GiaGoc ?? (phanTramGiam > 0 ? Math.Ceiling(giaBan * 100 / (100 - phanTramGiam)) : giaBan);
+                if (phanTramGiam == 0 && giaGoc > giaBan && giaGoc > 0)
+                {
+                    phanTramGiam = (int)((giaGoc - giaBan) * 100 / giaGoc);
+                }
+                var isHot = thuoc.IsHot ?? false;
+                var isNew = thuoc.IsNew ?? false;
+                
                 <div class="col-md-3">
-                    <div class="product-card">
+                    <div class="product-card position-relative">
+                        @if (phanTramGiam > 0 || isHot || isNew)
+                        {
+                            <div class="product-badges position-absolute" style="top: 10px; left: 10px; z-index: 2;">
+                                @if (phanTramGiam > 0)
+                                {
+                                    <span class="badge bg-danger">-@phanTramGiam%</span>
+                                }
+                                @if (isHot)
+                                {
+                                    <span class="badge bg-warning text-dark">HOT</span>
+                                }
+                                @if (isNew)
+                                {
+                                    <span class="badge bg-success">Mới</span>
+                                }
+                            </div>
+                        }
                         <div class="product-image">
-                            <img src="@(string.IsNullOrEmpty((string)thuoc.HinhAnh) ? "/images/no-image.svg" : thuoc.HinhAnh)" 
+                            <img src="@(string.IsNullOrEmpty(thuoc.HinhAnh) ? "/images/no-image.svg" : thuoc.HinhAnh)" 
                                  alt="@thuoc.TenThuoc" onerror="this.src='/images/no-image.svg'" />
                         </div>
                         <div class="product-info">
                             <h6 class="product-name">@thuoc.TenThuoc</h6>
                             <div class="product-category">
-                                <small class="text-muted">@thuoc.TenNhomThuoc</small>
+                                <small class="text-muted">@(thuoc.NhomThuoc?.TenNhomThuoc ?? "")</small>
                             </div>
                             <div class="product-price">
-                                <span class="price-new">@(((decimal?)thuoc.GiaBan ?? 0).ToString("N0"))đ</span>
+                                <span class="price-new text-danger fw-bold">@giaBan.ToString("N0")đ</span>
+                                @if (phanTramGiam > 0 && giaGoc > giaBan)
+                                {
+                                    <span class="price-old text-muted text-decoration-line-through ms-2">@giaGoc.ToString("N0")đ</span>
+                                }
                             </div>
                             <div class="product-brand">
-                                <small><i class="fas fa-building"></i> @thuoc.TenThuongHieu</small>
+                                <small><i class="fas fa-building"></i> @(thuoc.ThuongHieu?.TenThuongHieu ?? "Đang cập nhật")</small>
                             </div>
                             <div class="mt-2">
                                 <a asp-action="ChiTiet" asp-route-id="@thuoc.MaThuoc" 
@@ -112,15 +142,14 @@
                     </div>
                 </div>
             }
-            
-            @if (!items.Any())
-            {
-                <div class="col-12">
-                    <div class="alert alert-info text-center">
-                        <i class="fas fa-info-circle"></i> Không tìm thấy sản phẩm nào
-                    </div>
+        }
+        else
+        {
+            <div class="col-12">
+                <div class="alert alert-info text-center">
+                    <i class="fas fa-info-circle"></i> Không tìm thấy sản phẩm nào
                 </div>
-            }
+            </div>
         }
     </div>
 </div>

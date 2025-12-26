@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using QL_NhaThuoc.Data;
 using QL_NhaThuoc.Filters;
-using System.Data;
 
 namespace QL_NhaThuoc.Areas.Admin.Controllers
 {
@@ -9,127 +9,77 @@ namespace QL_NhaThuoc.Areas.Admin.Controllers
     [AdminAuthorize]
     public class NguoiDungController : Controller
     {
-        private readonly string _connectionString;
+        private readonly QL_NhaThuocDbContext _context;
 
-        public NguoiDungController(IConfiguration configuration)
+        public NguoiDungController(QL_NhaThuocDbContext context)
         {
-            _connectionString = configuration.GetConnectionString("DefaultConnection")!;
+            _context = context;
         }
 
-        public async Task<IActionResult> Index(string? search)
+        // GET: Admin/NguoiDung - EF + LINQ
+        public async Task<IActionResult> Index()
         {
-            var danhSach = new List<dynamic>();
-
-            using var connection = new SqlConnection(_connectionString);
-            await connection.OpenAsync();
-
-            using var cmd = new SqlCommand("sp_Admin_NguoiDung_DanhSach", connection);
-            cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("@VaiTro", DBNull.Value);
-
-            using var reader = await cmd.ExecuteReaderAsync();
-            while (await reader.ReadAsync())
-            {
-                var hoTen = reader.IsDBNull(reader.GetOrdinal("HoTen")) ? "" : reader.GetString(reader.GetOrdinal("HoTen"));
-                var soDienThoai = reader.GetString(reader.GetOrdinal("SoDienThoai"));
-
-                // Filter theo search
-                if (!string.IsNullOrEmpty(search))
+            var danhSach = await _context.NGUOI_DUNG
+                .Select(nd => new
                 {
-                    if (!soDienThoai.Contains(search) && !hoTen.Contains(search, StringComparison.OrdinalIgnoreCase))
-                        continue;
-                }
-
-                danhSach.Add(new
-                {
-                    MaNguoiDung = reader.GetInt32(reader.GetOrdinal("MaNguoiDung")),
-                    HoTen = hoTen,
-                    SoDienThoai = soDienThoai,
-                    DiaChi = reader.IsDBNull(reader.GetOrdinal("DiaChi")) ? "" : reader.GetString(reader.GetOrdinal("DiaChi")),
-                    VaiTro = reader.IsDBNull(reader.GetOrdinal("VaiTro")) ? "" : reader.GetString(reader.GetOrdinal("VaiTro")),
-                    NgayTao = reader.IsDBNull(reader.GetOrdinal("NgayTao")) ? (DateTime?)null : reader.GetDateTime(reader.GetOrdinal("NgayTao")),
-                    SoDonHang = reader.GetInt32(reader.GetOrdinal("SoDonHang")),
-                    TongChiTieu = reader.GetDecimal(reader.GetOrdinal("TongChiTieu"))
-                });
-            }
+                    nd.MaNguoiDung,
+                    nd.HoTen,
+                    nd.SoDienThoai,
+                    nd.DiaChi,
+                    nd.VaiTro,
+                    nd.NgayTao,
+                    SoDonHang = nd.DonHangs != null ? nd.DonHangs.Count : 0,
+                    TongChiTieu = nd.DonHangs != null 
+                        ? nd.DonHangs.Where(d => d.TrangThai == "Hoan thanh").Sum(d => d.TongTien ?? 0) 
+                        : 0
+                })
+                .OrderByDescending(nd => nd.NgayTao)
+                .ToListAsync();
 
             return View(danhSach);
         }
 
+        // GET: Admin/NguoiDung/Details/5 - EF + LINQ
         public async Task<IActionResult> Details(int id)
         {
-            using var connection = new SqlConnection(_connectionString);
-            await connection.OpenAsync();
+            var nguoiDung = await _context.NGUOI_DUNG
+                .Include(nd => nd.DonHangs!)
+                    .ThenInclude(dh => dh.ChiTietDonHangs)
+                .FirstOrDefaultAsync(nd => nd.MaNguoiDung == id);
 
-            using var cmd = new SqlCommand("sp_Admin_NguoiDung_ChiTiet", connection);
-            cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("@MaNguoiDung", id);
+            if (nguoiDung == null)
+                return NotFound();
 
-            dynamic? nguoiDung = null;
-            var donHangs = new List<dynamic>();
-
-            using var reader = await cmd.ExecuteReaderAsync();
-            
-            // Đọc thông tin người dùng
-            if (await reader.ReadAsync())
-            {
-                nguoiDung = new
-                {
-                    MaNguoiDung = reader.GetInt32(reader.GetOrdinal("MaNguoiDung")),
-                    HoTen = reader.IsDBNull(reader.GetOrdinal("HoTen")) ? "" : reader.GetString(reader.GetOrdinal("HoTen")),
-                    SoDienThoai = reader.GetString(reader.GetOrdinal("SoDienThoai")),
-                    DiaChi = reader.IsDBNull(reader.GetOrdinal("DiaChi")) ? "" : reader.GetString(reader.GetOrdinal("DiaChi")),
-                    VaiTro = reader.IsDBNull(reader.GetOrdinal("VaiTro")) ? "" : reader.GetString(reader.GetOrdinal("VaiTro")),
-                    NgayTao = reader.IsDBNull(reader.GetOrdinal("NgayTao")) ? (DateTime?)null : reader.GetDateTime(reader.GetOrdinal("NgayTao"))
-                };
-            }
-
-            if (nguoiDung == null) return NotFound();
-
-            // Đọc đơn hàng
-            if (await reader.NextResultAsync())
-            {
-                while (await reader.ReadAsync())
-                {
-                    donHangs.Add(new
-                    {
-                        MaDonHang = reader.GetInt32(reader.GetOrdinal("MaDonHang")),
-                        NgayDatHang = reader.GetDateTime(reader.GetOrdinal("NgayDatHang")),
-                        TrangThai = reader.IsDBNull(reader.GetOrdinal("TrangThai")) ? "" : reader.GetString(reader.GetOrdinal("TrangThai")),
-                        TongTien = reader.IsDBNull(reader.GetOrdinal("TongTien")) ? 0 : reader.GetDecimal(reader.GetOrdinal("TongTien"))
-                    });
-                }
-            }
-
-            ViewBag.DonHangs = donHangs;
             return View(nguoiDung);
         }
 
+        // POST: Admin/NguoiDung/CapNhatVaiTro - EF + LINQ
         [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CapNhatVaiTro(int id, string vaiTro)
+        {
+            var nguoiDung = await _context.NGUOI_DUNG.FindAsync(id);
+            if (nguoiDung != null)
+            {
+                nguoiDung.VaiTro = vaiTro;
+                await _context.SaveChangesAsync();
+                TempData["ThongBao"] = "Cập nhật vai trò thành công!";
+            }
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
+        // POST: Admin/NguoiDung/Delete/5 - EF + LINQ
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
-            using var connection = new SqlConnection(_connectionString);
-            await connection.OpenAsync();
-
-            using var cmd = new SqlCommand("sp_Admin_NguoiDung_Xoa", connection);
-            cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("@MaNguoiDung", id);
-            
-            var ketQuaParam = new SqlParameter("@KetQua", SqlDbType.Int) { Direction = ParameterDirection.Output };
-            var thongBaoParam = new SqlParameter("@ThongBao", SqlDbType.NVarChar, 200) { Direction = ParameterDirection.Output };
-            cmd.Parameters.Add(ketQuaParam);
-            cmd.Parameters.Add(thongBaoParam);
-
-            await cmd.ExecuteNonQueryAsync();
-
-            var ketQua = (int)ketQuaParam.Value;
-            var thongBao = thongBaoParam.Value?.ToString() ?? "";
-
-            if (ketQua == 1)
-                TempData["ThongBao"] = thongBao;
-            else
-                TempData["LoiThongBao"] = thongBao;
-
+            var nguoiDung = await _context.NGUOI_DUNG.FindAsync(id);
+            if (nguoiDung != null)
+            {
+                _context.NGUOI_DUNG.Remove(nguoiDung);
+                await _context.SaveChangesAsync();
+                TempData["ThongBao"] = "Xóa người dùng thành công!";
+            }
             return RedirectToAction(nameof(Index));
         }
     }

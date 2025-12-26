@@ -1,4 +1,3 @@
-@model IEnumerable<dynamic>
 @{
     ViewData["Title"] = "Quản lý nhóm thuốc";
 }
@@ -13,29 +12,55 @@
             <tr>
                 <th>ID</th>
                 <th>Tên nhóm thuốc</th>
+                <th>Danh mục cha</th>
                 <th>Mô tả</th>
                 <th>Số thuốc</th>
                 <th width="150">Thao tác</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var item in Model)
+            @if (Model != null)
             {
-                <tr>
-                    <td>@item.NhomThuoc.MaNhomThuoc</td>
-                    <td><strong>@item.NhomThuoc.TenNhomThuoc</strong></td>
-                    <td>@item.NhomThuoc.MoTa</td>
-                    <td><span class="badge bg-info">@item.SoLuongThuoc sản phẩm</span></td>
-                    <td>
-                        <a asp-action="Edit" asp-route-id="@item.NhomThuoc.MaNhomThuoc" class="btn btn-sm btn-warning">
-                            <i class="fas fa-edit"></i>
-                        </a>
-                        <form asp-action="Delete" asp-route-id="@item.NhomThuoc.MaNhomThuoc" method="post" class="d-inline"
-                              onsubmit="return confirm('Xóa nhóm này?')">
-                            <button type="submit" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
-                        </form>
-                    </td>
-                </tr>
+                var items = Model as IEnumerable<dynamic>;
+                @foreach (var item in items)
+                {
+                    var isDanhMucCha = item.MaDanhMucCha == null;
+                    <tr class="@(isDanhMucCha ? "table-primary" : "")">
+                        <td>@item.MaNhomThuoc</td>
+                        <td>
+                            @if (!isDanhMucCha)
+                            {
+                                <span class="text-muted">└─</span>
+                            }
+                            <strong>@item.TenNhomThuoc</strong>
+                            @if (isDanhMucCha)
+                            {
+                                <span class="badge bg-primary ms-1">Danh mục cha</span>
+                            }
+                        </td>
+                        <td>
+                            @if (item.TenDanhMucCha != null)
+                            {
+                                <span class="badge bg-secondary">@item.TenDanhMucCha</span>
+                            }
+                            else
+                            {
+                                <span class="text-muted">—</span>
+                            }
+                        </td>
+                        <td><small>@item.MoTa</small></td>
+                        <td><span class="badge bg-info">@item.SoLuongThuoc</span></td>
+                        <td>
+                            <a asp-action="Edit" asp-route-id="@item.MaNhomThuoc" class="btn btn-sm btn-warning">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <form asp-action="Delete" asp-route-id="@item.MaNhomThuoc" method="post" class="d-inline"
+                                  onsubmit="return confirm('Xóa nhóm này?')">
+                                <button type="submit" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                            </form>
+                        </td>
+                    </tr>
+                }
             }
         </tbody>
     </table>

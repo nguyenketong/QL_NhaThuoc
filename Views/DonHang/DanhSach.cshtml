@@ -1,11 +1,10 @@
+@model IEnumerable<QL_NhaThuoc.Models.DonHang>
 @{
     ViewData["Title"] = "Đơn hàng của tôi";
 }
 
 <div class="container my-4">
-    <h1 class="mb-4">
-        <i class="bi bi-bag-check"></i> Đơn hàng của tôi
-    </h1>
+    <h1 class="mb-4"><i class="bi bi-bag-check"></i> Đơn hàng của tôi</h1>
 
     @if (TempData["ThongBao"] != null)
     {
@@ -14,7 +13,6 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     }
-
     @if (TempData["LoiThongBao"] != null)
     {
         <div class="alert alert-danger alert-dismissible fade show">
@@ -23,82 +21,81 @@
         </div>
     }
 
-    @if (Model != null)
+    @if (Model != null && Model.Any())
     {
-        var items = Model as IEnumerable<dynamic>;
-        if (items.Any())
-        {
-            <div class="table-responsive">
-                <table class="table table-hover">
-                    <thead class="table-light">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Mã đơn</th>
+                        <th>Ngày đặt</th>
+                        <th>Sản phẩm</th>
+                        <th>Tổng tiền</th>
+                        <th>Trạng thái</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var dh in Model)
+                    {
                         <tr>
-                            <th>Mã đơn</th>
-                            <th>Ngày đặt</th>
-                            <th>Tổng tiền</th>
-                            <th>Trạng thái</th>
-                            <th>Thanh toán</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var donHang in items)
-                        {
-                            <tr>
-                                <td><strong>#@donHang.MaDonHang</strong></td>
-                                <td>@((DateTime)donHang.NgayDatHang).ToString("dd/MM/yyyy HH:mm")</td>
-                                <td><strong class="text-danger">@(((decimal?)donHang.TongTien)?.ToString("N0")) đ</strong></td>
-                                <td>
-                                    @{
-                                        var trangThai = (string)donHang.TrangThai;
-                                    }
-                                    @if (trangThai == "Cho xu ly")
-                                    {
+                            <td><strong>#@dh.MaDonHang</strong></td>
+                            <td>@dh.NgayDatHang.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>
+                                @if (dh.ChiTietDonHangs != null && dh.ChiTietDonHangs.Any())
+                                {
+                                    var firstItem = dh.ChiTietDonHangs.First();
+                                    <div class="d-flex align-items-center gap-2">
+                                        <img src="@(firstItem.Thuoc?.HinhAnh ?? "/images/no-image.svg")" style="width:40px;height:40px;object-fit:contain;" onerror="this.src='/images/no-image.svg'">
+                                        <span class="small">@(firstItem.Thuoc?.TenThuoc?.Length > 25 ? firstItem.Thuoc.TenThuoc.Substring(0, 25) + "..." : firstItem.Thuoc?.TenThuoc)</span>
+                                        @if (dh.ChiTietDonHangs.Count > 1)
+                                        {
+                                            <span class="badge bg-secondary">+@(dh.ChiTietDonHangs.Count - 1)</span>
+                                        }
+                                    </div>
+                                }
+                            </td>
+                            <td><strong class="text-danger">@dh.TongTien?.ToString("N0")đ</strong></td>
+                            <td>
+                                @switch (dh.TrangThai)
+                                {
+                                    case "Cho xu ly":
                                         <span class="badge bg-warning">Chờ xử lý</span>
-                                    }
-                                    else if (trangThai == "Dang giao")
-                                    {
+                                        break;
+                                    case "Dang giao":
                                         <span class="badge bg-info">Đang giao</span>
-                                    }
-                                    else if (trangThai == "Hoan thanh")
-                                    {
+                                        break;
+                                    case "Hoan thanh":
                                         <span class="badge bg-success">Hoàn thành</span>
-                                    }
-                                    else if (trangThai == "Da huy")
-                                    {
+                                        break;
+                                    case "Da huy":
                                         <span class="badge bg-danger">Đã hủy</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-secondary">@trangThai</span>
-                                    }
-                                </td>
-                                <td>@donHang.PhuongThucThanhToan</td>
-                                <td class="text-end">
-                                    <a asp-action="ChiTiet" asp-route-id="@donHang.MaDonHang" 
-                                       class="btn btn-sm btn-outline-primary">
-                                        <i class="bi bi-eye"></i> Chi tiết
-                                    </a>
-                                    <a asp-action="TheoDoi" asp-route-id="@donHang.MaDonHang" 
-                                       class="btn btn-sm btn-outline-info">
-                                        <i class="bi bi-truck"></i> Theo dõi
-                                    </a>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-        }
-        else
-        {
-            <div class="text-center py-5">
-                <i class="bi bi-bag-x" style="font-size: 5rem; color: #ccc;"></i>
-                <h3 class="mt-3">Chưa có đơn hàng nào</h3>
-                <p class="text-muted">Bạn chưa đặt đơn hàng nào</p>
-                <a asp-controller="Thuoc" asp-action="DanhSach" class="btn btn-primary">
-                    <i class="bi bi-shop"></i> Mua sắm ngay
-                </a>
-            </div>
-        }
+                                        break;
+                                    default:
+                                        <span class="badge bg-secondary">@dh.TrangThai</span>
+                                        break;
+                                }
+                            </td>
+                            <td class="text-end">
+                                <a asp-action="ChiTiet" asp-route-id="@dh.MaDonHang" class="btn btn-sm btn-outline-primary">
+                                    <i class="bi bi-eye"></i> Chi tiết
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="text-center py-5">
+            <i class="bi bi-bag-x" style="font-size: 5rem; color: #ccc;"></i>
+            <h3 class="mt-3">Chưa có đơn hàng nào</h3>
+            <p class="text-muted">Bạn chưa đặt đơn hàng nào</p>
+            <a asp-controller="Thuoc" asp-action="DanhSach" class="btn btn-primary">
+                <i class="bi bi-shop"></i> Mua sắm ngay
+            </a>
+        </div>
     }
 </div>

@@ -1,13 +1,14 @@
-@model List<QL_NhaThuoc.Controllers.GioHangController.GioHangItem>
+@model List<QL_NhaThuoc.ViewModels.GioHangItem>
 @{
     ViewData["Title"] = "Giỏ hàng";
-    var tongTien = Model.Sum(g => g.ThanhTien);
+    var sanPhamKhaDung = Model.Where(x => !x.KhongKhaDung).ToList();
+    var sanPhamKhongKhaDung = Model.Where(x => x.KhongKhaDung).ToList();
+    var tongTienChon = Model.Where(x => x.DuocChon && !x.KhongKhaDung).Sum(g => g.ThanhTien);
+    var soSanPhamChon = Model.Count(x => x.DuocChon && !x.KhongKhaDung);
 }
 
 <div class="container my-4">
-    <h1 class="mb-4">
-        <i class="bi bi-cart"></i> Giỏ hàng của bạn
-    </h1>
+    <h1 class="mb-4"><i class="bi bi-cart"></i> Giỏ hàng của bạn</h1>
 
     @if (TempData["ThongBao"] != null)
     {
@@ -16,7 +17,6 @@
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     }
-
     @if (TempData["LoiThongBao"] != null)
     {
         <div class="alert alert-danger alert-dismissible fade show">
@@ -27,14 +27,34 @@
 
     @if (Model.Any())
     {
+        @if (sanPhamKhongKhaDung.Any())
+        {
+            <div class="alert alert-danger">
+                <i class="bi bi-exclamation-circle-fill"></i> 
+                <strong>Lưu ý:</strong> Một số sản phẩm đã hết hàng hoặc ngừng kinh doanh.
+            </div>
+        }
+        
         <div class="row">
             <div class="col-lg-8">
-                <div class="card mb-4">
-                    <div class="card-body">
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <thead>
+                @if (sanPhamKhaDung.Any())
+                {
+                    <div class="card mb-4">
+                        <div class="card-header bg-white d-flex align-items-center">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="chonTatCa" 
+                                       @(sanPhamKhaDung.All(x => x.DuocChon) ? "checked" : "")
+                                       onchange="chonTatCaSanPham(this.checked)">
+                                <label class="form-check-label fw-bold" for="chonTatCa">
+                                    Chọn tất cả (@sanPhamKhaDung.Count sản phẩm)
+                                </label>
+                            </div>
+                        </div>
+                        <div class="card-body p-0">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
                                     <tr>
+                                        <th style="width:40px;"></th>
                                         <th>Sản phẩm</th>
                                         <th class="text-end">Đơn giá</th>
                                         <th class="text-center">Số lượng</th>
@@ -43,35 +63,85 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @foreach (var item in Model)
+                                    @foreach (var item in sanPhamKhaDung)
                                     {
-                                        <tr>
-                                            <td>
-                                                <strong>@item.TenThuoc</strong>
+                                        <tr class="@(item.SapHetHang ? "table-warning" : "")">
+                                            <td class="align-middle">
+                                                <input class="form-check-input item-checkbox" type="checkbox" 
+                                                       data-mathuoc="@item.MaThuoc" data-thanhtien="@item.ThanhTien"
+                                                       @(item.DuocChon ? "checked" : "")
+                                                       onchange="capNhatChonSanPham(@item.MaThuoc, this.checked)">
                                             </td>
-                                            <td class="text-end">@item.GiaBan.ToString("N0") đ</td>
-                                            <td class="text-center">
+                                            <td>
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <img src="@(string.IsNullOrEmpty(item.HinhAnh) ? "/images/no-image.svg" : item.HinhAnh)" 
+                                                         alt="@item.TenThuoc" style="width:60px;height:60px;object-fit:contain;"
+                                                         onerror="this.src='/images/no-image.svg'">
+                                                    <div>
+                                                        <strong>@item.TenThuoc</strong>
+                                                        @if (item.SapHetHang)
+                                                        {
+                                                            <div class="text-warning small"><i class="bi bi-exclamation-triangle"></i> Còn @item.SoLuongTon</div>
+                                                        }
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="text-end align-middle">@item.GiaBan.ToString("N0")đ</td>
+                                            <td class="text-center align-middle">
                                                 <form asp-action="CapNhat" method="post" class="d-inline">
                                                     <input type="hidden" name="maThuoc" value="@item.MaThuoc" />
-                                                    <div class="input-group input-group-sm" style="width: 120px; margin: 0 auto;">
-                                                        <button type="button" class="btn btn-outline-secondary" 
-                                                                onclick="giamSoLuong(this)">-</button>
-                                                        <input type="number" name="soLuong" value="@item.SoLuong" 
-                                                               min="1" class="form-control text-center" 
-                                                               onchange="this.form.submit()">
-                                                        <button type="button" class="btn btn-outline-secondary" 
-                                                                onclick="tangSoLuong(this)">+</button>
+                                                    <div class="input-group input-group-sm" style="width:100px;margin:0 auto;">
+                                                        <button type="button" class="btn btn-outline-secondary" onclick="giamSoLuong(this)">-</button>
+                                                        <input type="number" name="soLuong" value="@item.SoLuong" min="1" max="@item.SoLuongTon" 
+                                                               class="form-control text-center" onchange="this.form.submit()">
+                                                        <button type="button" class="btn btn-outline-secondary" onclick="tangSoLuong(this,@item.SoLuongTon)">+</button>
                                                     </div>
                                                 </form>
                                             </td>
-                                            <td class="text-end">
-                                                <strong class="text-danger">@item.ThanhTien.ToString("N0") đ</strong>
+                                            <td class="text-end align-middle"><strong class="text-danger">@item.ThanhTien.ToString("N0")đ</strong></td>
+                                            <td class="align-middle">
+                                                <a asp-action="Xoa" asp-route-maThuoc="@item.MaThuoc" class="btn btn-sm btn-outline-danger"
+                                                   onclick="return confirm('Xóa sản phẩm này?')"><i class="bi bi-trash"></i></a>
                                             </td>
-                                            <td class="text-end">
-                                                <a asp-action="Xoa" asp-route-maThuoc="@item.MaThuoc" 
-                                                   class="btn btn-sm btn-outline-danger"
-                                                   onclick="return confirm('Bạn có chắc muốn xóa sản phẩm này?')">
-                                                    <i class="bi bi-trash"></i>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                }
+
+                @if (sanPhamKhongKhaDung.Any())
+                {
+                    <div class="card mb-4 border-danger">
+                        <div class="card-header bg-danger text-white">
+                            <i class="bi bi-exclamation-triangle"></i> Sản phẩm không khả dụng (@sanPhamKhongKhaDung.Count)
+                        </div>
+                        <div class="card-body p-0">
+                            <table class="table mb-0">
+                                <tbody>
+                                    @foreach (var item in sanPhamKhongKhaDung)
+                                    {
+                                        <tr style="opacity:0.5;">
+                                            <td style="width:40px;"><input type="checkbox" disabled></td>
+                                            <td>
+                                                <div class="d-flex align-items-center gap-2">
+                                                    <img src="@(string.IsNullOrEmpty(item.HinhAnh) ? "/images/no-image.svg" : item.HinhAnh)" 
+                                                         style="width:60px;height:60px;object-fit:contain;filter:grayscale(100%);">
+                                                    <div>
+                                                        <del>@item.TenThuoc</del>
+                                                        <div class="text-danger small">
+                                                            <i class="bi bi-x-circle"></i> @(item.NgungKinhDoanh ? "Ngừng kinh doanh" : "Hết hàng")
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="text-end align-middle text-muted">@item.GiaBan.ToString("N0")đ</td>
+                                            <td class="text-center align-middle"><span class="badge bg-danger">@(item.NgungKinhDoanh ? "Ngừng KD" : "Hết hàng")</span></td>
+                                            <td class="text-end align-middle text-muted"><del>@item.ThanhTien.ToString("N0")đ</del></td>
+                                            <td class="align-middle">
+                                                <a asp-action="Xoa" asp-route-maThuoc="@item.MaThuoc" class="btn btn-sm btn-danger">
+                                                    <i class="bi bi-trash"></i> Xóa
                                                 </a>
                                             </td>
                                         </tr>
@@ -80,42 +150,46 @@
                             </table>
                         </div>
                     </div>
-                </div>
+                }
 
                 <div class="d-flex justify-content-between">
                     <a asp-controller="Thuoc" asp-action="DanhSach" class="btn btn-outline-primary">
-                        <i class="bi bi-arrow-left"></i> Tiếp tục mua hàng
+                        <i class="bi bi-arrow-left"></i> Tiếp tục mua
                     </a>
-                    <a asp-action="XoaTatCa" class="btn btn-outline-danger"
-                       onclick="return confirm('Bạn có chắc muốn xóa toàn bộ giỏ hàng?')">
+                    <a asp-action="XoaTatCa" class="btn btn-outline-danger" onclick="return confirm('Xóa toàn bộ giỏ hàng?')">
                         <i class="bi bi-trash"></i> Xóa tất cả
                     </a>
                 </div>
             </div>
 
             <div class="col-lg-4">
-                <div class="card">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0">Tổng đơn hàng</h5>
-                    </div>
+                <div class="card position-sticky" style="top:100px;">
+                    <div class="card-header bg-primary text-white"><h5 class="mb-0">Tổng đơn hàng</h5></div>
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">
-                            <span>Tạm tính:</span>
-                            <strong>@tongTien.ToString("N0") đ</strong>
+                            <span>Đã chọn:</span><strong id="soSanPhamChon">@soSanPhamChon sản phẩm</strong>
                         </div>
                         <div class="d-flex justify-content-between mb-2">
-                            <span>Phí vận chuyển:</span>
-                            <strong>Miễn phí</strong>
+                            <span>Tạm tính:</span><strong id="tongTienTamTinh">@tongTienChon.ToString("N0")đ</strong>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Phí ship:</span><strong>Miễn phí</strong>
                         </div>
                         <hr>
                         <div class="d-flex justify-content-between mb-3">
-                            <strong>Tổng cộng:</strong>
-                            <strong class="text-danger fs-5">@tongTien.ToString("N0") đ</strong>
+                            <strong>Tổng:</strong><strong class="text-danger fs-5" id="tongTienCong">@tongTienChon.ToString("N0")đ</strong>
                         </div>
-                        <div class="d-grid">
-                            <a asp-action="ThanhToan" class="btn btn-primary btn-lg">
-                                <i class="bi bi-credit-card"></i> Thanh toán
-                            </a>
+                        <div class="d-grid" id="btnContainer">
+                            @if (soSanPhamChon > 0)
+                            {
+                                <a asp-action="ThanhToan" class="btn btn-primary btn-lg" id="btnThanhToan">
+                                    <i class="bi bi-credit-card"></i> Thanh toán (<span id="soLuongTT">@soSanPhamChon</span>)
+                                </a>
+                            }
+                            else
+                            {
+                                <button class="btn btn-secondary btn-lg" disabled id="btnDisabled">Chọn sản phẩm để thanh toán</button>
+                            }
                         </div>
                     </div>
                 </div>
@@ -125,30 +199,43 @@
     else
     {
         <div class="text-center py-5">
-            <i class="bi bi-cart-x" style="font-size: 5rem; color: #ccc;"></i>
+            <i class="bi bi-cart-x" style="font-size:5rem;color:#ccc;"></i>
             <h3 class="mt-3">Giỏ hàng trống</h3>
-            <p class="text-muted">Bạn chưa có sản phẩm nào trong giỏ hàng</p>
-            <a asp-controller="Thuoc" asp-action="DanhSach" class="btn btn-primary">
-                <i class="bi bi-shop"></i> Mua sắm ngay
-            </a>
+            <a asp-controller="Thuoc" asp-action="DanhSach" class="btn btn-primary mt-2">Mua sắm ngay</a>
         </div>
     }
 </div>
 
 @section Scripts {
-    <script>
-        function tangSoLuong(btn) {
-            const input = btn.parentElement.querySelector('input[type="number"]');
-            input.value = parseInt(input.value) + 1;
-            input.form.submit();
-        }
-
-        function giamSoLuong(btn) {
-            const input = btn.parentElement.querySelector('input[type="number"]');
-            if (parseInt(input.value) > 1) {
-                input.value = parseInt(input.value) - 1;
-                input.form.submit();
-            }
-        }
-    </script>
+<script>
+function tangSoLuong(btn, max) {
+    const input = btn.parentElement.querySelector('input[type="number"]');
+    if (parseInt(input.value) < max) { input.value = parseInt(input.value) + 1; input.form.submit(); }
+    else alert('Chỉ còn ' + max + ' sản phẩm!');
+}
+function giamSoLuong(btn) {
+    const input = btn.parentElement.querySelector('input[type="number"]');
+    if (parseInt(input.value) > 1) { input.value = parseInt(input.value) - 1; input.form.submit(); }
+}
+function capNhatChonSanPham(maThuoc, chon) {
+    fetch('/GioHang/CapNhatChon', { method: 'POST', headers: {'Content-Type':'application/x-www-form-urlencoded'}, body: `maThuoc=${maThuoc}&duocChon=${chon}` })
+    .then(r => r.json()).then(() => capNhatUI());
+}
+function chonTatCaSanPham(chon) {
+    fetch('/GioHang/ChonTatCa', { method: 'POST', headers: {'Content-Type':'application/x-www-form-urlencoded'}, body: `chon=${chon}` })
+    .then(r => r.json()).then(() => { document.querySelectorAll('.item-checkbox').forEach(c => c.checked = chon); capNhatUI(); });
+}
+function capNhatUI() {
+    let tong = 0, sl = 0;
+    document.querySelectorAll('.item-checkbox:checked').forEach(c => { tong += parseFloat(c.dataset.thanhtien); sl++; });
+    document.getElementById('tongTienTamTinh').textContent = tong.toLocaleString('vi-VN') + 'đ';
+    document.getElementById('tongTienCong').textContent = tong.toLocaleString('vi-VN') + 'đ';
+    document.getElementById('soSanPhamChon').textContent = sl + ' sản phẩm';
+    const container = document.getElementById('btnContainer');
+    if (sl > 0) container.innerHTML = `<a href="/GioHang/ThanhToan" class="btn btn-primary btn-lg"><i class="bi bi-credit-card"></i> Thanh toán (${sl})</a>`;
+    else container.innerHTML = `<button class="btn btn-secondary btn-lg" disabled>Chọn sản phẩm để thanh toán</button>`;
+    const all = document.querySelectorAll('.item-checkbox'), checked = document.querySelectorAll('.item-checkbox:checked');
+    document.getElementById('chonTatCa').checked = all.length > 0 && all.length === checked.length;
+}
+</script>
 }

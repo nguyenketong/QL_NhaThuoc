@@ -1,9 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using QL_NhaThuoc.Data;
-using QL_NhaThuoc.Models;
 using QL_NhaThuoc.Filters;
-using System.Data;
+using QL_NhaThuoc.Models;
 
 namespace QL_NhaThuoc.Areas.Admin.Controllers
 {
@@ -12,170 +11,112 @@ namespace QL_NhaThuoc.Areas.Admin.Controllers
     public class NhomThuocController : Controller
     {
         private readonly QL_NhaThuocDbContext _context;
-        private readonly string _connectionString;
 
-        public NhomThuocController(QL_NhaThuocDbContext context, IConfiguration config)
+        public NhomThuocController(QL_NhaThuocDbContext context)
         {
             _context = context;
-            _connectionString = config.GetConnectionString("DefaultConnection")!;
         }
 
-        // INDEX - Gọi sp_NhomThuoc_DanhSach
+        // GET: Admin/NhomThuoc - EF + LINQ
         public async Task<IActionResult> Index()
         {
-            var data = new List<dynamic>();
-
-            using (var connection = new SqlConnection(_connectionString))
-            {
-                await connection.OpenAsync();
-
-                using (var command = new SqlCommand("sp_NhomThuoc_DanhSach", connection))
+            var danhSach = await _context.NHOM_THUOC
+                .Include(n => n.DanhMucCha)
+                .Select(n => new
                 {
-                    command.CommandType = CommandType.StoredProcedure;
+                    n.MaNhomThuoc,
+                    n.TenNhomThuoc,
+                    n.MoTa,
+                    n.MaDanhMucCha,
+                    TenDanhMucCha = n.DanhMucCha != null ? n.DanhMucCha.TenNhomThuoc : null,
+                    SoLuongThuoc = n.Thuocs != null ? n.Thuocs.Count : 0
+                })
+                .OrderBy(n => n.MaDanhMucCha == null ? 0 : 1)
+                .ThenBy(n => n.TenNhomThuoc)
+                .ToListAsync();
 
-                    using (var reader = await command.ExecuteReaderAsync())
-                    {
-                        while (await reader.ReadAsync())
-                        {
-                            data.Add(new
-                            {
-                                NhomThuoc = new NhomThuoc
-                                {
-                                    MaNhomThuoc = reader.GetInt32(reader.GetOrdinal("MaNhomThuoc")),
-                                    TenNhomThuoc = reader.GetString(reader.GetOrdinal("TenNhomThuoc")),
-                                    MoTa = reader.IsDBNull(reader.GetOrdinal("MoTa")) ? null : reader.GetString(reader.GetOrdinal("MoTa"))
-                                },
-                                SoLuongThuoc = reader.GetInt32(reader.GetOrdinal("SoLuongThuoc"))
-                            });
-                        }
-                    }
-                }
-            }
-
-            return View(data);
+            return View(danhSach);
         }
 
-        public IActionResult Create() => View();
+        // GET: Admin/NhomThuoc/Create
+        public async Task<IActionResult> Create()
+        {
+            // Load danh sách danh mục cha (chỉ lấy danh mục gốc)
+            ViewBag.DanhMucChaList = await _context.NHOM_THUOC
+                .Where(n => n.MaDanhMucCha == null)
+                .OrderBy(n => n.TenNhomThuoc)
+                .ToListAsync();
+            return View();
+        }
 
+        // POST: Admin/NhomThuoc/Create - EF + LINQ
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(NhomThuoc nhomThuoc)
         {
             if (ModelState.IsValid)
             {
-                using (var connection = new SqlConnection(_connectionString))
-                {
-                    await connection.OpenAsync();
-
-                    using (var command = new SqlCommand(
-                        "INSERT INTO NHOM_THUOC (TenNhomThuoc, MoTa) VALUES (@TenNhomThuoc, @MoTa)", connection))
-                    {
-                        command.Parameters.AddWithValue("@TenNhomThuoc", nhomThuoc.TenNhomThuoc);
-                        command.Parameters.AddWithValue("@MoTa", (object?)nhomThuoc.MoTa ?? DBNull.Value);
-
-                        await command.ExecuteNonQueryAsync();
-                    }
-                }
-
+                _context.NHOM_THUOC.Add(nhomThuoc);
+                await _context.SaveChangesAsync();
                 TempData["ThongBao"] = "Thêm nhóm thuốc thành công!";
                 return RedirectToAction(nameof(Index));
             }
+            ViewBag.DanhMucChaList = await _context.NHOM_THUOC
+                .Where(n => n.MaDanhMucCha == null)
+                .OrderBy(n => n.TenNhomThuoc)
+                .ToListAsync();
             return View(nhomThuoc);
         }
 
+        // GET: Admin/NhomThuoc/Edit/5
         public async Task<IActionResult> Edit(int id)
         {
-            NhomThuoc? nhomThuoc = null;
+            var nhomThuoc = await _context.NHOM_THUOC.FindAsync(id);
+            if (nhomThuoc == null)
+                return NotFound();
 
-            using (var connection = new SqlConnection(_connectionString))
-            {
-                await connection.OpenAsync();
-
-                using (var command = new SqlCommand(
-                    "SELECT * FROM NHOM_THUOC WHERE MaNhomThuoc = @MaNhomThuoc", connection))
-                {
-                    command.Parameters.AddWithValue("@MaNhomThuoc", id);
-
-                    using (var reader = await command.ExecuteReaderAsync())
-                    {
-                        if (await reader.ReadAsync())
-                        {
-                            nhomThuoc = new NhomThuoc
-                            {
-                                MaNhomThuoc = reader.GetInt32(reader.GetOrdinal("MaNhomThuoc")),
-                                TenNhomThuoc = reader.GetString(reader.GetOrdinal("TenNhomThuoc")),
-                                MoTa = reader.IsDBNull(reader.GetOrdinal("MoTa")) ? null : reader.GetString(reader.GetOrdinal("MoTa"))
-                            };
-                        }
-                    }
-                }
-            }
-
-            if (nhomThuoc == null) return NotFound();
+            // Load danh sách danh mục cha (không bao gồm chính nó và các danh mục con của nó)
+            ViewBag.DanhMucChaList = await _context.NHOM_THUOC
+                .Where(n => n.MaDanhMucCha == null && n.MaNhomThuoc != id)
+                .OrderBy(n => n.TenNhomThuoc)
+                .ToListAsync();
             return View(nhomThuoc);
         }
 
+        // POST: Admin/NhomThuoc/Edit/5 - EF + LINQ
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, NhomThuoc nhomThuoc)
         {
-            if (id != nhomThuoc.MaNhomThuoc) return NotFound();
+            if (id != nhomThuoc.MaNhomThuoc)
+                return NotFound();
 
             if (ModelState.IsValid)
             {
-                using (var connection = new SqlConnection(_connectionString))
-                {
-                    await connection.OpenAsync();
-
-                    using (var command = new SqlCommand(
-                        "UPDATE NHOM_THUOC SET TenNhomThuoc = @TenNhomThuoc, MoTa = @MoTa WHERE MaNhomThuoc = @MaNhomThuoc", connection))
-                    {
-                        command.Parameters.AddWithValue("@MaNhomThuoc", nhomThuoc.MaNhomThuoc);
-                        command.Parameters.AddWithValue("@TenNhomThuoc", nhomThuoc.TenNhomThuoc);
-                        command.Parameters.AddWithValue("@MoTa", (object?)nhomThuoc.MoTa ?? DBNull.Value);
-
-                        await command.ExecuteNonQueryAsync();
-                    }
-                }
-
+                _context.Update(nhomThuoc);
+                await _context.SaveChangesAsync();
                 TempData["ThongBao"] = "Cập nhật nhóm thuốc thành công!";
                 return RedirectToAction(nameof(Index));
             }
+            ViewBag.DanhMucChaList = await _context.NHOM_THUOC
+                .Where(n => n.MaDanhMucCha == null && n.MaNhomThuoc != id)
+                .OrderBy(n => n.TenNhomThuoc)
+                .ToListAsync();
             return View(nhomThuoc);
         }
 
+        // POST: Admin/NhomThuoc/Delete/5 - EF + LINQ
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
-            using (var connection = new SqlConnection(_connectionString))
+            var nhomThuoc = await _context.NHOM_THUOC.FindAsync(id);
+            if (nhomThuoc != null)
             {
-                await connection.OpenAsync();
-
-                // Kiểm tra ràng buộc
-                using (var checkCommand = new SqlCommand(
-                    "SELECT COUNT(*) FROM THUOC WHERE MaNhomThuoc = @MaNhomThuoc", connection))
-                {
-                    checkCommand.Parameters.AddWithValue("@MaNhomThuoc", id);
-                    var soThuocSuDung = (int)(await checkCommand.ExecuteScalarAsync())!;
-
-                    if (soThuocSuDung > 0)
-                    {
-                        TempData["LoiThongBao"] = $"Không thể xóa! Có {soThuocSuDung} thuốc đang thuộc nhóm này.";
-                        return RedirectToAction(nameof(Index));
-                    }
-                }
-
-                // Xóa
-                using (var deleteCommand = new SqlCommand(
-                    "DELETE FROM NHOM_THUOC WHERE MaNhomThuoc = @MaNhomThuoc", connection))
-                {
-                    deleteCommand.Parameters.AddWithValue("@MaNhomThuoc", id);
-                    await deleteCommand.ExecuteNonQueryAsync();
-                }
-
+                _context.NHOM_THUOC.Remove(nhomThuoc);
+                await _context.SaveChangesAsync();
                 TempData["ThongBao"] = "Xóa nhóm thuốc thành công!";
             }
-
             return RedirectToAction(nameof(Index));
         }
     }

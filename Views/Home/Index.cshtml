@@ -1,155 +1,137 @@
-﻿@{
-    ViewData["Title"] = "Nhà Thuốc Online - Chăm sóc sức khỏe toàn diện";
+﻿@model IEnumerable<QL_NhaThuoc.Models.Thuoc>
+@{
+    ViewData["Title"] = "Nhà Thuốc Tây - Chăm sóc sức khỏe toàn diện";
+    var sanPhamMoi = ViewBag.SanPhamMoi as List<QL_NhaThuoc.Models.Thuoc>;
+    var sanPhamHot = ViewBag.SanPhamHot as List<QL_NhaThuoc.Models.Thuoc>;
+    var sanPhamBanChay = ViewBag.SanPhamBanChay as List<QL_NhaThuoc.Models.Thuoc>;
+    var nhomThuocs = ViewBag.NhomThuocs as List<QL_NhaThuoc.Models.NhomThuoc>;
+    var thuongHieus = ViewBag.ThuongHieus as List<QL_NhaThuoc.Models.ThuongHieu>;
+    var baiViets = ViewBag.BaiViets as List<QL_NhaThuoc.Models.BaiViet>;
+    var baiVietNoiBat = baiViets?.FirstOrDefault(b => b.IsNoiBat == true) ?? baiViets?.FirstOrDefault();
+    var baiVietKhac = baiViets?.Where(b => b.MaBaiViet != baiVietNoiBat?.MaBaiViet).ToList();
 }
 
-<!-- Hero Banner -->
-<section class="hero-banner">
-    <div class="container">
-        <div id="heroCarousel" class="carousel slide" data-bs-ride="carousel">
-            <div class="carousel-indicators">
-                <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active"></button>
-                <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1"></button>
-                <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="2"></button>
-            </div>
-            <div class="carousel-inner">
-                <div class="carousel-item active">
-                    <div class="banner-content">
-                        <h2>🏥 Chăm sóc sức khỏe toàn diện</h2>
-                        <p>Thuốc chính hãng - Giá tốt nhất - Giao hàng nhanh</p>
-                        <a asp-controller="Thuoc" asp-action="DanhSach" class="btn btn-primary btn-lg">
-                            <i class="fas fa-shopping-bag"></i> Mua ngay
-                        </a>
-                    </div>
-                </div>
-                <div class="carousel-item">
-                    <div class="banner-content">
-                        <h2>🚚 Miễn phí giao hàng</h2>
-                        <p>Đơn hàng từ 300.000đ - Giao hàng toàn quốc</p>
-                        <a asp-controller="Thuoc" asp-action="DanhSach" class="btn btn-primary btn-lg">
-                            <i class="fas fa-truck"></i> Khám phá ngay
-                        </a>
-                    </div>
-                </div>
-                <div class="carousel-item">
-                    <div class="banner-content">
-                        <h2>👨‍⚕️ Tư vấn dược sĩ miễn phí</h2>
-                        <p>Hotline: 1800 6928 - Hỗ trợ 24/7</p>
-                        <a href="tel:18006928" class="btn btn-primary btn-lg">
-                            <i class="fas fa-phone"></i> Gọi ngay
-                        </a>
-                    </div>
-                </div>
-            </div>
-            <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
-                <span class="carousel-control-prev-icon"></span>
-            </button>
-            <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
-                <span class="carousel-control-next-icon"></span>
-            </button>
+<!-- Hero Slider - Full Width -->
+<section class="hero-slider-full">
+    <div id="heroCarousel" class="carousel slide" data-bs-ride="carousel">
+        <div class="carousel-indicators">
+            <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" class="active"></button>
+            <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1"></button>
+            <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="2"></button>
         </div>
-    </div>
-</section>
-
-<!-- Quick Categories -->
-<section class="quick-categories">
-    <div class="container">
-        <div class="row g-3">
-            <div class="col-4 col-md-2">
-                <a asp-controller="Thuoc" asp-action="TheoNhom" asp-route-id="1" class="quick-cat-item d-block text-decoration-none">
-                    <div class="quick-cat-icon">
-                        <i class="fas fa-pills"></i>
-                    </div>
-                    <span>Giảm đau<br>Hạ sốt</span>
-                </a>
-            </div>
-            <div class="col-4 col-md-2">
-                <a asp-controller="Thuoc" asp-action="TheoNhom" asp-route-id="5" class="quick-cat-item d-block text-decoration-none">
-                    <div class="quick-cat-icon">
-                        <i class="fas fa-capsules"></i>
-                    </div>
-                    <span>Vitamin<br>TPCN</span>
-                </a>
-            </div>
-            <div class="col-4 col-md-2">
-                <a asp-controller="Thuoc" asp-action="TheoNhom" asp-route-id="4" class="quick-cat-item d-block text-decoration-none">
-                    <div class="quick-cat-icon">
-                        <i class="fas fa-head-side-virus"></i>
-                    </div>
-                    <span>Cảm cúm<br>Sốt</span>
-                </a>
-            </div>
-            <div class="col-4 col-md-2">
-                <a asp-controller="Thuoc" asp-action="TheoNhom" asp-route-id="2" class="quick-cat-item d-block text-decoration-none">
-                    <div class="quick-cat-icon">
-                        <i class="fas fa-bacteria"></i>
-                    </div>
-                    <span>Kháng sinh<br>Kháng viêm</span>
-                </a>
-            </div>
-            <div class="col-4 col-md-2">
-                <a asp-controller="Thuoc" asp-action="TheoNhom" asp-route-id="3" class="quick-cat-item d-block text-decoration-none">
-                    <div class="quick-cat-icon">
-                        <i class="fas fa-stomach"></i>
-                    </div>
-                    <span>Tiêu hóa<br>Dạ dày</span>
-                </a>
-            </div>
-            <div class="col-4 col-md-2">
-                <a asp-controller="NhomThuoc" asp-action="DanhSach" class="quick-cat-item d-block text-decoration-none">
-                    <div class="quick-cat-icon" style="background: linear-gradient(135deg, #FF6B35, #FF8E53);">
-                        <i class="fas fa-th-large"></i>
-                    </div>
-                    <span>Xem tất cả<br>danh mục</span>
-                </a>
-            </div>
-        </div>
-    </div>
-</section>
-
-<!-- Flash Sale Section -->
-<section class="container mt-4">
-    <div class="flash-sale-section px-4">
-        <div class="flash-sale-header">
-            <div class="flash-sale-title">
-                <i class="fas fa-bolt"></i> FLASH SALE - GIÁ TỐT
-            </div>
-            <div class="countdown">
-                <div class="countdown-item" id="hours">00</div>
-                <div class="countdown-item">:</div>
-                <div class="countdown-item" id="minutes">00</div>
-                <div class="countdown-item">:</div>
-                <div class="countdown-item" id="seconds">00</div>
-            </div>
-        </div>
-        <div class="row g-3">
-            @if (Model != null)
-            {
-                var items = Model as IEnumerable<dynamic>;
-                @foreach (var thuoc in items.Take(4))
-                {
-                    <div class="col-6 col-md-3">
-                        <div class="product-card bg-white">
-                            <div class="product-badge">
-                                <span class="badge badge-sale">-15%</span>
-                            </div>
-                            <div class="product-image">
-                                <img src="@(string.IsNullOrEmpty((string)thuoc.HinhAnh) ? "/images/no-image.svg" : thuoc.HinhAnh)" 
-                                     alt="@thuoc.TenThuoc" onerror="this.src='/images/no-image.svg'" />
-                            </div>
-                            <div class="product-info">
-                                <div class="product-category">@thuoc.TenNhomThuoc</div>
-                                <h6 class="product-name">@thuoc.TenThuoc</h6>
-                                <div class="product-price">
-                                    <span class="price-current">@(((decimal?)thuoc.GiaBan ?? 0).ToString("N0"))đ</span>
-                                    <span class="price-unit">/Hộp</span>
+        <div class="carousel-inner">
+            <div class="carousel-item active">
+                <div class="hero-slide-full" style="background-image: url('https://images.unsplash.com/photo-1631549916768-4119b2e5f926?w=1920&q=80'); background-size: cover; background-position: center;">
+                    <div class="container position-relative">
+                        <div class="row align-items-center min-vh-50">
+                            <div class="col-lg-5">
+                                <div class="hero-content-box">
+                                    <span class="badge bg-primary mb-3 px-3 py-2">🏥 Nhà Thuốc Uy Tín</span>
+                                    <h1 class="display-5 fw-bold mb-3 text-primary">Chăm sóc sức khỏe toàn diện</h1>
+                                    <p class="lead mb-4 text-muted">Thuốc chính hãng - Giá tốt nhất - Giao hàng nhanh chóng</p>
+                                    <div class="d-flex gap-3 flex-wrap">
+                                        <a asp-controller="Thuoc" asp-action="DanhSach" class="btn btn-primary btn-lg px-4">
+                                            <i class="fas fa-shopping-bag me-2"></i> Mua ngay
+                                        </a>
+                                        <a href="tel:0919081786" class="btn btn-outline-primary btn-lg px-4">
+                                            <i class="fas fa-phone me-2"></i> Tư vấn
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="product-footer">
-                                <a asp-controller="Thuoc" asp-action="ChiTiet" asp-route-id="@thuoc.MaThuoc" 
-                                   class="btn btn-outline-primary btn-sm">Chi tiết</a>
-                                <button onclick="themVaoGioHang(@thuoc.MaThuoc)" class="btn btn-cart btn-sm">
-                                    <i class="fas fa-cart-plus"></i> Mua
-                                </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="carousel-item">
+                <div class="hero-slide-full" style="background-image: url('https://images.unsplash.com/photo-1587854692152-cbe660dbde88?w=1920&q=80'); background-size: cover; background-position: center;">
+                    <div class="container position-relative">
+                        <div class="row align-items-center min-vh-50">
+                            <div class="col-lg-5">
+                                <div class="hero-content-box">
+                                    <span class="badge bg-success mb-3 px-3 py-2">🚚 Free Ship</span>
+                                    <h1 class="display-5 fw-bold mb-3 text-success">Miễn phí giao hàng</h1>
+                                    <p class="lead mb-4 text-muted">Giao hàng toàn quốc trong 24h</p>
+                                    <div class="d-flex gap-3 flex-wrap">
+                                        <a asp-controller="Thuoc" asp-action="DanhSach" class="btn btn-success btn-lg px-4">
+                                            <i class="fas fa-truck me-2"></i> Khám phá ngay
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="carousel-item">
+                <div class="hero-slide-full" style="background-image: url('https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=1920&q=80'); background-size: cover; background-position: center;">
+                    <div class="container position-relative">
+                        <div class="row align-items-center min-vh-50">
+                            <div class="col-lg-5">
+                                <div class="hero-content-box">
+                                    <span class="badge bg-warning text-dark mb-3 px-3 py-2">👨‍⚕️ Hỗ trợ 24/7</span>
+                                    <h1 class="display-5 fw-bold mb-3 text-warning">Tư vấn dược sĩ miễn phí</h1>
+                                    <p class="lead mb-4 text-muted">Hotline: 0795930020 - Đội ngũ dược sĩ chuyên nghiệp</p>
+                                    <div class="d-flex gap-3 flex-wrap">
+                                        <a href="tel:0919081786" class="btn btn-warning btn-lg px-4">
+                                            <i class="fas fa-phone me-2"></i> Gọi ngay
+                                        </a>
+                                        <a href="https://zalo.me/0919081786" target="_blank" class="btn btn-outline-warning btn-lg px-4">
+                                            <i class="fas fa-comment-dots me-2"></i> Chat Zalo
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon"></span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+            <span class="carousel-control-next-icon"></span>
+        </button>
+    </div>
+</section>
+
+<!-- SẢN PHẨM BÁN CHẠY -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="section-header text-center mb-4">
+            <h2 class="section-title-main text-primary fw-bold">SẢN PHẨM BÁN CHẠY</h2>
+            <p class="text-muted">Một số dòng sản phẩm bán chạy của công ty chúng tôi đang kinh doanh hiện tại</p>
+            <div class="title-divider"></div>
+        </div>
+        
+        <div class="row row-cols-2 row-cols-md-3 row-cols-lg-5 g-3">
+            @if (sanPhamBanChay != null && sanPhamBanChay.Any())
+            {
+                @foreach (var thuoc in sanPhamBanChay.Take(10))
+                {
+                    <div class="col">
+                        <div class="product-card-compact">
+                            <div class="product-badge-hot">Hot</div>
+                            <div class="product-img-compact">
+                                <a asp-controller="Thuoc" asp-action="ChiTiet" asp-route-id="@thuoc.MaThuoc">
+                                    <img src="@(string.IsNullOrEmpty(thuoc.HinhAnh) ? "/images/no-image.svg" : thuoc.HinhAnh)" 
+                                         alt="@thuoc.TenThuoc" onerror="this.src='/images/no-image.svg'">
+                                </a>
+                            </div>
+                            <div class="product-content-compact">
+                                <a asp-controller="Thuoc" asp-action="ChiTiet" asp-route-id="@thuoc.MaThuoc" class="product-title-compact">
+                                    @thuoc.TenThuoc
+                                </a>
+                                <div class="product-price-compact">@((thuoc.GiaBan ?? 0).ToString("N0"))đ</div>
+                                <div class="product-actions-compact">
+                                    <a asp-controller="Thuoc" asp-action="ChiTiet" asp-route-id="@thuoc.MaThuoc" class="btn btn-outline-primary btn-sm">
+                                        <i class="fas fa-eye me-1"></i>Chi tiết
+                                    </a>
+                                    <button onclick="themVaoGioHang(@thuoc.MaThuoc)" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-cart-plus me-1"></i>Thêm giỏ
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -159,236 +141,1145 @@
     </div>
 </section>
 
-<!-- Sản phẩm nổi bật -->
-<section class="container py-5">
-    <h3 class="section-title">
-        <i class="fas fa-star"></i> Sản phẩm bán chạy
-    </h3>
-    <div class="row g-4">
-        @if (Model != null)
-        {
-            var allItems = Model as IEnumerable<dynamic>;
-            @foreach (var thuoc in allItems)
+<!-- SẢN PHẨM KHUYẾN MÃI -->
+<section class="py-5 promo-section">
+    <div class="container">
+        <div class="section-header text-center mb-4">
+            <h2 class="section-title-main text-primary fw-bold">SẢN PHẨM KHUYẾN MÃI</h2>
+            <p class="text-muted">Một số dòng sản phẩm bán chạy của công ty chúng tôi đang kinh doanh hiện tại</p>
+            <div class="title-divider"></div>
+        </div>
+        
+        <!-- Category Tabs -->
+        <div class="promo-tabs-wrapper text-center mb-4">
+            <div class="promo-tabs d-inline-flex flex-wrap justify-content-center gap-2">
+                <button class="promo-tab" data-category="detox">THIẾT BỊ Y TẾ</button>
+                <button class="promo-tab" data-category="makeup">DƯỢC MỸ PHẨM</button>
+                <button class="promo-tab" data-category="milk">MẸ VÀ BÉ</button>
+                <button class="promo-tab" data-category="supplement">THỰC PHẨM CHỨC NĂNG</button>
+                <button class="promo-tab" data-category="pharma">DƯỢC PHẨM</button>
+            </div>
+        </div>
+        
+        <!-- Products Grid -->
+        <div class="row row-cols-2 row-cols-md-3 row-cols-lg-5 g-3">
+            @if (sanPhamHot != null && sanPhamHot.Any())
             {
-                <div class="col-6 col-md-4 col-lg-3">
-                    <div class="product-card">
-                        <div class="product-badge">
-                            <span class="badge badge-hot">HOT</span>
-                        </div>
-                        <div class="product-image">
-                            <img src="@(string.IsNullOrEmpty((string)thuoc.HinhAnh) ? "/images/no-image.svg" : thuoc.HinhAnh)" 
-                                 alt="@thuoc.TenThuoc" onerror="this.src='/images/no-image.svg'" />
-                            <div class="product-actions">
-                                <button class="btn" title="Xem nhanh" onclick="xemNhanh(@thuoc.MaThuoc)">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                                <button class="btn" title="Yêu thích">
-                                    <i class="fas fa-heart"></i>
-                                </button>
+                @foreach (var thuoc in sanPhamHot.Take(10))
+                {
+                    var giaBan = thuoc.GiaBan ?? 0;
+                    var phanTramGiam = (thuoc.PhanTramGiam.HasValue && thuoc.PhanTramGiam.Value > 0) 
+                        ? thuoc.PhanTramGiam.Value : 0;
+                    // Kiểm tra khuyến mãi còn hiệu lực
+                    var dangKhuyenMai = phanTramGiam > 0 
+                        && (!thuoc.NgayBatDauKM.HasValue || thuoc.NgayBatDauKM <= DateTime.Now)
+                        && (!thuoc.NgayKetThucKM.HasValue || thuoc.NgayKetThucKM >= DateTime.Now);
+                    // Tính giá gốc
+                    var giaGoc = thuoc.GiaGoc ?? (phanTramGiam > 0 ? Math.Ceiling(giaBan * 100 / (100 - phanTramGiam)) : giaBan);
+                    // Nếu hết khuyến mãi, hiển thị giá gốc
+                    if (!dangKhuyenMai && phanTramGiam > 0)
+                    {
+                        giaBan = giaGoc;
+                        phanTramGiam = 0;
+                    }
+                    var isHot = thuoc.IsHot ?? false;
+                    var hetHang = (thuoc.SoLuongTon ?? 0) <= 0;
+                    <div class="col">
+                        <div class="product-card-promo @(hetHang ? "out-of-stock" : "")">
+                            <div class="promo-badges">
+                                @if (hetHang)
+                                {
+                                    <span class="badge-soldout">Hết hàng</span>
+                                }
+                                else if (isHot)
+                                {
+                                    <span class="badge-hot">Nóng</span>
+                                }
+                                @if (dangKhuyenMai && phanTramGiam > 0)
+                                {
+                                    <span class="badge-discount">-@phanTramGiam%</span>
+                                }
                             </div>
-                        </div>
-                        <div class="product-info">
-                            <div class="product-category">@thuoc.TenNhomThuoc</div>
-                            <a asp-controller="Thuoc" asp-action="ChiTiet" asp-route-id="@thuoc.MaThuoc" class="text-decoration-none">
-                                <h6 class="product-name">@thuoc.TenThuoc</h6>
-                            </a>
-                            <div class="product-brand">
-                                <i class="fas fa-building"></i> @(thuoc.TenThuongHieu ?? "Đang cập nhật")
+                            <div class="product-img-promo">
+                                <a asp-controller="Thuoc" asp-action="ChiTiet" asp-route-id="@thuoc.MaThuoc">
+                                    <img src="@(string.IsNullOrEmpty(thuoc.HinhAnh) ? "/images/no-image.svg" : thuoc.HinhAnh)" 
+                                         alt="@thuoc.TenThuoc" onerror="this.src='/images/no-image.svg'">
+                                </a>
                             </div>
-                            <div class="product-price">
-                                <span class="price-current">@(((decimal?)thuoc.GiaBan ?? 0).ToString("N0"))đ</span>
-                                <span class="price-unit">/Hộp</span>
+                            <div class="product-content-promo">
+                                <a asp-controller="Thuoc" asp-action="ChiTiet" asp-route-id="@thuoc.MaThuoc" class="product-title-promo">
+                                    @thuoc.TenThuoc
+                                </a>
+                                <div class="product-price-promo">
+                                    <span class="price-current">@giaBan.ToString("N0")đ</span>
+                                    @if (dangKhuyenMai && phanTramGiam > 0)
+                                    {
+                                        <span class="price-original">@giaGoc.ToString("N0")đ</span>
+                                    }
+                                </div>
+                                @if (dangKhuyenMai && thuoc.NgayKetThucKM.HasValue)
+                                {
+                                    <div class="promo-countdown text-warning small mb-1">
+                                        <i class="fas fa-clock"></i> Đến @thuoc.NgayKetThucKM.Value.ToString("dd/MM")
+                                    </div>
+                                }
+                                @if (hetHang)
+                                {
+                                    <button class="btn-buy-now disabled" disabled>Hết hàng</button>
+                                }
+                                else
+                                {
+                                    <button onclick="themVaoGioHang(@thuoc.MaThuoc)" class="btn-buy-now">Mua ngay</button>
+                                }
                             </div>
-                        </div>
-                        <div class="product-footer">
-                            <a asp-controller="Thuoc" asp-action="ChiTiet" asp-route-id="@thuoc.MaThuoc" 
-                               class="btn btn-outline-primary btn-sm">
-                                <i class="fas fa-info-circle"></i> Chi tiết
-                            </a>
-                            <button onclick="themVaoGioHang(@thuoc.MaThuoc)" class="btn btn-primary btn-sm">
-                                <i class="fas fa-cart-plus"></i> Thêm
-                            </button>
                         </div>
                     </div>
+                }
+            }
+            else
+            {
+                <div class="col-12 text-center py-4">
+                    <p class="text-muted">Chưa có sản phẩm khuyến mãi</p>
                 </div>
             }
-        }
-        else
-        {
-            <div class="col-12">
-                <div class="alert alert-info text-center">
-                    <i class="fas fa-info-circle"></i> Chưa có sản phẩm nào. Vui lòng thêm dữ liệu vào database.
-                </div>
-            </div>
-        }
-    </div>
-    <div class="text-center mt-4">
-        <a asp-controller="Thuoc" asp-action="DanhSach" class="btn btn-outline-primary btn-lg">
-            <i class="fas fa-th-large"></i> Xem tất cả sản phẩm
-        </a>
-    </div>
-</section>
-
-<!-- Danh mục nổi bật -->
-<section class="container py-4">
-    <h3 class="section-title">
-        <i class="fas fa-list-alt"></i> Danh mục thuốc
-    </h3>
-    <div class="row g-4">
-        <div class="col-6 col-md-3">
-            <div class="category-card">
-                <div class="category-icon">
-                    <i class="fas fa-pills"></i>
-                </div>
-                <h5>Thuốc giảm đau, hạ sốt</h5>
-                <p>Paracetamol, Ibuprofen, Aspirin...</p>
-                <a asp-controller="Thuoc" asp-action="TheoNhom" asp-route-id="1">
-                    Xem thêm <i class="fas fa-arrow-right"></i>
-                </a>
-            </div>
-        </div>
-        <div class="col-6 col-md-3">
-            <div class="category-card">
-                <div class="category-icon">
-                    <i class="fas fa-capsules"></i>
-                </div>
-                <h5>Vitamin & Thực phẩm CN</h5>
-                <p>Vitamin C, D, E, Omega-3...</p>
-                <a asp-controller="Thuoc" asp-action="TheoNhom" asp-route-id="5">
-                    Xem thêm <i class="fas fa-arrow-right"></i>
-                </a>
-            </div>
-        </div>
-        <div class="col-6 col-md-3">
-            <div class="category-card">
-                <div class="category-icon">
-                    <i class="fas fa-head-side-virus"></i>
-                </div>
-                <h5>Thuốc cảm cúm</h5>
-                <p>Decolgen, Tiffy, Panadol...</p>
-                <a asp-controller="Thuoc" asp-action="TheoNhom" asp-route-id="4">
-                    Xem thêm <i class="fas fa-arrow-right"></i>
-                </a>
-            </div>
-        </div>
-        <div class="col-6 col-md-3">
-            <div class="category-card">
-                <div class="category-icon">
-                    <i class="fas fa-bacteria"></i>
-                </div>
-                <h5>Thuốc kháng sinh</h5>
-                <p>Amoxicillin, Azithromycin...</p>
-                <a asp-controller="Thuoc" asp-action="TheoNhom" asp-route-id="2">
-                    Xem thêm <i class="fas fa-arrow-right"></i>
-                </a>
-            </div>
         </div>
     </div>
 </section>
 
-<!-- Tại sao chọn chúng tôi -->
-<section class="features-section">
+<!-- Banner quảng cáo -->
+<section class="py-4">
     <div class="container">
-        <h3 class="section-title text-center mb-4" style="justify-content: center;">
-            <i class="fas fa-award"></i> Tại sao chọn Nhà Thuốc Online?
-        </h3>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <div class="banner-img-wrapper">
+                    <img src="https://nhathuoctaychihang.com/thumbs/640x210x1/upload/photo/qc1-7327.png" 
+                         alt="Kem dưỡng da cao cấp" class="banner-img">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="banner-img-wrapper">
+                    <img src="https://nhathuoctaychihang.com/thumbs/640x210x1/upload/photo/qc2-4495.png" 
+                         alt="Deal hết sẩy giảm 50%" class="banner-img">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- SẢN PHẨM MỚI -->
+<section class="py-5">
+    <div class="container">
+        <div class="section-header text-center mb-4">
+            <h2 class="section-title-main text-primary fw-bold">SẢN PHẨM MỚI</h2>
+            <p class="text-muted">Một số dòng sản phẩm mới nhất của công ty chúng tôi đang kinh doanh hiện tại</p>
+            <div class="title-divider"></div>
+        </div>
+        
+        <div class="row row-cols-2 row-cols-md-3 row-cols-lg-5 g-3">
+            @if (sanPhamMoi != null && sanPhamMoi.Any())
+            {
+                @foreach (var thuoc in sanPhamMoi.Take(10))
+                {
+                    <div class="col">
+                        <div class="product-card-compact">
+                            <div class="product-badge-new">Mới</div>
+                            <div class="product-img-compact">
+                                <a asp-controller="Thuoc" asp-action="ChiTiet" asp-route-id="@thuoc.MaThuoc">
+                                    <img src="@(string.IsNullOrEmpty(thuoc.HinhAnh) ? "/images/no-image.svg" : thuoc.HinhAnh)" 
+                                         alt="@thuoc.TenThuoc" onerror="this.src='/images/no-image.svg'">
+                                </a>
+                            </div>
+                            <div class="product-content-compact">
+                                <a asp-controller="Thuoc" asp-action="ChiTiet" asp-route-id="@thuoc.MaThuoc" class="product-title-compact">
+                                    @thuoc.TenThuoc
+                                </a>
+                                <div class="product-price-compact">@((thuoc.GiaBan ?? 0).ToString("N0"))đ</div>
+                                <div class="product-actions-compact">
+                                    <a asp-controller="Thuoc" asp-action="ChiTiet" asp-route-id="@thuoc.MaThuoc" class="btn btn-outline-primary btn-sm">
+                                        <i class="fas fa-eye me-1"></i>Chi tiết
+                                    </a>
+                                    <button onclick="themVaoGioHang(@thuoc.MaThuoc)" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-cart-plus me-1"></i>Thêm giỏ
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="col-12 text-center py-4">
+                    <p class="text-muted">Chưa có sản phẩm mới</p>
+                </div>
+            }
+        </div>
+    </div>
+</section>
+
+
+<!-- HÃY CHỌN NHÀ THUỐC TÂY -->
+<section class="py-5" style="background: linear-gradient(135deg, #1a8ccc 0%, #0d6efd 100%);">
+    <div class="container">
+        <div class="text-center text-white mb-5">
+            <h2 class="fw-bold">HÃY CHỌN NHÀ THUỐC TÂY THANH HOÀN</h2>
+            <p>Một số dòng sản phẩm bán chạy của công ty chúng tôi đang kinh doanh hiện tại</p>
+        </div>
+        
         <div class="row g-4">
-            <div class="col-6 col-md-3">
-                <div class="feature-box">
-                    <i class="fas fa-shipping-fast"></i>
-                    <h5>Giao hàng nhanh</h5>
-                    <p>Miễn phí ship đơn từ 300k<br>Giao trong 2h nội thành</p>
+            <div class="col-md-4">
+                <div class="feature-card-new text-center text-white">
+                    <div class="feature-icon-new mb-3">
+                        <i class="fas fa-headset fa-2x"></i>
+                    </div>
+                    <h5>TƯ VẤN MIỄN PHÍ</h5>
+                    <p class="small opacity-75">Chúng tôi luôn tư vấn tận tâm 24/7 để phục vụ khách hàng tốt nhất có thể</p>
                 </div>
             </div>
-            <div class="col-6 col-md-3">
-                <div class="feature-box">
-                    <i class="fas fa-certificate"></i>
-                    <h5>Chính hãng 100%</h5>
-                    <p>Cam kết thuốc chính hãng<br>Nguồn gốc rõ ràng</p>
+            <div class="col-md-4">
+                <div class="feature-card-new text-center text-white">
+                    <div class="feature-icon-new mb-3">
+                        <i class="fas fa-truck fa-2x"></i>
+                    </div>
+                    <h5>VẬN CHUYỂN NHANH</h5>
+                    <p class="small opacity-75">Đội ngũ giao hàng tận nơi luôn tận tâm vào hết sức, với những hóa đơn đặt hàng</p>
                 </div>
             </div>
-            <div class="col-6 col-md-3">
-                <div class="feature-box">
-                    <i class="fas fa-user-md"></i>
-                    <h5>Tư vấn dược sĩ</h5>
-                    <p>Đội ngũ dược sĩ chuyên nghiệp<br>Hỗ trợ 24/7</p>
+            <div class="col-md-4">
+                <div class="feature-card-new text-center text-white">
+                    <div class="feature-icon-new mb-3">
+                        <i class="fas fa-heart fa-2x"></i>
+                    </div>
+                    <h5>PHỤC VỤ TẬN TÂM</h5>
+                    <p class="small opacity-75">Chuyên bán trực tiếp và online đa kênh, khách hàng an tâm khi đến với nhà thuốc</p>
                 </div>
             </div>
-            <div class="col-6 col-md-3">
-                <div class="feature-box">
-                    <i class="fas fa-undo-alt"></i>
-                    <h5>Đổi trả dễ dàng</h5>
-                    <p>Đổi trả trong 30 ngày<br>Hoàn tiền nhanh chóng</p>
+        </div>
+        
+        <div class="row g-4 mt-3">
+            <div class="col-md-6">
+                <div class="feature-card-new text-center text-white">
+                    <div class="feature-icon-new mb-3">
+                        <i class="fas fa-tags fa-2x"></i>
+                    </div>
+                    <h5>GIÁ CẢ HỢP LÝ</h5>
+                    <p class="small opacity-75">Giá cả đảm bảo đúng với giá cả niêm yết tại nhà thuốc</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="bg-white rounded-3 p-4">
+                    <h5 class="text-primary mb-3">CHÍNH SÁCH</h5>
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Chính sách bảo vệ thông tin cá nhân của người tiêu dùng</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Phương thức thanh toán</li>
+                        <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Giới thiệu điều khoản dịch vụ</li>
+                    </ul>
                 </div>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Thương hiệu nổi bật -->
-<section class="container py-4">
-    <h3 class="section-title">
-        <i class="fas fa-building"></i> Thương hiệu nổi bật
-    </h3>
-    <div class="row g-3 align-items-center">
-        <div class="col-4 col-md-2">
-            <div class="bg-white p-3 rounded text-center shadow-sm">
-                <img src="https://via.placeholder.com/100x50?text=DHG" alt="DHG Pharma" class="img-fluid" style="max-height: 40px;">
+<!-- GÓC SỨC KHỎE & CHỨNG CHỈ -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row g-4">
+            <!-- Góc sức khỏe -->
+            <div class="col-lg-6">
+                <h4 class="text-primary fw-bold mb-3">GÓC SỨC KHỎE</h4>
+                <p class="text-muted small mb-4">Chia sẻ kiến thức y tế, sức khỏe và chăm sóc bản thân</p>
+                
+                @if (baiViets != null && baiViets.Any())
+                {
+                    <div class="row g-3">
+                        <!-- Bài viết lớn bên trái -->
+                        <div class="col-5">
+                            @if (baiVietNoiBat != null)
+                            {
+                                <div class="health-main-article">
+                                    <a asp-controller="BaiViet" asp-action="ChiTiet" asp-route-id="@baiVietNoiBat.MaBaiViet">
+                                        <div class="health-main-img">
+                                            @if (!string.IsNullOrEmpty(baiVietNoiBat.HinhAnh))
+                                            {
+                                                <img src="@baiVietNoiBat.HinhAnh" alt="@baiVietNoiBat.TieuDe" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                                <div class="health-main-placeholder" style="display:none;">
+                                                    <i class="fas fa-heartbeat fa-3x text-primary"></i>
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                <div class="health-main-placeholder">
+                                                    <i class="fas fa-heartbeat fa-3x text-primary"></i>
+                                                </div>
+                                            }
+                                        </div>
+                                    </a>
+                                    <h6 class="mt-2">@baiVietNoiBat.TieuDe</h6>
+                                    <p class="text-muted small">@(baiVietNoiBat.MoTaNgan?.Length > 80 ? baiVietNoiBat.MoTaNgan.Substring(0, 80) + "..." : baiVietNoiBat.MoTaNgan)</p>
+                                    <a asp-controller="BaiViet" asp-action="GocSucKhoe" class="btn btn-primary btn-sm">Xem Thêm</a>
+                                </div>
+                            }
+                        </div>
+                        
+                        <!-- Danh sách bài viết nhỏ bên phải - Auto scroll -->
+                        <div class="col-7">
+                            <div class="health-list-wrapper">
+                                <div class="health-list-scroll" id="healthListScroll">
+                                    @if (baiVietKhac != null)
+                                    {
+                                        @foreach (var bv in baiVietKhac)
+                                        {
+                                            <a asp-controller="BaiViet" asp-action="ChiTiet" asp-route-id="@bv.MaBaiViet" class="health-small-item">
+                                                <div class="health-small-img">
+                                                    @if (!string.IsNullOrEmpty(bv.HinhAnh))
+                                                    {
+                                                        <img src="@bv.HinhAnh" alt="@bv.TieuDe" onerror="this.src='/images/no-image.svg'">
+                                                    }
+                                                    else
+                                                    {
+                                                        <div class="health-small-placeholder">
+                                                            <i class="fas fa-newspaper text-primary"></i>
+                                                        </div>
+                                                    }
+                                                </div>
+                                                <div class="health-small-content">
+                                                    <h6>@(bv.TieuDe.Length > 35 ? bv.TieuDe.Substring(0, 35) + "..." : bv.TieuDe)</h6>
+                                                    <div class="health-small-date">
+                                                        <i class="far fa-calendar-alt text-primary"></i>
+                                                        <span class="text-primary">@(bv.NgayDang?.ToString("dd/MM/yyyy") ?? "-")</span>
+                                                    </div>
+                                                    <p class="small text-muted mb-0">@(bv.MoTaNgan?.Length > 60 ? bv.MoTaNgan.Substring(0, 60) + "..." : bv.MoTaNgan)</p>
+                                                </div>
+                                            </a>
+                                        }
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-4 bg-white rounded shadow-sm">
+                        <i class="fas fa-newspaper fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">Chưa có bài viết nào</p>
+                        <a asp-controller="BaiViet" asp-action="GocSucKhoe" class="btn btn-outline-primary btn-sm">Xem tất cả</a>
+                    </div>
+                }
             </div>
-        </div>
-        <div class="col-4 col-md-2">
-            <div class="bg-white p-3 rounded text-center shadow-sm">
-                <img src="https://via.placeholder.com/100x50?text=Sanofi" alt="Sanofi" class="img-fluid" style="max-height: 40px;">
-            </div>
-        </div>
-        <div class="col-4 col-md-2">
-            <div class="bg-white p-3 rounded text-center shadow-sm">
-                <img src="https://via.placeholder.com/100x50?text=Pfizer" alt="Pfizer" class="img-fluid" style="max-height: 40px;">
-            </div>
-        </div>
-        <div class="col-4 col-md-2">
-            <div class="bg-white p-3 rounded text-center shadow-sm">
-                <img src="https://via.placeholder.com/100x50?text=Abbott" alt="Abbott" class="img-fluid" style="max-height: 40px;">
-            </div>
-        </div>
-        <div class="col-4 col-md-2">
-            <div class="bg-white p-3 rounded text-center shadow-sm">
-                <img src="https://via.placeholder.com/100x50?text=Bayer" alt="Bayer" class="img-fluid" style="max-height: 40px;">
-            </div>
-        </div>
-        <div class="col-4 col-md-2">
-            <div class="bg-white p-3 rounded text-center shadow-sm">
-                <img src="https://via.placeholder.com/100x50?text=GSK" alt="GSK" class="img-fluid" style="max-height: 40px;">
+            
+            <!-- Chứng chỉ chứng nhận -->
+            <div class="col-lg-6">
+                <h4 class="text-primary fw-bold mb-3">CHỨNG CHỈ CHỨNG NHẬN</h4>
+                <p class="text-muted small mb-4">Nhà thuốc được cấp phép hoạt động theo quy định của Bộ Y tế</p>
+                
+                <div class="certificate-box text-center p-4 bg-white rounded shadow-sm">
+                    <div class="certificate-placeholder">
+                        <i class="fas fa-certificate fa-4x text-warning mb-3"></i>
+                        <h5 class="text-primary">GIẤY CHỨNG NHẬN</h5>
+                        <p class="text-muted small">Đủ điều kiện kinh doanh dược phẩm</p>
+                        <p class="text-muted small mb-0">Số: xxx/ĐKKD - Ngày cấp: xx/xx/xxxx</p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </section>
 
-@section Scripts {
-<script>
-    // Countdown Timer
-    function updateCountdown() {
-        const now = new Date();
-        const endOfDay = new Date();
-        endOfDay.setHours(23, 59, 59, 999);
+<!-- THƯƠNG HIỆU ĐỐI TÁC -->
+<section class="py-5 bg-white border-top">
+    <div class="container">
+        <div class="section-header text-center mb-4">
+            <h2 class="section-title-main text-primary fw-bold">THƯƠNG HIỆU ĐỐI TÁC</h2>
+            <p class="text-muted">Các thương hiệu uy tín hàng đầu mà chúng tôi hợp tác</p>
+            <div class="title-divider"></div>
+        </div>
         
-        const diff = endOfDay - now;
-        
-        const hours = Math.floor(diff / (1000 * 60 * 60));
-        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-        
-        document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
-        document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
-        document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
-    }
-    
-    setInterval(updateCountdown, 1000);
-    updateCountdown();
+        <div class="brand-slider-wrapper">
+            <div class="brand-slider" id="brandSlider">
+                @if (thuongHieus != null && thuongHieus.Any())
+                {
+                    @foreach (var th in thuongHieus)
+                    {
+                        <a asp-controller="ThuongHieu" asp-action="ChiTiet" asp-route-id="@th.MaThuongHieu" class="brand-item">
+                            <div class="brand-logo-box">
+                                @if (!string.IsNullOrEmpty(th.HinhAnh))
+                                {
+                                    <img src="@th.HinhAnh" alt="@th.TenThuongHieu" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                    <div class="brand-placeholder" style="display:none;">
+                                        <i class="fas fa-building"></i>
+                                        <span>@th.TenThuongHieu</span>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div class="brand-placeholder">
+                                        <i class="fas fa-building"></i>
+                                        <span>@th.TenThuongHieu</span>
+                                    </div>
+                                }
+                            </div>
+                            <div class="brand-name">@th.TenThuongHieu</div>
+                        </a>
+                    }
+                }
+                else
+                {
+                    <div class="brand-item"><div class="brand-logo-box"><div class="brand-placeholder"><i class="fas fa-building"></i><span>DHG Pharma</span></div></div><div class="brand-name">DHG Pharma</div></div>
+                    <div class="brand-item"><div class="brand-logo-box"><div class="brand-placeholder"><i class="fas fa-building"></i><span>Sanofi</span></div></div><div class="brand-name">Sanofi</div></div>
+                    <div class="brand-item"><div class="brand-logo-box"><div class="brand-placeholder"><i class="fas fa-building"></i><span>Abbott</span></div></div><div class="brand-name">Abbott</div></div>
+                    <div class="brand-item"><div class="brand-logo-box"><div class="brand-placeholder"><i class="fas fa-building"></i><span>Pfizer</span></div></div><div class="brand-name">Pfizer</div></div>
+                    <div class="brand-item"><div class="brand-logo-box"><div class="brand-placeholder"><i class="fas fa-building"></i><span>Traphaco</span></div></div><div class="brand-name">Traphaco</div></div>
+                    <div class="brand-item"><div class="brand-logo-box"><div class="brand-placeholder"><i class="fas fa-building"></i><span>Pharbaco</span></div></div><div class="brand-name">Pharbaco</div></div>
+                }
+            </div>
+            <button class="brand-nav brand-prev" onclick="scrollBrands(-1)"><i class="fas fa-chevron-left"></i></button>
+            <button class="brand-nav brand-next" onclick="scrollBrands(1)"><i class="fas fa-chevron-right"></i></button>
+        </div>
+    </div>
+</section>
 
-    // Xem nhanh sản phẩm
-    function xemNhanh(maThuoc) {
-        window.location.href = '/Thuoc/ChiTiet/' + maThuoc;
-    }
-</script>
+
+<style>
+/* Hero Slider Full */
+.hero-slider-full {
+    margin-bottom: 0;
+    position: relative;
 }
+.hero-slider-full .carousel-control-prev,
+.hero-slider-full .carousel-control-next {
+    width: 50px;
+    height: 50px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0,0,0,0.40);
+    border-radius: 50%;
+    opacity: 1;
+}
+.hero-slider-full .carousel-control-prev {
+    left: 20px;
+}
+.hero-slider-full .carousel-control-next {
+    right: 20px;
+}
+.hero-slider-full .carousel-control-prev:hover,
+.hero-slider-full .carousel-control-next:hover {
+    background: rgba(255,255,255,0.5);
+}
+.hero-slider-full .carousel-control-prev-icon,
+.hero-slider-full .carousel-control-next-icon {
+    width: 20px;
+    height: 20px;
+}
+.hero-slide-full {
+    min-height: 450px;
+    display: flex;
+    align-items: center;
+    position: relative;
+}
+.hero-slide-full .container {
+    padding-left: 80px;
+    padding-right: 80px;
+}
+/* Hero Content Box */
+.hero-content-box {
+    background: rgba(255,255,255,0.95);
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+}
+.min-vh-50 {
+    min-height: 450px;
+}
+.hero-img {
+    max-height: 350px;
+    animation: float 3s ease-in-out infinite;
+}
+@@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+}
+@@media (max-width: 991px) {
+    .hero-slide-full, .min-vh-50 {
+        min-height: 350px;
+    }
+    .hero-slide-full .container {
+        padding-left: 60px;
+        padding-right: 60px;
+    }
+    .hero-slider-full .carousel-control-prev {
+        left: 10px;
+    }
+    .hero-slider-full .carousel-control-next {
+        right: 10px;
+    }
+}
+
+/* Section Title */
+.section-title-main {
+    font-size: 1.8rem;
+    margin-bottom: 10px;
+}
+.title-divider {
+    width: 100px;
+    height: 3px;
+    background: linear-gradient(90deg, #1a8ccc, #0d6efd);
+    margin: 15px auto;
+    border-radius: 2px;
+}
+
+/* Product Card Compact - 5 columns */
+.product-card-compact {
+    background: #fff;
+    border-radius: 8px;
+    padding: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    position: relative;
+    transition: all 0.3s;
+    height: 100%;
+}
+.product-card-compact:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.12);
+}
+.product-badge-hot, .product-badge-new {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: bold;
+    z-index: 1;
+}
+.product-badge-hot {
+    background: #dc3545;
+    color: #fff;
+}
+.product-badge-new {
+    background: #28a745;
+    color: #fff;
+}
+.product-img-compact {
+    text-align: center;
+    padding: 5px;
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.product-img-compact img {
+    max-height: 100px;
+    max-width: 100%;
+    object-fit: contain;
+}
+.product-content-compact {
+    padding-top: 8px;
+}
+.product-title-compact {
+    display: block;
+    color: #333;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 500;
+    height: 32px;
+    overflow: hidden;
+    line-height: 1.3;
+    margin-bottom: 5px;
+}
+.product-title-compact:hover {
+    color: #0d6efd;
+}
+.product-price-compact {
+    color: #dc3545;
+    font-weight: bold;
+    font-size: 14px;
+    margin-bottom: 8px;
+}
+.product-actions-compact {
+    display: flex;
+    gap: 5px;
+}
+.product-actions-compact .btn {
+    flex: 1;
+    padding: 5px 8px;
+    font-size: 12px;
+}
+
+/* Product Card New */
+.product-card-new {
+    background: #fff;
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    position: relative;
+    transition: all 0.3s;
+    height: 100%;
+}
+.product-card-new:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+}
+.product-badge-hot {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: #dc3545;
+    color: #fff;
+    padding: 3px 10px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: bold;
+}
+.product-img {
+    text-align: center;
+    padding: 10px;
+    height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.product-img img {
+    max-height: 130px;
+    max-width: 100%;
+    object-fit: contain;
+}
+.product-content {
+    padding-top: 10px;
+}
+.product-title {
+    display: block;
+    color: #333;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    height: 40px;
+    overflow: hidden;
+    line-height: 1.4;
+}
+.product-title:hover {
+    color: #0d6efd;
+}
+.product-price-new {
+    color: #dc3545;
+    font-weight: bold;
+    font-size: 16px;
+    margin-top: 8px;
+}
+
+/* 5 columns */
+.col-lg-2-4 {
+    flex: 0 0 auto;
+    width: 20%;
+}
+@@media (max-width: 991px) {
+    .col-lg-2-4 { width: 33.333%; }
+}
+@@media (max-width: 575px) {
+    .col-lg-2-4 { width: 50%; }
+}
+
+/* Feature Card */
+.feature-icon-new {
+    width: 60px;
+    height: 60px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Promo Section */
+.promo-section {
+    background: linear-gradient(180deg, #e8f4fc 0%, #d4ecf9 100%);
+}
+
+/* Promo Tabs */
+.promo-tabs-wrapper {
+    margin-bottom: 20px;
+}
+.promo-tabs {
+    background: transparent;
+}
+.promo-tab {
+    padding: 10px 20px;
+    border: 2px solid #1a8ccc;
+    border-radius: 25px;
+    background: #fff;
+    color: #1a8ccc;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+.promo-tab:hover, .promo-tab.active {
+    background: #1a8ccc;
+    color: #fff;
+}
+
+/* Product Card Promo */
+.product-card-promo {
+    background: #fff;
+    border-radius: 10px;
+    padding: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    position: relative;
+    transition: all 0.3s;
+    height: 100%;
+}
+.product-card-promo:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 20px rgba(0,0,0,0.12);
+}
+.promo-badges {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    z-index: 1;
+}
+.badge-hot {
+    background: #ff6b35;
+    color: #fff;
+    padding: 3px 10px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: bold;
+}
+.badge-discount {
+    background: #dc3545;
+    color: #fff;
+    padding: 3px 10px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: bold;
+}
+.product-img-promo {
+    text-align: center;
+    padding: 10px;
+    height: 140px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.product-img-promo img {
+    max-height: 120px;
+    max-width: 100%;
+    object-fit: contain;
+}
+.product-content-promo {
+    padding-top: 10px;
+}
+.product-title-promo {
+    display: block;
+    color: #333;
+    text-decoration: none;
+    font-size: 13px;
+    font-weight: 500;
+    height: 38px;
+    overflow: hidden;
+    line-height: 1.4;
+    margin-bottom: 8px;
+}
+.product-title-promo:hover {
+    color: #1a8ccc;
+}
+.product-price-promo {
+    margin-bottom: 10px;
+}
+.price-current {
+    color: #dc3545;
+    font-weight: bold;
+    font-size: 15px;
+    margin-right: 8px;
+}
+.price-original {
+    color: #999;
+    font-size: 12px;
+    text-decoration: line-through;
+}
+.btn-buy-now {
+    display: block;
+    width: 100%;
+    padding: 8px 15px;
+    background: #1a8ccc;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+.btn-buy-now:hover {
+    background: #0d6efd;
+}
+
+/* Banner Image */
+.banner-img-wrapper {
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 3px 15px rgba(0,0,0,0.1);
+}
+.banner-img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    transition: transform 0.4s ease, filter 0.3s ease;
+    cursor: pointer;
+}
+.banner-img-wrapper:hover .banner-img {
+    transform: scale(1.05);
+    filter: brightness(1.1);
+}
+
+/* Brand Slider */
+.brand-slider-wrapper {
+    position: relative;
+    padding: 0 50px;
+}
+.brand-slider {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    padding: 10px 0;
+    cursor: grab;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+.brand-slider::-webkit-scrollbar {
+    display: none;
+}
+.brand-slider.dragging {
+    cursor: grabbing;
+    scroll-behavior: auto;
+}
+.brand-item {
+    flex: 0 0 auto;
+    width: 150px;
+    text-align: center;
+    text-decoration: none;
+    transition: transform 0.3s;
+}
+.brand-item:hover {
+    transform: translateY(-5px);
+}
+.brand-logo-box {
+    width: 150px;
+    height: 100px;
+    border: 2px solid #e9ecef;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+    overflow: hidden;
+    transition: all 0.3s;
+}
+.brand-logo-box:hover {
+    border-color: #1a8ccc;
+    box-shadow: 0 5px 20px rgba(26,140,204,0.15);
+}
+.brand-logo-box img {
+    max-width: 120px;
+    max-height: 80px;
+    object-fit: contain;
+}
+.brand-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #6c757d;
+}
+.brand-placeholder i {
+    font-size: 2rem;
+    margin-bottom: 5px;
+    color: #1a8ccc;
+}
+.brand-placeholder span {
+    font-size: 11px;
+    font-weight: 600;
+}
+.brand-name {
+    margin-top: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #333;
+}
+.brand-nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 50%;
+    background: #1a8ccc;
+    color: #fff;
+    cursor: pointer;
+    z-index: 10;
+    transition: all 0.3s;
+}
+.brand-nav:hover {
+    background: #0d6efd;
+    transform: translateY(-50%) scale(1.1);
+}
+.brand-prev { left: 0; }
+.brand-next { right: 0; }
+
+@@media (max-width: 768px) {
+    .brand-slider-wrapper { padding: 0 35px; }
+    .brand-item { width: 120px; }
+    .brand-logo-box { width: 120px; height: 80px; }
+    .brand-nav { width: 30px; height: 30px; font-size: 12px; }
+}
+
+/* Health Main Article */
+.health-main-article {
+    background: #fff;
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+.health-main-img {
+    width: 100%;
+    height: 180px;
+    border-radius: 8px;
+    overflow: hidden;
+    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+}
+.health-main-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.health-main-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+}
+.health-main-article h6 {
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.4;
+    margin-bottom: 8px;
+}
+
+/* Health List Scroll */
+.health-list-wrapper {
+    height: 350px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    position: relative;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+.health-list-wrapper::-webkit-scrollbar {
+    display: none;
+}
+.health-list-scroll {
+    animation: scrollUp 15s linear infinite;
+}
+.health-list-scroll:hover {
+    animation-play-state: paused;
+}
+@@keyframes scrollUp {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-50%); }
+}
+.health-small-item {
+    display: flex;
+    gap: 12px;
+    padding: 10px;
+    background: #fff;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    transition: all 0.3s;
+}
+.health-small-item:hover {
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+.health-small-img {
+    width: 100px;
+    height: 80px;
+    border-radius: 8px;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: #f5f5f5;
+}
+.health-small-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.health-small-content {
+    flex: 1;
+}
+.health-small-content h6 {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #333;
+    line-height: 1.3;
+}
+.health-small-date {
+    font-size: 12px;
+    margin-bottom: 5px;
+}
+.health-small-date i {
+    margin-right: 5px;
+}
+.health-small-placeholder {
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+a.health-small-item {
+    text-decoration: none;
+    color: inherit;
+}
+.certificate-placeholder {
+    padding: 20px;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var wrapper = document.querySelector('.health-list-wrapper');
+    var scrollContainer = document.getElementById('healthListScroll');
+    
+    if (scrollContainer && wrapper) {
+        // Duplicate content for infinite scroll
+        var content = scrollContainer.innerHTML;
+        scrollContainer.innerHTML = content + content;
+        
+        // Drag to scroll
+        var isDown = false;
+        var startY;
+        var scrollTop;
+        
+        wrapper.style.overflow = 'hidden';
+        wrapper.style.cursor = 'grab';
+        
+        wrapper.addEventListener('mousedown', function(e) {
+            isDown = true;
+            wrapper.style.cursor = 'grabbing';
+            scrollContainer.style.animation = 'none';
+            startY = e.pageY - wrapper.offsetTop;
+            scrollTop = wrapper.scrollTop;
+            e.preventDefault();
+        });
+        
+        wrapper.addEventListener('mouseleave', function() {
+            isDown = false;
+            wrapper.style.cursor = 'grab';
+        });
+        
+        wrapper.addEventListener('mouseup', function() {
+            isDown = false;
+            wrapper.style.cursor = 'grab';
+            // Resume animation after 2 seconds
+            setTimeout(function() {
+                if (!isDown) {
+                    scrollContainer.style.animation = 'scrollUp 15s linear infinite';
+                }
+            }, 2000);
+        });
+        
+        wrapper.addEventListener('mousemove', function(e) {
+            if (!isDown) return;
+            e.preventDefault();
+            var y = e.pageY - wrapper.offsetTop;
+            var walk = (y - startY) * 2;
+            wrapper.scrollTop = scrollTop - walk;
+        });
+        
+        // Touch support for mobile
+        wrapper.addEventListener('touchstart', function(e) {
+            scrollContainer.style.animation = 'none';
+            startY = e.touches[0].pageY - wrapper.offsetTop;
+            scrollTop = wrapper.scrollTop;
+        });
+        
+        wrapper.addEventListener('touchmove', function(e) {
+            var y = e.touches[0].pageY - wrapper.offsetTop;
+            var walk = (y - startY) * 2;
+            wrapper.scrollTop = scrollTop - walk;
+        });
+        
+        wrapper.addEventListener('touchend', function() {
+            setTimeout(function() {
+                scrollContainer.style.animation = 'scrollUp 15s linear infinite';
+            }, 2000);
+        });
+    }
+});
+
+// Brand Slider - Drag to scroll
+document.addEventListener('DOMContentLoaded', function() {
+    var slider = document.getElementById('brandSlider');
+    if (!slider) return;
+    
+    var isDown = false;
+    var startX;
+    var scrollLeft;
+    
+    slider.addEventListener('mousedown', function(e) {
+        isDown = true;
+        slider.classList.add('dragging');
+        startX = e.pageX - slider.offsetLeft;
+        scrollLeft = slider.scrollLeft;
+        e.preventDefault();
+    });
+    
+    slider.addEventListener('mouseleave', function() {
+        isDown = false;
+        slider.classList.remove('dragging');
+    });
+    
+    slider.addEventListener('mouseup', function() {
+        isDown = false;
+        slider.classList.remove('dragging');
+    });
+    
+    slider.addEventListener('mousemove', function(e) {
+        if (!isDown) return;
+        e.preventDefault();
+        var x = e.pageX - slider.offsetLeft;
+        var walk = (x - startX) * 2;
+        slider.scrollLeft = scrollLeft - walk;
+    });
+    
+    // Touch support
+    slider.addEventListener('touchstart', function(e) {
+        startX = e.touches[0].pageX - slider.offsetLeft;
+        scrollLeft = slider.scrollLeft;
+    });
+    
+    slider.addEventListener('touchmove', function(e) {
+        var x = e.touches[0].pageX - slider.offsetLeft;
+        var walk = (x - startX) * 2;
+        slider.scrollLeft = scrollLeft - walk;
+    });
+});
+
+function scrollBrands(direction) {
+    var slider = document.getElementById('brandSlider');
+    if (slider) {
+        var scrollAmount = 200;
+        slider.scrollBy({ left: direction * scrollAmount, behavior: 'smooth' });
+    }
+}
+</script>

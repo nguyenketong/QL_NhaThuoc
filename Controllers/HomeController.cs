@@ -1,70 +1,114 @@
-using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
-using QL_NhaThuoc.Models;
-using System.Data;
+using Microsoft.EntityFrameworkCore;
+using QL_NhaThuoc.Data;
 
 namespace QL_NhaThuoc.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
-        private readonly string _connectionString;
+        private readonly QL_NhaThuocDbContext _context;
 
-        public HomeController(ILogger<HomeController> logger, IConfiguration configuration)
+        public HomeController(QL_NhaThuocDbContext context)
         {
-            _logger = logger;
-            _connectionString = configuration.GetConnectionString("DefaultConnection")!;
+            _context = context;
         }
 
-        // Trang chu - Hien thi danh sach thuoc
+        // GET: Home/Index - EF + LINQ
         public async Task<IActionResult> Index()
         {
-            var danhSachThuoc = new List<dynamic>();
+            // Sản phẩm mới (chỉ lấy sản phẩm được đánh dấu IsNew = true)
+            var sanPhamMoi = await _context.THUOC
+                .Include(t => t.NhomThuoc)
+                .Include(t => t.ThuongHieu)
+                .Where(t => t.IsNew == true && t.IsActive != false)
+                .OrderByDescending(t => t.NgayTao ?? DateTime.MinValue)
+                .Take(10)
+                .ToListAsync();
 
-            using var connection = new SqlConnection(_connectionString);
-            await connection.OpenAsync();
+            // Sản phẩm Hot/Khuyến mãi (chỉ lấy sản phẩm được đánh dấu IsHot = true hoặc đang khuyến mãi)
+            var sanPhamHot = await _context.THUOC
+                .Include(t => t.NhomThuoc)
+                .Include(t => t.ThuongHieu)
+                .Where(t => t.IsActive != false && 
+                    (t.IsHot == true || 
+                    (t.PhanTramGiam > 0 && 
+                     (t.NgayBatDauKM == null || t.NgayBatDauKM <= DateTime.Now) &&
+                     (t.NgayKetThucKM == null || t.NgayKetThucKM >= DateTime.Now))))
+                .OrderByDescending(t => t.PhanTramGiam ?? 0)
+                .ThenByDescending(t => t.MaThuoc)
+                .Take(10)
+                .ToListAsync();
 
-            using var cmd = new SqlCommand("sp_Home_ThuocMoiNhat", connection);
-            cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("@SoLuong", 12);
+            // Sản phẩm bán chạy (chỉ tính đơn hàng thành công)
+            var sanPhamBanChay = await _context.CHI_TIET_DON_HANG
+                .Include(ct => ct.DonHang)
+                .Where(ct => ct.DonHang != null && 
+                    (ct.DonHang.TrangThai == "Dang giao" || ct.DonHang.TrangThai == "Hoan thanh"))
+                .GroupBy(ct => ct.MaThuoc)
+                .Select(g => new { MaThuoc = g.Key, TongBan = g.Sum(x => x.SoLuong) })
+                .OrderByDescending(x => x.TongBan)
+                .Take(10)
+                .Join(_context.THUOC.Include(t => t.ThuongHieu).Where(t => t.IsActive != false),
+                    ct => ct.MaThuoc,
+                    t => t.MaThuoc,
+                    (ct, t) => t)
+                .ToListAsync();
 
-            using var reader = await cmd.ExecuteReaderAsync();
-            while (await reader.ReadAsync())
+            // Nếu chưa có đơn hàng thành công, lấy sản phẩm ngẫu nhiên
+            if (!sanPhamBanChay.Any())
             {
-                danhSachThuoc.Add(new
-                {
-                    MaThuoc = reader.GetInt32(reader.GetOrdinal("MaThuoc")),
-                    TenThuoc = reader.GetString(reader.GetOrdinal("TenThuoc")),
-                    GiaBan = reader.IsDBNull(reader.GetOrdinal("GiaBan")) ? (decimal?)null : reader.GetDecimal(reader.GetOrdinal("GiaBan")),
-                    HinhAnh = reader.IsDBNull(reader.GetOrdinal("HinhAnh")) ? "" : reader.GetString(reader.GetOrdinal("HinhAnh")),
-                    MoTa = reader.IsDBNull(reader.GetOrdinal("MoTa")) ? "" : reader.GetString(reader.GetOrdinal("MoTa")),
-                    TenNhomThuoc = reader.IsDBNull(reader.GetOrdinal("TenNhomThuoc")) ? "" : reader.GetString(reader.GetOrdinal("TenNhomThuoc")),
-                    TenThuongHieu = reader.IsDBNull(reader.GetOrdinal("TenThuongHieu")) ? "" : reader.GetString(reader.GetOrdinal("TenThuongHieu")),
-                    TenNuocSX = reader.IsDBNull(reader.GetOrdinal("TenNuocSX")) ? "" : reader.GetString(reader.GetOrdinal("TenNuocSX"))
-                });
+                sanPhamBanChay = await _context.THUOC
+                    .Include(t => t.ThuongHieu)
+                    .Where(t => t.IsActive != false)
+                    .OrderBy(t => Guid.NewGuid())
+                    .Take(10)
+                    .ToListAsync();
             }
 
-            return View(danhSachThuoc);
+            // Danh sách nhóm thuốc
+            var nhomThuocs = await _context.NHOM_THUOC
+                .OrderBy(n => n.TenNhomThuoc)
+                .Take(8)
+                .ToListAsync();
+
+            // Danh sách thương hiệu
+            var thuongHieus = await _context.THUONG_HIEU
+                .OrderBy(th => th.TenThuongHieu)
+                .Take(8)
+                .ToListAsync();
+
+            // Bài viết cho Góc sức khỏe
+            var baiViets = await _context.BAI_VIET
+                .Where(b => b.IsActive == true)
+                .OrderByDescending(b => b.NgayDang)
+                .Take(10)
+                .ToListAsync();
+
+            ViewBag.SanPhamMoi = sanPhamMoi;
+            ViewBag.SanPhamHot = sanPhamHot;
+            ViewBag.SanPhamBanChay = sanPhamBanChay;
+            ViewBag.NhomThuocs = nhomThuocs;
+            ViewBag.ThuongHieus = thuongHieus;
+            ViewBag.BaiViets = baiViets;
+
+            return View(sanPhamMoi);
         }
 
-        // Gioi thieu
+        // GET: Home/GioiThieu
         public IActionResult GioiThieu()
         {
             return View();
         }
 
-        // Lien he
+        // GET: Home/LienHe
         public IActionResult LienHe()
         {
             return View();
         }
 
-        // Trang loi
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            return View();
         }
     }
 }

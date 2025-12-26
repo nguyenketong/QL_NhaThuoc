@@ -7,8 +7,9 @@
     var selectedDoiTuongs = ViewBag.SelectedDoiTuongs as List<int> ?? new List<int>();
 }
 
-<form asp-action="Edit" method="post">
+<form asp-action="Edit" method="post" enctype="multipart/form-data">
     <input type="hidden" asp-for="MaThuoc" />
+    <input type="hidden" asp-for="NgayTao" />
     <div class="row">
         <!-- Thông tin cơ bản -->
         <div class="col-lg-8">
@@ -42,20 +43,91 @@
                                 <option value="">-- Chọn --</option>
                             </select>
                         </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Giá bán</label>
-                            <div class="input-group">
-                                <input asp-for="GiaBan" type="number" class="form-control" />
-                                <span class="input-group-text">VNĐ</span>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Hình ảnh (URL)</label>
-                            <input asp-for="HinhAnh" class="form-control" />
-                        </div>
                         <div class="col-12">
                             <label class="form-label">Mô tả</label>
                             <textarea asp-for="MoTa" class="form-control" rows="3"></textarea>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Hình ảnh</label>
+                            <input type="file" name="hinhAnhFile" class="form-control" accept="image/*" />
+                            <small class="text-muted">Hoặc nhập URL:</small>
+                            <input asp-for="HinhAnh" class="form-control mt-1" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Giá & Kho -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-success text-white">
+                    <i class="fas fa-dollar-sign"></i> Giá & Tồn kho
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Giá bán <span class="text-danger">*</span></label>
+                            <div class="input-group">
+                                <input asp-for="GiaBan" type="number" class="form-control" required />
+                                <span class="input-group-text">đ</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Số lượng tồn</label>
+                            <input asp-for="SoLuongTon" type="number" class="form-control" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Số lượng đã bán</label>
+                            <input asp-for="SoLuongDaBan" type="number" class="form-control" readonly />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Khuyến mãi -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-danger text-white">
+                    <i class="fas fa-tags"></i> Khuyến mãi
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Giá gốc (trước KM)</label>
+                            <div class="input-group">
+                                <input asp-for="GiaGoc" type="number" class="form-control" />
+                                <span class="input-group-text">đ</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Phần trăm giảm</label>
+                            <div class="input-group">
+                                <input asp-for="PhanTramGiam" type="number" class="form-control" min="0" max="100" />
+                                <span class="input-group-text">%</span>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Ngày bắt đầu KM</label>
+                            <input asp-for="NgayBatDauKM" type="date" class="form-control" />
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Ngày kết thúc KM</label>
+                            <input asp-for="NgayKetThucKM" type="date" class="form-control" />
+                        </div>
+                        <div class="col-md-8">
+                            <label class="form-label">Đánh dấu sản phẩm</label>
+                            <div class="d-flex gap-4 mt-2">
+                                <div class="form-check">
+                                    <input type="checkbox" name="IsHot" value="true" class="form-check-input" id="chkIsHot" @(Model.IsHot == true ? "checked" : "") />
+                                    <label class="form-check-label text-danger fw-bold" for="chkIsHot">🔥 HOT</label>
+                                </div>
+                                <div class="form-check">
+                                    <input type="checkbox" name="IsNew" value="true" class="form-check-input" id="chkIsNew" @(Model.IsNew == true ? "checked" : "") />
+                                    <label class="form-check-label text-success fw-bold" for="chkIsNew">🆕 MỚI</label>
+                                </div>
+                                <div class="form-check">
+                                    <input type="checkbox" name="IsActive" value="true" class="form-check-input" id="chkIsActive" @(Model.IsActive != false ? "checked" : "") />
+                                    <label class="form-check-label text-primary fw-bold" for="chkIsActive">✅ Kinh doanh</label>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -230,6 +302,41 @@
 
 @section Scripts {
 <script>
+    // Lấy các input
+    const giaBanInput = document.getElementById('GiaBan');
+    const giaGocInput = document.getElementById('GiaGoc');
+    const phanTramGiamInput = document.getElementById('PhanTramGiam');
+
+    // Khi thay đổi Giá gốc → tính Giá bán (nếu có phần trăm giảm)
+    giaGocInput.addEventListener('input', function() {
+        const giaGoc = parseFloat(this.value) || 0;
+        const phanTram = parseFloat(phanTramGiamInput.value) || 0;
+        if (giaGoc > 0 && phanTram > 0) {
+            const giaBan = Math.round(giaGoc * (100 - phanTram) / 100);
+            giaBanInput.value = giaBan;
+        }
+    });
+
+    // Khi thay đổi Phần trăm giảm → tính Giá bán (nếu có giá gốc)
+    phanTramGiamInput.addEventListener('input', function() {
+        const phanTram = parseFloat(this.value) || 0;
+        const giaGoc = parseFloat(giaGocInput.value) || 0;
+        if (giaGoc > 0 && phanTram > 0 && phanTram < 100) {
+            const giaBan = Math.round(giaGoc * (100 - phanTram) / 100);
+            giaBanInput.value = giaBan;
+        }
+    });
+
+    // Khi thay đổi Giá bán → tính Phần trăm giảm (nếu có giá gốc)
+    giaBanInput.addEventListener('input', function() {
+        const giaBan = parseFloat(this.value) || 0;
+        const giaGoc = parseFloat(giaGocInput.value) || 0;
+        if (giaGoc > 0 && giaBan > 0 && giaGoc > giaBan) {
+            const phanTram = Math.round((giaGoc - giaBan) * 100 / giaGoc);
+            phanTramGiamInput.value = phanTram;
+        }
+    });
+
     function themThanhPhan() {
         var container = document.getElementById('thanhPhanContainer');
         var firstRow = container.querySelector('.thanh-phan-row');

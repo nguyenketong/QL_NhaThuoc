@@ -1,3 +1,4 @@
+@model IEnumerable<QL_NhaThuoc.Models.Thuoc>
 @{
     ViewData["Title"] = "Quản lý thuốc";
 }
@@ -6,13 +7,6 @@
     <div>
         <form method="get" class="d-flex gap-2">
             <input type="text" name="search" class="form-control" placeholder="Tìm kiếm..." value="@Context.Request.Query["search"]" />
-            <select name="nhomId" class="form-select" style="width: 200px;">
-                <option value="">-- Tất cả nhóm --</option>
-                @foreach (var nhom in ViewBag.NhomThuocs)
-                {
-                    <option value="@nhom.MaNhomThuoc">@nhom.TenNhomThuoc</option>
-                }
-            </select>
             <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i></button>
         </form>
     </div>
@@ -35,17 +29,16 @@
             </tr>
         </thead>
         <tbody>
-            @if (Model != null)
+            @if (Model != null && Model.Any())
             {
-                var items = Model as IEnumerable<dynamic>;
-                @foreach (var item in items)
+                @foreach (var item in Model)
                 {
                     <tr>
                         <td>@item.MaThuoc</td>
                         <td><strong>@item.TenThuoc</strong></td>
-                        <td><span class="badge bg-info">@item.TenNhomThuoc</span></td>
-                        <td>@item.TenThuongHieu</td>
-                        <td class="text-danger fw-bold">@(((decimal?)item.GiaBan)?.ToString("N0") ?? "0")đ</td>
+                        <td><span class="badge bg-info">@item.NhomThuoc?.TenNhomThuoc</span></td>
+                        <td>@item.ThuongHieu?.TenThuongHieu</td>
+                        <td class="text-danger fw-bold">@item.GiaBan?.ToString("N0")đ</td>
                         <td>@item.DonViTinh</td>
                         <td>
                             <a asp-action="Edit" asp-route-id="@item.MaThuoc" class="btn btn-sm btn-warning">
@@ -61,16 +54,14 @@
                     </tr>
                 }
             }
+            else
+            {
+                <tr>
+                    <td colspan="7" class="text-center text-muted py-4">
+                        <i class="fas fa-info-circle"></i> Chưa có thuốc nào
+                    </td>
+                </tr>
+            }
         </tbody>
     </table>
 </div>
-
-@{
-    var allItems = Model as IEnumerable<dynamic>;
-    if (allItems == null || !allItems.Any())
-    {
-        <div class="alert alert-info text-center mt-3">
-            <i class="fas fa-info-circle"></i> Chưa có thuốc nào
-        </div>
-    }
-}

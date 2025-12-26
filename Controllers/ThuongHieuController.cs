@@ -1,63 +1,74 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
-using System.Data;
+using Microsoft.EntityFrameworkCore;
+using QL_NhaThuoc.Data;
 
 namespace QL_NhaThuoc.Controllers
 {
     public class ThuongHieuController : Controller
     {
-        private readonly string _connectionString;
+        private readonly QL_NhaThuocDbContext _context;
 
-        public ThuongHieuController(IConfiguration configuration)
+        public ThuongHieuController(QL_NhaThuocDbContext context)
         {
-            _connectionString = configuration.GetConnectionString("DefaultConnection")!;
+            _context = context;
         }
 
-        // Chi tiết thương hiệu - hiển thị các thuốc của thương hiệu
-        public async Task<IActionResult> ChiTiet(int id)
+        // GET: ThuongHieu/DanhSach
+        public async Task<IActionResult> DanhSach()
         {
-            using var connection = new SqlConnection(_connectionString);
-            await connection.OpenAsync();
+            var danhSach = await _context.THUONG_HIEU
+                .OrderBy(th => th.TenThuongHieu)
+                .ToListAsync();
 
-            using var cmd = new SqlCommand("sp_ThuongHieu_ChiTiet", connection);
-            cmd.CommandType = CommandType.StoredProcedure;
-            cmd.Parameters.AddWithValue("@MaThuongHieu", id);
+            return View(danhSach);
+        }
 
-            dynamic? thuongHieu = null;
-            var danhSachThuoc = new List<dynamic>();
+        // GET: ThuongHieu/ChiTiet/5 - Hiển thị sản phẩm theo thương hiệu
+        public async Task<IActionResult> ChiTiet(int id, int page = 1, string? sapXep = null)
+        {
+            var thuongHieu = await _context.THUONG_HIEU
+                .FirstOrDefaultAsync(th => th.MaThuongHieu == id);
 
-            using var reader = await cmd.ExecuteReaderAsync();
-            
-            // Thông tin thương hiệu
-            if (await reader.ReadAsync())
+            if (thuongHieu == null)
             {
-                thuongHieu = new
-                {
-                    MaThuongHieu = reader.GetInt32(reader.GetOrdinal("MaThuongHieu")),
-                    TenThuongHieu = reader.GetString(reader.GetOrdinal("TenThuongHieu")),
-                    QuocGia = reader.IsDBNull(reader.GetOrdinal("QuocGia")) ? "" : reader.GetString(reader.GetOrdinal("QuocGia"))
-                };
+                TempData["Error"] = "Không tìm thấy thương hiệu này!";
+                return RedirectToAction("DanhSach");
             }
 
-            if (thuongHieu == null) return NotFound();
+            // Load sản phẩm của thương hiệu
+            var allThuocs = await _context.THUOC
+                .Include(t => t.NhomThuoc)
+                .Where(t => t.MaThuongHieu == id)
+                .ToListAsync();
 
-            // Danh sách thuốc
-            if (await reader.NextResultAsync())
+            // Sắp xếp
+            var sortedThuocs = sapXep switch
             {
-                while (await reader.ReadAsync())
-                {
-                    danhSachThuoc.Add(new
-                    {
-                        MaThuoc = reader.GetInt32(reader.GetOrdinal("MaThuoc")),
-                        TenThuoc = reader.GetString(reader.GetOrdinal("TenThuoc")),
-                        MoTa = reader.IsDBNull(reader.GetOrdinal("MoTa")) ? "" : reader.GetString(reader.GetOrdinal("MoTa")),
-                        GiaBan = reader.IsDBNull(reader.GetOrdinal("GiaBan")) ? (decimal?)null : reader.GetDecimal(reader.GetOrdinal("GiaBan")),
-                        HinhAnh = reader.IsDBNull(reader.GetOrdinal("HinhAnh")) ? "" : reader.GetString(reader.GetOrdinal("HinhAnh"))
-                    });
-                }
-            }
+                "gia-tang" => allThuocs.OrderBy(t => t.GiaBan).ToList(),
+                "gia-giam" => allThuocs.OrderByDescending(t => t.GiaBan).ToList(),
+                "ten-az" => allThuocs.OrderBy(t => t.TenThuoc).ToList(),
+                "ten-za" => allThuocs.OrderByDescending(t => t.TenThuoc).ToList(),
+                "moi-nhat" => allThuocs.OrderByDescending(t => t.NgayTao).ToList(),
+                _ => allThuocs.OrderByDescending(t => t.MaThuoc).ToList()
+            };
 
-            ViewBag.Thuocs = danhSachThuoc;
+            // Phân trang
+            int pageSize = 12;
+            int totalItems = sortedThuocs.Count;
+            int totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+
+            var thuocs = sortedThuocs
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            thuongHieu.Thuocs = thuocs;
+
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = totalPages;
+            ViewBag.TotalItems = totalItems;
+            ViewBag.SapXep = sapXep;
+
             return View(thuongHieu);
         }
     }

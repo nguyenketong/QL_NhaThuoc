@@ -1,7 +1,8 @@
+@model QL_NhaThuoc.Models.DonHang
 @{
-    ViewData["Title"] = "Chi tiết đơn hàng";
-    var donHang = Model as dynamic;
-    var chiTietList = ViewBag.ChiTietDonHangs as IEnumerable<dynamic>;
+    ViewData["Title"] = "Chi tiết đơn hàng #" + Model.MaDonHang;
+    var laChuyenKhoan = Model.PhuongThucThanhToan == "Chuyển khoản";
+    var noiDungCK = $"DH{Model.MaDonHang}";
 }
 
 <div class="row g-4">
@@ -12,18 +13,56 @@
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-6">
-                        <p><strong>Mã đơn:</strong> #@donHang.MaDonHang</p>
-                        <p><strong>Ngày đặt:</strong> @((DateTime)donHang.NgayDatHang).ToString("dd/MM/yyyy HH:mm")</p>
-                        <p><strong>Thanh toán:</strong> @donHang.PhuongThucThanhToan</p>
+                        <p><strong>Mã đơn:</strong> #@Model.MaDonHang</p>
+                        <p><strong>Ngày đặt:</strong> @Model.NgayDatHang.ToString("dd/MM/yyyy HH:mm")</p>
+                        <p><strong>Thanh toán:</strong> @Model.PhuongThucThanhToan
+                            @if (laChuyenKhoan)
+                            {
+                                if (Model.DaThanhToan)
+                                {
+                                    <span class="badge bg-success ms-2"><i class="fas fa-check"></i> Đã thanh toán</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning ms-2"><i class="fas fa-clock"></i> Chờ thanh toán</span>
+                                }
+                            }
+                        </p>
                     </div>
                     <div class="col-md-6">
-                        <p><strong>Khách hàng:</strong> @(donHang.HoTen ?? "N/A")</p>
-                        <p><strong>SĐT:</strong> @donHang.SoDienThoai</p>
-                        <p><strong>Địa chỉ:</strong> @donHang.DiaChiGiaoHang</p>
+                        <p><strong>Khách hàng:</strong> @(Model.NguoiDung?.HoTen ?? "N/A")</p>
+                        <p><strong>SĐT:</strong> @Model.NguoiDung?.SoDienThoai</p>
+                        <p><strong>Địa chỉ:</strong> @Model.DiaChiGiaoHang</p>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- Thông tin chuyển khoản (chỉ hiện khi là chuyển khoản) -->
+        @if (laChuyenKhoan)
+        {
+            <div class="card border-0 shadow-sm mb-4 @(Model.DaThanhToan ? "border-success" : "border-warning")">
+                <div class="card-header @(Model.DaThanhToan ? "bg-success" : "bg-warning") @(Model.DaThanhToan ? "text-white" : "text-dark")">
+                    <h6 class="mb-0"><i class="fas fa-university"></i> Thông tin chuyển khoản cần kiểm tra</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <p class="mb-2"><strong>Số tiền:</strong></p>
+                            <h4 class="text-danger">@Model.TongTien?.ToString("N0")đ</h4>
+                        </div>
+                        <div class="col-6">
+                            <p class="mb-2"><strong>Nội dung CK:</strong></p>
+                            <h4 class="text-success">@noiDungCK</h4>
+                        </div>
+                    </div>
+                    <hr>
+                    <p class="small text-muted mb-0">
+                        <i class="fas fa-info-circle"></i> Kiểm tra lịch sử giao dịch ngân hàng với nội dung chứa "<strong>@noiDungCK</strong>" và số tiền <strong>@Model.TongTien?.ToString("N0")đ</strong>
+                    </p>
+                </div>
+            </div>
+        }
 
         <!-- Chi tiết sản phẩm -->
         <div class="card border-0 shadow-sm">
@@ -38,15 +77,15 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @if (chiTietList != null)
+                    @if (Model.ChiTietDonHangs != null)
                     {
-                        @foreach (var ct in chiTietList)
+                        @foreach (var ct in Model.ChiTietDonHangs)
                         {
                             <tr>
-                                <td>@ct.TenThuoc</td>
-                                <td class="text-end">@(((decimal?)ct.DonGia)?.ToString("N0"))đ</td>
+                                <td>@ct.Thuoc?.TenThuoc</td>
+                                <td class="text-end">@ct.DonGia?.ToString("N0")đ</td>
                                 <td class="text-center">@ct.SoLuong</td>
-                                <td class="text-end fw-bold">@(((decimal?)ct.ThanhTien)?.ToString("N0"))đ</td>
+                                <td class="text-end fw-bold">@ct.ThanhTien?.ToString("N0")đ</td>
                             </tr>
                         }
                     }
@@ -54,7 +93,7 @@
                 <tfoot class="table-light">
                     <tr>
                         <td colspan="3" class="text-end"><strong>Tổng cộng:</strong></td>
-                        <td class="text-end text-danger fw-bold fs-5">@(((decimal?)donHang.TongTien)?.ToString("N0"))đ</td>
+                        <td class="text-end text-danger fw-bold fs-5">@Model.TongTien?.ToString("N0")đ</td>
                     </tr>
                 </tfoot>
             </table>
@@ -62,16 +101,35 @@
     </div>
 
     <div class="col-lg-4">
+        <!-- Xác nhận thanh toán (chỉ hiện khi chuyển khoản và chưa thanh toán) -->
+        @if (laChuyenKhoan && !Model.DaThanhToan && Model.TrangThai == "Cho xu ly")
+        {
+            <div class="card border-0 shadow-sm mb-3 border-warning">
+                <div class="card-header bg-warning text-dark">
+                    <h6 class="mb-0"><i class="fas fa-money-check-alt"></i> Xác nhận thanh toán</h6>
+                </div>
+                <div class="card-body">
+                    <p class="small text-muted mb-3">
+                        Kiểm tra tài khoản ngân hàng đã nhận được <strong class="text-danger">@Model.TongTien?.ToString("N0")đ</strong> 
+                        với nội dung <strong class="text-success">@noiDungCK</strong> chưa?
+                    </p>
+                    <form asp-action="XacNhanThanhToan" method="post">
+                        <input type="hidden" name="id" value="@Model.MaDonHang" />
+                        <button type="submit" class="btn btn-success w-100" onclick="return confirm('Xác nhận đã nhận được tiền chuyển khoản?')">
+                            <i class="fas fa-check-circle"></i> Đã nhận tiền
+                        </button>
+                    </form>
+                </div>
+            </div>
+        }
+
         <!-- Cập nhật trạng thái -->
         <div class="card border-0 shadow-sm">
             <div class="card-header bg-white"><h6 class="mb-0">Trạng thái đơn hàng</h6></div>
             <div class="card-body">
                 <div class="mb-3">
                     <strong>Hiện tại:</strong>
-                    @{
-                        var trangThai = (string)donHang.TrangThai;
-                    }
-                    @switch (trangThai)
+                    @switch (Model.TrangThai)
                     {
                         case "Cho xu ly": <span class="badge bg-warning fs-6">Chờ xử lý</span> break;
                         case "Dang giao": <span class="badge bg-info fs-6">Đang giao</span> break;
@@ -79,18 +137,64 @@
                         default: <span class="badge bg-danger fs-6">Đã hủy</span> break;
                     }
                 </div>
-                <form asp-action="UpdateStatus" method="post">
-                    <input type="hidden" name="id" value="@donHang.MaDonHang" />
-                    <select name="trangThai" class="form-select mb-3">
-                        <option value="Cho xu ly">Chờ xử lý</option>
-                        <option value="Dang giao">Đang giao</option>
-                        <option value="Hoan thanh">Hoàn thành</option>
-                        <option value="Da huy">Đã hủy</option>
-                    </select>
-                    <button type="submit" class="btn btn-primary w-100">
-                        <i class="fas fa-save"></i> Cập nhật
-                    </button>
-                </form>
+
+                @if (laChuyenKhoan && !Model.DaThanhToan && Model.TrangThai == "Cho xu ly")
+                {
+                    <div class="alert alert-warning small">
+                        <i class="fas fa-exclamation-triangle"></i> Cần xác nhận thanh toán trước khi chuyển trạng thái "Đang giao"
+                    </div>
+                }
+
+                @{
+                    var daHoanThanh = Model.TrangThai == "Hoan thanh";
+                    var daHuy = Model.TrangThai == "Da huy";
+                    var dangGiao = Model.TrangThai == "Dang giao";
+                    var khongTheDoiTrangThai = daHoanThanh || daHuy;
+                    var khongTheHuy = dangGiao || Model.DaThanhToan;
+                }
+
+                @if (khongTheDoiTrangThai)
+                {
+                    <div class="alert @(daHoanThanh ? "alert-success" : "alert-secondary") small">
+                        <i class="fas fa-lock"></i> Đơn hàng @(daHoanThanh ? "đã hoàn thành" : "đã hủy") - không thể thay đổi trạng thái
+                    </div>
+                }
+                else
+                {
+                    <form asp-action="CapNhatTrangThai" method="post" id="formCapNhat">
+                        <input type="hidden" name="id" value="@Model.MaDonHang" />
+                        <select name="trangThai" class="form-select mb-3" id="selectTrangThai">
+                            @if (!dangGiao)
+                            {
+                                <option value="Cho xu ly" selected="@(Model.TrangThai == "Cho xu ly")">Chờ xử lý</option>
+                            }
+                            <option value="Dang giao" selected="@(Model.TrangThai == "Dang giao")">Đang giao</option>
+                            <option value="Hoan thanh">Hoàn thành</option>
+                            @if (!khongTheHuy)
+                            {
+                                <option value="Da huy">Đã hủy</option>
+                            }
+                        </select>
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-save"></i> Cập nhật
+                        </button>
+                    </form>
+                    
+                    @if (khongTheHuy)
+                    {
+                        <div class="alert alert-info small mt-2 mb-0">
+                            <i class="fas fa-info-circle"></i> 
+                            @if (Model.DaThanhToan)
+                            {
+                                <span>Đã thanh toán - không thể hủy đơn</span>
+                            }
+                            else if (dangGiao)
+                            {
+                                <span>Đang giao - không thể hủy đơn</span>
+                            }
+                        </div>
+                    }
+                }
             </div>
         </div>
         <a asp-action="Index" class="btn btn-secondary w-100 mt-3">
@@ -98,3 +202,17 @@
         </a>
     </div>
 </div>
+
+@if (laChuyenKhoan && !Model.DaThanhToan && Model.TrangThai == "Cho xu ly")
+{
+<script>
+document.getElementById('formCapNhat')?.addEventListener('submit', function(e) {
+    var trangThai = document.getElementById('selectTrangThai').value;
+    if (trangThai === 'Dang giao' || trangThai === 'Hoan thanh') {
+        alert('Vui lòng xác nhận đã nhận tiền chuyển khoản trước khi chuyển trạng thái!');
+        e.preventDefault();
+        return false;
+    }
+});
+</script>
+}

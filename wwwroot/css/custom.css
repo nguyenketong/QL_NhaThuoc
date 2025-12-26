@@ -396,6 +396,32 @@ body {
     color: var(--white);
 }
 
+.badge-soldout {
+    background: #9E9E9E;
+    color: var(--white);
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.product-card-promo.out-of-stock {
+    opacity: 0.7;
+}
+
+.product-card-promo.out-of-stock .product-img-promo img {
+    filter: grayscale(50%);
+}
+
+.btn-buy-now.disabled {
+    background: #9E9E9E !important;
+    cursor: not-allowed;
+}
+
+.promo-countdown {
+    font-size: 0.75rem;
+}
+
 .product-image {
     width: 100%;
     height: 200px;
@@ -901,8 +927,8 @@ body {
 }
 
 .bg-warning {
-    background: #FFF3E0 !important;
-    color: #E65100 !important;
+    background: #FFDA9F !important;
+    color: #000000 !important;
 }
 
 .bg-success {
@@ -1577,3 +1603,236 @@ body {
 .header-wrapper.scrolled .nav-link {
     padding: 12px 15px;
 }
+
+
+/* ===================================
+   NEW MEGA MENU DESIGN
+   =================================== */
+.mega-menu-new {
+    width: 800px;
+    padding: 0;
+    border: none;
+    border-radius: 12px;
+    box-shadow: 0 10px 50px rgba(0,0,0,0.15);
+    margin-top: 10px;
+    overflow: hidden;
+}
+
+.mega-menu-container {
+    display: flex;
+    padding: 0;
+}
+
+.mega-menu-column {
+    flex: 1;
+    padding: 20px;
+    border-right: 1px solid #f0f0f0;
+    min-width: 0;
+}
+
+.mega-menu-column:last-child {
+    border-right: none;
+}
+
+.mega-menu-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--primary-color);
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 15px;
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--primary-light);
+}
+
+.mega-menu-header i {
+    font-size: 1.1rem;
+}
+
+.mega-menu-items {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.mega-menu-items li {
+    margin-bottom: 0;
+}
+
+.mega-menu-items a {
+    display: block;
+    padding: 10px 0;
+    color: #444;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    border-bottom: 1px solid #f5f5f5;
+}
+
+.mega-menu-items li:last-child a {
+    border-bottom: none;
+}
+
+.mega-menu-items a:hover {
+    color: var(--primary-color);
+    padding-left: 8px;
+    background: linear-gradient(90deg, rgba(30,136,229,0.05), transparent);
+}
+
+.mega-menu-viewall {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 15px;
+    padding: 10px 16px;
+    background: var(--primary-color);
+    color: white !important;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.mega-menu-viewall:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(30,136,229,0.3);
+}
+
+/* Responsive mega menu */
+@media (max-width: 991px) {
+    .mega-menu-new {
+        width: 100%;
+        max-width: 95vw;
+    }
+    
+    .mega-menu-container {
+        flex-wrap: wrap;
+    }
+    
+    .mega-menu-column {
+        flex: 0 0 50%;
+        border-right: none;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    .mega-menu-column:nth-child(odd) {
+        border-right: 1px solid #f0f0f0;
+    }
+}
+
+@media (max-width: 576px) {
+    .mega-menu-container {
+        flex-direction: column;
+    }
+    
+    .mega-menu-column {
+        flex: 0 0 100%;
+        border-right: none;
+    }
+}
+
+
+/* ===================================
+   FLOATING BUTTONS - GOM GỌN
+   =================================== */
+.floating-buttons-wrapper {
+    position: fixed;
+    right: 20px;
+    bottom: 100px;
+    z-index: 1000;
+}
+
+.float-btn-main {
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1E88E5 0%, #1565C0 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 22px;
+    box-shadow: 0 4px 15px rgba(30,136,229,0.4);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    z-index: 10;
+    position: relative;
+}
+
+.float-btn-main:hover {
+    transform: rotate(45deg);
+    background: linear-gradient(135deg, #F44336 0%, #D32F2F 100%);
+    box-shadow: 0 4px 15px rgba(244,67,54,0.4);
+}
+
+.floating-buttons-wrapper:hover .float-btn-main {
+    transform: rotate(45deg);
+    background: linear-gradient(135deg, #F44336 0%, #D32F2F 100%);
+}
+
+.floating-buttons-wrapper .floating-buttons {
+    position: absolute;
+    bottom: 65px;
+    right: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    transition: all 0.3s ease;
+}
+
+.floating-buttons-wrapper:hover .floating-buttons {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.floating-buttons-wrapper .float-btn {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 20px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+    transition: all 0.3s;
+    position: relative;
+    text-decoration: none;
+}
+
+.floating-buttons-wrapper .float-btn:hover {
+    transform: scale(1.1);
+    color: #fff;
+}
+
+.floating-buttons-wrapper .float-btn .float-label {
+    position: absolute;
+    right: 60px;
+    background: #333;
+    color: #fff;
+    padding: 5px 12px;
+    border-radius: 5px;
+    font-size: 12px;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s;
+}
+
+.floating-buttons-wrapper .float-btn:hover .float-label {
+    opacity: 1;
+    visibility: visible;
+}
+
+.floating-buttons-wrapper .float-btn.zalo { background: #0068ff; }
+.floating-buttons-wrapper .float-btn.cart { background: #28a745; }
+.floating-buttons-wrapper .float-btn.phone { background: #ffc107; color: #333; }
+.floating-buttons-wrapper .float-btn.phone .float-label { color: #fff; }
+.floating-buttons-wrapper .float-btn.support { background: #dc3545; }

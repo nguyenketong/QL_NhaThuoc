@@ -1,6 +1,6 @@
+@model QL_NhaThuoc.Models.NguoiDung
 @{
     ViewData["Title"] = "Chi tiết khách hàng";
-    var nguoiDung = Model as dynamic;
 }
 
 <div class="row g-4">
@@ -10,11 +10,12 @@
                 <div class="mb-3">
                     <i class="fas fa-user-circle" style="font-size: 5rem; color: #1E88E5;"></i>
                 </div>
-                <h5>@(nguoiDung.HoTen ?? nguoiDung.SoDienThoai)</h5>
-                <p class="text-muted">@nguoiDung.SoDienThoai</p>
+                <h5>@(Model.HoTen ?? Model.SoDienThoai)</h5>
+                <p class="text-muted">@Model.SoDienThoai</p>
                 <hr>
-                <p><i class="fas fa-map-marker-alt text-primary"></i> @(nguoiDung.DiaChi ?? "Chưa cập nhật")</p>
-                <p><i class="fas fa-calendar text-primary"></i> Tham gia: @(nguoiDung.NgayTao != null ? ((DateTime)nguoiDung.NgayTao).ToString("dd/MM/yyyy") : "N/A")</p>
+                <p><i class="fas fa-map-marker-alt text-primary"></i> @(Model.DiaChi ?? "Chưa cập nhật")</p>
+                <p><i class="fas fa-calendar text-primary"></i> Tham gia: @Model.NgayTao?.ToString("dd/MM/yyyy")</p>
+                <p><i class="fas fa-user-tag text-primary"></i> Vai trò: <span class="badge bg-info">@(Model.VaiTro ?? "KhachHang")</span></p>
             </div>
         </div>
     </div>
@@ -31,34 +32,31 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @if (ViewBag.DonHangs != null)
+                    @if (Model.DonHangs != null && Model.DonHangs.Any())
                     {
-                        var donHangs = ViewBag.DonHangs as IEnumerable<dynamic>;
-                        @foreach (var dh in donHangs)
+                        @foreach (var dh in Model.DonHangs.OrderByDescending(d => d.NgayDatHang))
                         {
                             <tr>
                                 <td><a asp-action="Details" asp-controller="DonHang" asp-route-id="@dh.MaDonHang">#@dh.MaDonHang</a></td>
-                                <td>@((DateTime)dh.NgayDatHang).ToString("dd/MM/yyyy")</td>
-                                <td class="text-danger">@(((decimal?)dh.TongTien ?? 0).ToString("N0"))đ</td>
+                                <td>@dh.NgayDatHang.ToString("dd/MM/yyyy")</td>
+                                <td class="text-danger">@(dh.TongTien?.ToString("N0") ?? "0")đ</td>
                                 <td>
-                                    @{
-                                        var trangThai = (string)dh.TrangThai;
-                                    }
-                                    @if (trangThai == "Hoan thanh")
+                                    @switch (dh.TrangThai)
                                     {
-                                        <span class="badge bg-success">Hoàn thành</span>
-                                    }
-                                    else if (trangThai == "Cho xu ly")
-                                    {
-                                        <span class="badge bg-warning">Chờ xử lý</span>
-                                    }
-                                    else
-                                    {
-                                        <span class="badge bg-secondary">@trangThai</span>
+                                        case "Hoan thanh": <span class="badge bg-success">Hoàn thành</span> break;
+                                        case "Cho xu ly": <span class="badge bg-warning">Chờ xử lý</span> break;
+                                        case "Dang giao": <span class="badge bg-info">Đang giao</span> break;
+                                        default: <span class="badge bg-secondary">@dh.TrangThai</span> break;
                                     }
                                 </td>
                             </tr>
                         }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="4" class="text-center text-muted py-3">Chưa có đơn hàng nào</td>
+                        </tr>
                     }
                 </tbody>
             </table>
