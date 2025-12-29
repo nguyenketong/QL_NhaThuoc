@@ -2,6 +2,22 @@
     ViewData["Title"] = "Quản lý khách hàng";
 }
 
+@if (TempData["Loi"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-circle me-2"></i>@TempData["Loi"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (TempData["ThongBao"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle me-2"></i>@TempData["ThongBao"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
 <div class="mb-4">
     <form method="get" class="d-flex gap-2">
         <input type="text" name="search" class="form-control" style="width: 300px;" 
@@ -42,10 +58,13 @@
                             <a asp-action="Details" asp-route-id="@item.MaNguoiDung" class="btn btn-sm btn-info">
                                 <i class="fas fa-eye"></i>
                             </a>
-                            <form asp-action="Delete" asp-route-id="@item.MaNguoiDung" method="post" class="d-inline"
-                                  onsubmit="return confirm('Xóa khách hàng này?')">
-                                <button type="submit" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
-                            </form>
+                            @if (item.VaiTro != "Admin")
+                            {
+                                <form asp-action="Delete" asp-route-id="@item.MaNguoiDung" method="post" class="d-inline"
+                                      onsubmit="return confirm('Xóa khách hàng này?')">
+                                    <button type="submit" class="btn btn-sm btn-danger"><i class="fas fa-trash"></i></button>
+                                </form>
+                            }
                         </td>
                     </tr>
                 }

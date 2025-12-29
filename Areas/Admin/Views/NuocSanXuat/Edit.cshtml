@@ -9,9 +9,11 @@
             <div class="card-body">
                 <form asp-action="Edit" method="post">
                     <input type="hidden" asp-for="MaNuocSX" />
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
                     <div class="mb-3">
                         <label class="form-label">Tên nước sản xuất <span class="text-danger">*</span></label>
-                        <input asp-for="TenNuocSX" class="form-control" required />
+                        <input asp-for="TenNuocSX" class="form-control" />
+                        <span asp-validation-for="TenNuocSX" class="text-danger"></span>
                     </div>
                     <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Cập nhật</button>
                     <a asp-action="Index" class="btn btn-secondary"><i class="fas fa-arrow-left"></i> Quay lại</a>
@@ -20,3 +22,7 @@
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

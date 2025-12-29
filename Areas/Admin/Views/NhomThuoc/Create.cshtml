@@ -7,10 +7,11 @@
 <div class="card">
     <div class="card-body">
         <form asp-action="Create" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label class="form-label">Tên nhóm thuốc <span class="text-danger">*</span></label>
-                    <input asp-for="TenNhomThuoc" class="form-control" placeholder="VD: Thuốc giảm đau" required />
+                    <input asp-for="TenNhomThuoc" class="form-control" placeholder="VD: Thuốc giảm đau" />
                     <span asp-validation-for="TenNhomThuoc" class="text-danger"></span>
                 </div>
                 <div class="col-md-6 mb-3">
@@ -27,6 +28,7 @@
                 <div class="col-12 mb-3">
                     <label class="form-label">Mô tả</label>
                     <textarea asp-for="MoTa" class="form-control" rows="3" placeholder="Mô tả ngắn về nhóm thuốc"></textarea>
+                    <span asp-validation-for="MoTa" class="text-danger"></span>
                 </div>
             </div>
             <div class="d-flex gap-2">
@@ -36,3 +38,7 @@
         </form>
     </div>
 </div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

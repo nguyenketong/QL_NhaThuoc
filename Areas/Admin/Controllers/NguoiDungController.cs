@@ -74,12 +74,21 @@ namespace QL_NhaThuoc.Areas.Admin.Controllers
         public async Task<IActionResult> Delete(int id)
         {
             var nguoiDung = await _context.NGUOI_DUNG.FindAsync(id);
-            if (nguoiDung != null)
+            if (nguoiDung == null)
             {
-                _context.NGUOI_DUNG.Remove(nguoiDung);
-                await _context.SaveChangesAsync();
-                TempData["ThongBao"] = "Xóa người dùng thành công!";
+                return RedirectToAction(nameof(Index));
             }
+
+            // Không cho xóa tài khoản Admin
+            if (nguoiDung.VaiTro == "Admin")
+            {
+                TempData["Loi"] = "Không thể xóa tài khoản Admin!";
+                return RedirectToAction(nameof(Index));
+            }
+
+            _context.NGUOI_DUNG.Remove(nguoiDung);
+            await _context.SaveChangesAsync();
+            TempData["ThongBao"] = "Xóa người dùng thành công!";
             return RedirectToAction(nameof(Index));
         }
     }

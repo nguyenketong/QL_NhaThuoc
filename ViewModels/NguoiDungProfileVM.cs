@@ -10,17 +10,17 @@ namespace QL_NhaThuoc.ViewModels
         public int MaNguoiDung { get; set; }
 
         [Required(ErrorMessage = "Vui lòng nhập họ tên")]
-        [StringLength(150)]
+        [StringLength(100, MinimumLength = 2, ErrorMessage = "Họ tên phải từ 2 đến 100 ký tự")]
         [Display(Name = "Họ và tên")]
         public string HoTen { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Vui lòng nhập số điện thoại")]
         [Phone(ErrorMessage = "Số điện thoại không hợp lệ")]
-        [StringLength(20)]
+        [RegularExpression(@"^(0[3|5|7|8|9])+([0-9]{8})$", ErrorMessage = "Số điện thoại phải có 10 số và bắt đầu bằng 03, 05, 07, 08 hoặc 09")]
         [Display(Name = "Số điện thoại")]
         public string SoDienThoai { get; set; } = string.Empty;
 
-        [StringLength(255)]
+        [StringLength(500, ErrorMessage = "Địa chỉ không quá 500 ký tự")]
         [Display(Name = "Địa chỉ")]
         public string? DiaChi { get; set; }
 
@@ -28,7 +28,10 @@ namespace QL_NhaThuoc.ViewModels
         public DateTime? NgayTao { get; set; }
 
         // Thống kê
+        [Display(Name = "Tổng đơn hàng")]
         public int TongDonHang { get; set; }
+        
+        [Display(Name = "Tổng chi tiêu")]
         public decimal TongChiTieu { get; set; }
     }
 }
