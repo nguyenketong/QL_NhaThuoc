@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "hbQoNeqqnX0=",
+  "dgSpecHash": "b/1G/6ycrts=",
   "success": true,
-  "projectFilePath": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc.csproj",
+  "projectFilePath": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\KE TONG\\.nuget\\packages\\azure.core\\1.25.0\\azure.core.1.25.0.nupkg.sha512",
     "C:\\Users\\KE TONG\\.nuget\\packages\\azure.identity\\1.7.0\\azure.identity.1.7.0.nupkg.sha512",

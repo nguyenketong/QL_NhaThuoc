@@ -33,7 +33,7 @@
                                         <a asp-controller="Thuoc" asp-action="DanhSach" class="btn btn-primary btn-lg px-4">
                                             <i class="fas fa-shopping-bag me-2"></i> Mua ngay
                                         </a>
-                                        <a href="tel:0919081786" class="btn btn-outline-primary btn-lg px-4">
+                                        <a href="tel:0768867054" class="btn btn-outline-primary btn-lg px-4">
                                             <i class="fas fa-phone me-2"></i> Tư vấn
                                         </a>
                                     </div>
@@ -71,12 +71,12 @@
                                 <div class="hero-content-box">
                                     <span class="badge bg-warning text-dark mb-3 px-3 py-2">👨‍⚕️ Hỗ trợ 24/7</span>
                                     <h1 class="display-5 fw-bold mb-3 text-warning">Tư vấn dược sĩ miễn phí</h1>
-                                    <p class="lead mb-4 text-muted">Hotline: 0795930020 - Đội ngũ dược sĩ chuyên nghiệp</p>
+                                    <p class="lead mb-4 text-muted">Hotline: 0768867054 - Đội ngũ dược sĩ chuyên nghiệp</p>
                                     <div class="d-flex gap-3 flex-wrap">
-                                        <a href="tel:0919081786" class="btn btn-warning btn-lg px-4">
+                                        <a href="tel:0768867054" class="btn btn-warning btn-lg px-4">
                                             <i class="fas fa-phone me-2"></i> Gọi ngay
                                         </a>
-                                        <a href="https://zalo.me/0919081786" target="_blank" class="btn btn-outline-warning btn-lg px-4">
+                                        <a href="https://zalo.me/0768867054" target="_blank" class="btn btn-outline-warning btn-lg px-4">
                                             <i class="fas fa-comment-dots me-2"></i> Chat Zalo
                                         </a>
                                     </div>
@@ -594,7 +594,6 @@
                         <i class="fas fa-certificate fa-4x text-warning mb-3"></i>
                         <h5 class="text-primary">GIẤY CHỨNG NHẬN</h5>
                         <p class="text-muted small">Đủ điều kiện kinh doanh dược phẩm</p>
-                        <p class="text-muted small mb-0">Số: xxx/ĐKKD - Ngày cấp: xx/xx/xxxx</p>
                     </div>
                 </div>
             </div>
@@ -1063,16 +1062,11 @@
     overflow-x: auto;
     scroll-behavior: smooth;
     padding: 10px 0;
-    cursor: grab;
     -ms-overflow-style: none;
     scrollbar-width: none;
 }
 .brand-slider::-webkit-scrollbar {
     display: none;
-}
-.brand-slider.dragging {
-    cursor: grabbing;
-    scroll-behavior: auto;
 }
 .brand-item {
     flex: 0 0 auto;
@@ -1394,8 +1388,9 @@ document.addEventListener('DOMContentLoaded', function() {
 function scrollBrands(direction) {
     var slider = document.getElementById('brandSlider');
     if (slider) {
-        var scrollAmount = 200;
-        slider.scrollBy({ left: direction * scrollAmount, behavior: 'smooth' });
+        // Cuộn theo chiều rộng hiển thị (trừ padding)
+        var containerWidth = slider.parentElement.offsetWidth - 100;
+        slider.scrollBy({ left: direction * containerWidth, behavior: 'smooth' });
     }
 }
 </script>

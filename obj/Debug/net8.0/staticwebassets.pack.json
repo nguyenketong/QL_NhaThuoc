@@ -1,307 +1,351 @@
 {
   "Files": [
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\obj\\Debug\\net8.0\\scopedcss\\projectbundle\\QL_NhaThuoc.bundle.scp.css",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\obj\\Debug\\net8.0\\scopedcss\\projectbundle\\QL_NhaThuoc.bundle.scp.css",
       "PackagePath": "staticwebassets\\QL_NhaThuoc.bundle.scp.css"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\css\\custom.css",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\css\\custom.css",
       "PackagePath": "staticwebassets\\css\\custom.css"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\css\\site.css",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\css\\site.css",
       "PackagePath": "staticwebassets\\css\\site.css"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\favicon.ico",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\favicon.ico",
       "PackagePath": "staticwebassets\\favicon.ico"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\images\\.gitkeep",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\images\\.gitkeep",
       "PackagePath": "staticwebassets\\images\\.gitkeep"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\images\\amoxicillin.jpg",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\images\\amoxicillin.jpg",
       "PackagePath": "staticwebassets\\images\\amoxicillin.jpg"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\images\\baiviet\\5badde20-82a1-40d8-9504-ab6cdba6bc59.jpg",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\images\\baiviet\\5badde20-82a1-40d8-9504-ab6cdba6bc59.jpg",
       "PackagePath": "staticwebassets\\images\\baiviet\\5badde20-82a1-40d8-9504-ab6cdba6bc59.jpg"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\images\\baiviet\\a6581c99-9625-4cf7-9e7d-ff2baaee6151.jpg",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\images\\baiviet\\a6581c99-9625-4cf7-9e7d-ff2baaee6151.jpg",
       "PackagePath": "staticwebassets\\images\\baiviet\\a6581c99-9625-4cf7-9e7d-ff2baaee6151.jpg"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\images\\baiviet\\f27ea6a7-254a-4a1d-8dd9-74652e5a8033.jpg",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\images\\baiviet\\f27ea6a7-254a-4a1d-8dd9-74652e5a8033.jpg",
       "PackagePath": "staticwebassets\\images\\baiviet\\f27ea6a7-254a-4a1d-8dd9-74652e5a8033.jpg"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\images\\brands\\3f3c53f8-8ecd-4ffa-bb98-f00bfd00d276.png",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\images\\brands\\19115dfa-1caa-460c-8a08-cd93a8235bef.jpg",
+      "PackagePath": "staticwebassets\\images\\brands\\19115dfa-1caa-460c-8a08-cd93a8235bef.jpg"
+    },
+    {
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\images\\brands\\1b1b6d02-ce27-4cdf-8ef5-b797ad22f340.png",
+      "PackagePath": "staticwebassets\\images\\brands\\1b1b6d02-ce27-4cdf-8ef5-b797ad22f340.png"
+    },
+    {
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\images\\brands\\227e6275-2049-4e7d-ae00-10d902e1cd21.png",
+      "PackagePath": "staticwebassets\\images\\brands\\227e6275-2049-4e7d-ae00-10d902e1cd21.png"
+    },
+    {
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\images\\brands\\3f3c53f8-8ecd-4ffa-bb98-f00bfd00d276.png",
       "PackagePath": "staticwebassets\\images\\brands\\3f3c53f8-8ecd-4ffa-bb98-f00bfd00d276.png"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\images\\brands\\5dbb3f4c-3406-4c17-bd5a-208536c0b5bb.webp",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\images\\brands\\5dbb3f4c-3406-4c17-bd5a-208536c0b5bb.webp",
       "PackagePath": "staticwebassets\\images\\brands\\5dbb3f4c-3406-4c17-bd5a-208536c0b5bb.webp"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\images\\brands\\62306dbb-4234-4b8f-bf6e-f9d9c3416d1b.jpg",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\images\\brands\\62306dbb-4234-4b8f-bf6e-f9d9c3416d1b.jpg",
       "PackagePath": "staticwebassets\\images\\brands\\62306dbb-4234-4b8f-bf6e-f9d9c3416d1b.jpg"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\images\\brands\\69439c82-6c66-478a-97ef-4c943d9d6572.jpg",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\images\\brands\\69439c82-6c66-478a-97ef-4c943d9d6572.jpg",
       "PackagePath": "staticwebassets\\images\\brands\\69439c82-6c66-478a-97ef-4c943d9d6572.jpg"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\images\\brands\\6fa555dc-e58f-41d1-9ab4-2d361121fc1a.jpg",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\images\\brands\\6fa555dc-e58f-41d1-9ab4-2d361121fc1a.jpg",
       "PackagePath": "staticwebassets\\images\\brands\\6fa555dc-e58f-41d1-9ab4-2d361121fc1a.jpg"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\images\\brands\\9415749c-54da-47af-be4e-ccd36f39c426.png",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\images\\brands\\714d5d65-8b12-426c-a1a8-ca69b512429e.png",
+      "PackagePath": "staticwebassets\\images\\brands\\714d5d65-8b12-426c-a1a8-ca69b512429e.png"
+    },
+    {
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\images\\brands\\71c66c43-9070-4c8d-831d-9967a97fb7bd.png",
+      "PackagePath": "staticwebassets\\images\\brands\\71c66c43-9070-4c8d-831d-9967a97fb7bd.png"
+    },
+    {
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\images\\brands\\743283b1-5a5e-4b2a-821c-7c6ab02632a2.png",
+      "PackagePath": "staticwebassets\\images\\brands\\743283b1-5a5e-4b2a-821c-7c6ab02632a2.png"
+    },
+    {
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\images\\brands\\9415749c-54da-47af-be4e-ccd36f39c426.png",
       "PackagePath": "staticwebassets\\images\\brands\\9415749c-54da-47af-be4e-ccd36f39c426.png"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\images\\brands\\c574a067-ad7a-4c9e-9d8d-1b635844897b.png",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\images\\brands\\bcc71059-735c-49de-85fc-9fb19afe8be1.png",
+      "PackagePath": "staticwebassets\\images\\brands\\bcc71059-735c-49de-85fc-9fb19afe8be1.png"
+    },
+    {
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\images\\brands\\c3382310-dfd3-4351-bb77-c4cb054bf75b.png",
+      "PackagePath": "staticwebassets\\images\\brands\\c3382310-dfd3-4351-bb77-c4cb054bf75b.png"
+    },
+    {
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\images\\brands\\c574a067-ad7a-4c9e-9d8d-1b635844897b.png",
       "PackagePath": "staticwebassets\\images\\brands\\c574a067-ad7a-4c9e-9d8d-1b635844897b.png"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\images\\brands\\fb0859e2-4cc8-43ed-85aa-f8817cb20a68.png",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\images\\brands\\cc32af74-9871-4019-a5f4-d1564eac8a82.png",
+      "PackagePath": "staticwebassets\\images\\brands\\cc32af74-9871-4019-a5f4-d1564eac8a82.png"
+    },
+    {
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\images\\brands\\d0dc33a4-fd74-4332-9956-960f1b8a9cde.jpg",
+      "PackagePath": "staticwebassets\\images\\brands\\d0dc33a4-fd74-4332-9956-960f1b8a9cde.jpg"
+    },
+    {
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\images\\brands\\f457b271-1c99-48b7-ad88-7b475b60d2a5.png",
+      "PackagePath": "staticwebassets\\images\\brands\\f457b271-1c99-48b7-ad88-7b475b60d2a5.png"
+    },
+    {
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\images\\brands\\fb0859e2-4cc8-43ed-85aa-f8817cb20a68.png",
       "PackagePath": "staticwebassets\\images\\brands\\fb0859e2-4cc8-43ed-85aa-f8817cb20a68.png"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\images\\no-image.svg",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\images\\no-image.svg",
       "PackagePath": "staticwebassets\\images\\no-image.svg"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\js\\site.js",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\js\\site.js",
       "PackagePath": "staticwebassets\\js\\site.js"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\LICENSE",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\LICENSE",
       "PackagePath": "staticwebassets\\lib\\bootstrap"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.css",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.css",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-grid.css"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.css.map",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.css.map",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-grid.css.map"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.min.css",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.min.css",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-grid.min.css"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.min.css.map",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.min.css.map",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-grid.min.css.map"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.css",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.css",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.css"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.css.map",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.css.map",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.css.map"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.min.css",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.min.css",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.min.css"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.min.css.map",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.min.css.map",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-grid.rtl.min.css.map"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.css",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.css",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.css"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.css.map",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.css.map",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.css.map"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.min.css",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.min.css",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.min.css"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.min.css.map",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.min.css.map",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.min.css.map"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.css",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.css",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.css"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.css.map",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.css.map",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.css.map"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.min.css",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.min.css",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.min.css"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.min.css.map",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.min.css.map",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-reboot.rtl.min.css.map"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.css",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.css",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.css"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.css.map",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.css.map",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.css.map"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.min.css",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.min.css",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.min.css"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.min.css.map",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.min.css.map",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.min.css.map"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.css",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.css",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.css"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.css.map",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.css.map",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.css.map"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.min.css",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.min.css",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.min.css"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.min.css.map",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.min.css.map",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap-utilities.rtl.min.css.map"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.css",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.css",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap.css"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.css.map",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.css.map",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap.css.map"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.min.css",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.min.css",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap.min.css"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.min.css.map",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.min.css.map",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap.min.css.map"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.css",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.css",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.css"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.css.map",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.css.map",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.css.map"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.min.css",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.min.css",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.min.css"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.min.css.map",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.min.css.map",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\css\\bootstrap.rtl.min.css.map"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.js",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.js",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.js"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.js.map",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.js.map",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.js.map"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.min.js",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.min.js",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.min.js"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.min.js.map",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.min.js.map",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.bundle.min.js.map"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.esm.js",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.esm.js",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.esm.js"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.esm.js.map",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.esm.js.map",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.esm.js.map"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.esm.min.js",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.esm.min.js",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.esm.min.js"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.esm.min.js.map",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.esm.min.js.map",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.esm.min.js.map"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.js",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.js",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.js"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.js.map",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.js.map",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.js.map"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.min.js",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.min.js",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.min.js"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.min.js.map",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\bootstrap\\dist\\js\\bootstrap.min.js.map",
       "PackagePath": "staticwebassets\\lib\\bootstrap\\dist\\js\\bootstrap.min.js.map"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\jquery-validation-unobtrusive\\LICENSE.txt",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\jquery-validation-unobtrusive\\LICENSE.txt",
       "PackagePath": "staticwebassets\\lib\\jquery-validation-unobtrusive\\LICENSE.txt"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\jquery-validation-unobtrusive\\jquery.validate.unobtrusive.js",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\jquery-validation-unobtrusive\\jquery.validate.unobtrusive.js",
       "PackagePath": "staticwebassets\\lib\\jquery-validation-unobtrusive\\jquery.validate.unobtrusive.js"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\jquery-validation-unobtrusive\\jquery.validate.unobtrusive.min.js",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\jquery-validation-unobtrusive\\jquery.validate.unobtrusive.min.js",
       "PackagePath": "staticwebassets\\lib\\jquery-validation-unobtrusive\\jquery.validate.unobtrusive.min.js"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\jquery-validation\\LICENSE.md",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\jquery-validation\\LICENSE.md",
       "PackagePath": "staticwebassets\\lib\\jquery-validation\\LICENSE.md"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\jquery-validation\\dist\\additional-methods.js",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\jquery-validation\\dist\\additional-methods.js",
       "PackagePath": "staticwebassets\\lib\\jquery-validation\\dist\\additional-methods.js"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\jquery-validation\\dist\\additional-methods.min.js",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\jquery-validation\\dist\\additional-methods.min.js",
       "PackagePath": "staticwebassets\\lib\\jquery-validation\\dist\\additional-methods.min.js"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\jquery-validation\\dist\\jquery.validate.js",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\jquery-validation\\dist\\jquery.validate.js",
       "PackagePath": "staticwebassets\\lib\\jquery-validation\\dist\\jquery.validate.js"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\jquery-validation\\dist\\jquery.validate.min.js",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\jquery-validation\\dist\\jquery.validate.min.js",
       "PackagePath": "staticwebassets\\lib\\jquery-validation\\dist\\jquery.validate.min.js"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\jquery\\LICENSE.txt",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\jquery\\LICENSE.txt",
       "PackagePath": "staticwebassets\\lib\\jquery\\LICENSE.txt"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\jquery\\dist\\jquery.js",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\jquery\\dist\\jquery.js",
       "PackagePath": "staticwebassets\\lib\\jquery\\dist\\jquery.js"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\jquery\\dist\\jquery.min.js",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\jquery\\dist\\jquery.min.js",
       "PackagePath": "staticwebassets\\lib\\jquery\\dist\\jquery.min.js"
     },
     {
-      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\jquery\\dist\\jquery.min.map",
+      "Id": "D:\\THUC_TAP_CHUYENNGANH\\QL_NhaThuoc\\QL_NhaThuoc\\wwwroot\\lib\\jquery\\dist\\jquery.min.map",
       "PackagePath": "staticwebassets\\lib\\jquery\\dist\\jquery.min.map"
     },
     {

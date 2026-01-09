@@ -21,11 +21,8 @@
         <!-- Main Content -->
         <div class="col-lg-9">
             <div class="profile-card">
-                <div class="profile-header d-flex justify-content-between align-items-center">
+                <div class="profile-header">
                     <h4><i class="fas fa-map-marker-alt"></i> Quản lý sổ địa chỉ</h4>
-                    <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addAddressModal">
-                        <i class="fas fa-plus"></i> Thêm địa chỉ mới
-                    </button>
                 </div>
                 <div class="profile-body">
                     @if (!string.IsNullOrEmpty(Model?.DiaChi))
@@ -36,7 +33,7 @@
                             </div>
                             <div class="address-body">
                                 <div class="address-name">
-                                    <i class="fas fa-user"></i> @(Model.HoTen ?? Model.SoDienThoai)
+                                    <i class="fas fa-user"></i> @(Model.HoTen ?? "Chưa cập nhật")
                                 </div>
                                 <div class="address-phone">
                                     <i class="fas fa-phone"></i> @Model.SoDienThoai
@@ -46,7 +43,7 @@
                                 </div>
                             </div>
                             <div class="address-actions">
-                                <button class="btn btn-outline-primary btn-sm">
+                                <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editAddressModal">
                                     <i class="fas fa-edit"></i> Sửa
                                 </button>
                             </div>
@@ -58,13 +55,51 @@
                             <i class="fas fa-map-marker-alt" style="font-size: 4rem; color: #ddd;"></i>
                             <h5 class="mt-3 text-muted">Chưa có địa chỉ nào</h5>
                             <p class="text-muted">Thêm địa chỉ để thuận tiện cho việc giao hàng</p>
-                            <a asp-action="Profile" class="btn btn-primary">
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editAddressModal">
                                 <i class="fas fa-plus"></i> Thêm địa chỉ
-                            </a>
+                            </button>
                         </div>
                     }
                 </div>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Sửa địa chỉ -->
+<div class="modal fade" id="editAddressModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form asp-action="UpdateDiaChi" method="post">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="fas fa-map-marker-alt text-primary"></i> 
+                        @(string.IsNullOrEmpty(Model?.DiaChi) ? "Thêm địa chỉ" : "Sửa địa chỉ")
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Họ tên <span class="text-danger">*</span></label>
+                        <input type="text" name="hoTen" class="form-control" value="@Model?.HoTen" required placeholder="Nhập họ tên người nhận">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Số điện thoại</label>
+                        <input type="text" class="form-control" value="@Model?.SoDienThoai" disabled>
+                        <small class="text-muted">Số điện thoại không thể thay đổi</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Địa chỉ <span class="text-danger">*</span></label>
+                        <textarea name="diaChi" class="form-control" rows="3" required placeholder="Nhập địa chỉ chi tiết (số nhà, đường, phường/xã, quận/huyện, tỉnh/thành phố)">@Model?.DiaChi</textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Lưu địa chỉ
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>

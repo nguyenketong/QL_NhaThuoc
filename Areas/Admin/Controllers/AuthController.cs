@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QL_NhaThuoc.Data;
+using QL_NhaThuoc.Services;
 
 namespace QL_NhaThuoc.Areas.Admin.Controllers
 {
@@ -8,10 +9,12 @@ namespace QL_NhaThuoc.Areas.Admin.Controllers
     public class AuthController : Controller
     {
         private readonly QL_NhaThuocDbContext _context;
+        private readonly PasswordService _passwordService;
 
-        public AuthController(QL_NhaThuocDbContext context)
+        public AuthController(QL_NhaThuocDbContext context, PasswordService passwordService)
         {
             _context = context;
+            _passwordService = passwordService;
         }
 
         // Trang đăng nhập Admin
@@ -26,7 +29,7 @@ namespace QL_NhaThuoc.Areas.Admin.Controllers
             return View();
         }
 
-        // Xử lý đăng nhập Admin (dùng SĐT + mật khẩu đơn giản)
+        // Xử lý đăng nhập Admin (dùng SĐT + mật khẩu hash)
         [HttpPost]
         public async Task<IActionResult> Login(string soDienThoai, string matKhau)
         {
@@ -40,8 +43,32 @@ namespace QL_NhaThuoc.Areas.Admin.Controllers
                 return View();
             }
 
-            // Mật khẩu mặc định cho Admin: "admin123" (trong thực tế nên hash)
-            if (matKhau != "admin123")
+            // Kiểm tra mật khẩu
+            bool matKhauHopLe = false;
+            bool dangDungMatKhauMacDinh = false;
+
+            if (!string.IsNullOrEmpty(admin.MatKhauHash))
+            {
+                // Xác thực bằng mật khẩu đã hash
+                matKhauHopLe = _passwordService.VerifyPassword(matKhau, admin.MatKhauHash);
+                
+                // Kiểm tra xem có đang dùng mật khẩu mặc định không
+                dangDungMatKhauMacDinh = _passwordService.VerifyPassword("admin123", admin.MatKhauHash);
+            }
+            else
+            {
+                // Fallback: Nếu chưa có hash, dùng mật khẩu mặc định và tự động hash
+                if (matKhau == "admin123")
+                {
+                    matKhauHopLe = true;
+                    dangDungMatKhauMacDinh = true;
+                    // Tự động hash mật khẩu mặc định và lưu vào DB
+                    admin.MatKhauHash = _passwordService.HashPassword("admin123");
+                    await _context.SaveChangesAsync();
+                }
+            }
+
+            if (!matKhauHopLe)
             {
                 ViewBag.Error = "Mật khẩu không đúng!";
                 return View();
@@ -62,7 +89,82 @@ namespace QL_NhaThuoc.Areas.Admin.Controllers
                 SameSite = SameSiteMode.Strict
             });
 
-            TempData["ThongBao"] = "Đăng nhập Admin thành công!";
+            // Thông báo cảnh báo nếu đang dùng mật khẩu mặc định
+            if (dangDungMatKhauMacDinh)
+            {
+                TempData["CanhBaoMatKhau"] = "⚠️ Bạn đang sử dụng mật khẩu mặc định. Vui lòng đổi mật khẩu ngay để bảo mật tài khoản!";
+            }
+            else
+            {
+                TempData["ThongBao"] = "Đăng nhập Admin thành công!";
+            }
+            
+            return RedirectToAction("Index", "Dashboard");
+        }
+
+        // GET: Đổi mật khẩu Admin
+        [HttpGet]
+        public IActionResult DoiMatKhau()
+        {
+            if (HttpContext.Session.GetString("VaiTro") != "Admin")
+                return RedirectToAction("Login");
+            
+            return View();
+        }
+
+        // POST: Đổi mật khẩu Admin
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DoiMatKhau(string matKhauCu, string matKhauMoi, string xacNhanMatKhau)
+        {
+            if (HttpContext.Session.GetString("VaiTro") != "Admin")
+                return RedirectToAction("Login");
+
+            // Validate
+            if (string.IsNullOrEmpty(matKhauMoi) || matKhauMoi.Length < 6)
+            {
+                ViewBag.Error = "Mật khẩu mới phải có ít nhất 6 ký tự!";
+                return View();
+            }
+
+            if (matKhauMoi != xacNhanMatKhau)
+            {
+                ViewBag.Error = "Xác nhận mật khẩu không khớp!";
+                return View();
+            }
+
+            var maNguoiDung = HttpContext.Session.GetInt32("MaNguoiDung");
+            var admin = await _context.NGUOI_DUNG.FindAsync(maNguoiDung);
+
+            if (admin == null)
+            {
+                ViewBag.Error = "Không tìm thấy tài khoản!";
+                return View();
+            }
+
+            // Kiểm tra mật khẩu cũ
+            bool matKhauCuDung = false;
+            if (!string.IsNullOrEmpty(admin.MatKhauHash))
+            {
+                matKhauCuDung = _passwordService.VerifyPassword(matKhauCu, admin.MatKhauHash);
+            }
+            else
+            {
+                // Nếu chưa có hash, kiểm tra mật khẩu mặc định
+                matKhauCuDung = matKhauCu == "admin123";
+            }
+
+            if (!matKhauCuDung)
+            {
+                ViewBag.Error = "Mật khẩu cũ không đúng!";
+                return View();
+            }
+
+            // Hash và lưu mật khẩu mới
+            admin.MatKhauHash = _passwordService.HashPassword(matKhauMoi);
+            await _context.SaveChangesAsync();
+
+            TempData["ThongBao"] = "Đổi mật khẩu thành công!";
             return RedirectToAction("Index", "Dashboard");
         }
 

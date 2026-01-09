@@ -24,8 +24,9 @@ builder.Services.AddSession(options =>
 builder.Services.AddHttpClient();
 
 // Services
-builder.Services.AddScoped<ISmsService, SmsService>();
+builder.Services.AddScoped<ISmsService, SmsService>(); // OTP hiển thị console
 builder.Services.AddScoped<OtpServiceVietnamese>();
+builder.Services.AddScoped<PasswordService>(); // Hash mật khẩu Admin
 
 var app = builder.Build();
 

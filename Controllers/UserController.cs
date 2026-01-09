@@ -132,6 +132,27 @@ namespace QL_NhaThuoc.Controllers
             return View(nguoiDung);
         }
 
+        // POST: User/UpdateDiaChi
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateDiaChi(string hoTen, string diaChi)
+        {
+            var maNguoiDung = GetCurrentUserId();
+            if (!maNguoiDung.HasValue)
+                return RedirectToAction(nameof(PhoneLogin));
+
+            var nguoiDung = await _context.NGUOI_DUNG.FindAsync(maNguoiDung.Value);
+            if (nguoiDung != null)
+            {
+                nguoiDung.HoTen = hoTen;
+                nguoiDung.DiaChi = diaChi;
+                await _context.SaveChangesAsync();
+                TempData["ThongBao"] = "Cập nhật địa chỉ thành công!";
+            }
+
+            return RedirectToAction(nameof(DiaChi));
+        }
+
         // GET: User/Logout
         public IActionResult Logout()
         {

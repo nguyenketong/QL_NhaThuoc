@@ -33,6 +33,12 @@ namespace QL_NhaThuoc.Models
         [Display(Name = "Vai trò")]
         public string VaiTro { get; set; } = "User";
         
+        /// <summary>
+        /// Mật khẩu đã hash (chỉ dùng cho Admin)
+        /// </summary>
+        [StringLength(256)]
+        public string? MatKhauHash { get; set; }
+        
         public ICollection<DonHang>? DonHangs { get; set; }
     }
 }

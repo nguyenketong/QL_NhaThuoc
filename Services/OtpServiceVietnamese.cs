@@ -1,5 +1,4 @@
 using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
 using QL_NhaThuoc.Data;
 using QL_NhaThuoc.Models;
 using System.Data;
@@ -22,11 +21,11 @@ namespace QL_NhaThuoc.Services
             _connectionString = configuration.GetConnectionString("DefaultConnection")!;
         }
 
-        public async Task<(bool Success, string Message)> GenerateAndSendOtpAsync(string phoneNumber)
+        public async Task<(bool Success, string Message, string? PinId)> GenerateAndSendOtpAsync(string phoneNumber)
         {
             try
             {
-                // Tìm người dùng theo số điện thoại - Stored Procedure
+                // Tìm người dùng theo số điện thoại
                 NguoiDung? nguoiDung = null;
                 
                 using (var connection = new SqlConnection(_connectionString))
@@ -60,7 +59,7 @@ namespace QL_NhaThuoc.Services
                     {
                         SoDienThoai = phoneNumber,
                         HoTen = phoneNumber,
-                        VaiTro = "KhachHang",
+                        VaiTro = "User",
                         NgayTao = DateTime.Now
                     };
                     _context.NGUOI_DUNG.Add(nguoiDung);
@@ -69,37 +68,34 @@ namespace QL_NhaThuoc.Services
                     _logger.LogInformation($"Auto-created new user for phone: {phoneNumber}");
                 }
 
-                // Tạo mã OTP 6 chữ số
-                var otp = GenerateOtp();
-                var otpExpiry = DateTime.Now.AddMinutes(5);
+                // Gửi OTP qua Infobip (Infobip tự tạo mã OTP)
+                var (success, pinId) = await _smsService.SendOtpAsync(phoneNumber);
+                
+                if (!success || string.IsNullOrEmpty(pinId))
+                {
+                    return (false, "Không thể gửi SMS. Vui lòng thử lại", null);
+                }
 
-                // Cập nhật OTP vào database - Stored Procedure
+                // Lưu PinId vào database để xác minh sau
                 using (var connection = new SqlConnection(_connectionString))
                 {
                     await connection.OpenAsync();
                     using var cmd = new SqlCommand("sp_NguoiDung_CapNhatOTP", connection);
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.Parameters.AddWithValue("@MaNguoiDung", nguoiDung.MaNguoiDung);
-                    cmd.Parameters.AddWithValue("@OTP", otp);
-                    cmd.Parameters.AddWithValue("@OTP_Expire", otpExpiry);
+                    cmd.Parameters.AddWithValue("@OTP", pinId); // Lưu PinId thay vì OTP
+                    cmd.Parameters.AddWithValue("@OTP_Expire", DateTime.Now.AddMinutes(5));
                     await cmd.ExecuteNonQueryAsync();
                 }
 
-                // Gửi OTP qua SMS
-                var smsSent = await _smsService.SendOtpAsync(phoneNumber, otp);
-                if (!smsSent)
-                {
-                    return (false, "Không thể gửi SMS. Vui lòng thử lại");
-                }
+                _logger.LogInformation($"OTP sent to {phoneNumber}, PinId: {pinId}");
 
-                _logger.LogInformation($"OTP generated for {phoneNumber}: {otp}, expires at {otpExpiry}");
-
-                return (true, "Mã OTP đã được gửi đến số điện thoại của bạn");
+                return (true, "Mã OTP đã được gửi đến số điện thoại của bạn", pinId);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Error generating OTP for {phoneNumber}");
-                return (false, "Đã xảy ra lỗi. Vui lòng thử lại");
+                return (false, "Đã xảy ra lỗi. Vui lòng thử lại", null);
             }
         }
 
@@ -107,7 +103,7 @@ namespace QL_NhaThuoc.Services
         {
             try
             {
-                // Tìm người dùng theo số điện thoại - Stored Procedure
+                // Tìm người dùng theo số điện thoại
                 NguoiDung? nguoiDung = null;
                 
                 using (var connection = new SqlConnection(_connectionString))
@@ -149,7 +145,11 @@ namespace QL_NhaThuoc.Services
                     return (false, "Mã OTP đã hết hạn. Vui lòng yêu cầu mã mới", null);
                 }
 
-                if (nguoiDung.OTP != otp)
+                // Xác minh OTP qua Infobip API
+                var pinId = nguoiDung.OTP; // PinId được lưu trong trường OTP
+                var verified = await _smsService.VerifyOtpAsync(pinId, otp);
+
+                if (!verified)
                 {
                     return (false, "Mã OTP không chính xác", null);
                 }
@@ -163,12 +163,6 @@ namespace QL_NhaThuoc.Services
                 _logger.LogError(ex, $"Error verifying OTP for {phoneNumber}");
                 return (false, "Đã xảy ra lỗi. Vui lòng thử lại", null);
             }
-        }
-
-        private string GenerateOtp()
-        {
-            var random = new Random();
-            return random.Next(100000, 999999).ToString();
         }
     }
 }

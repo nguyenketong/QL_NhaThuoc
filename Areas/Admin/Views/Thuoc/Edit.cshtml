@@ -1,4 +1,5 @@
 @model Thuoc
+@using Microsoft.AspNetCore.Mvc.Rendering
 @{
     ViewData["Title"] = "Sửa thuốc";
     var thanhPhans = ViewBag.ThanhPhans as List<QL_NhaThuoc.Models.ThanhPhan>;
@@ -10,6 +11,36 @@
 <form asp-action="Edit" method="post" enctype="multipart/form-data">
     <input type="hidden" asp-for="MaThuoc" />
     <input type="hidden" asp-for="NgayTao" />
+    
+    <!-- Hiển thị lỗi validation -->
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-danger">
+            <i class="fas fa-exclamation-triangle"></i> <strong>Vui lòng kiểm tra lại thông tin:</strong>
+            <ul class="mb-0 mt-2">
+                @foreach (var state in ViewData.ModelState)
+                {
+                    foreach (var error in state.Value.Errors)
+                    {
+                        var fieldName = state.Key;
+                        var message = error.ErrorMessage;
+                        
+                        // Chuyển đổi thông báo lỗi sang tiếng Việt dễ hiểu
+                        if (message.Contains("The value '' is invalid"))
+                        {
+                            continue; // Bỏ qua lỗi này vì đã xử lý trong controller
+                        }
+                        else if (message.Contains("is required"))
+                        {
+                            message = $"Vui lòng nhập {fieldName}";
+                        }
+                        <li>@message</li>
+                    }
+                }
+            </ul>
+        </div>
+    }
+    
     <div class="row">
         <!-- Thông tin cơ bản -->
         <div class="col-lg-8">
@@ -33,14 +64,38 @@
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">Thương hiệu</label>
-                            <select asp-for="MaThuongHieu" asp-items="ViewBag.ThuongHieus" class="form-select">
+                            <select name="MaThuongHieu" class="form-select">
                                 <option value="">-- Chọn --</option>
+                                @foreach (SelectListItem item in ViewBag.ThuongHieus)
+                                {
+                                    var isSelected = Model.MaThuongHieu?.ToString() == item.Value;
+                                    if (isSelected)
+                                    {
+                                        <option value="@item.Value" selected>@item.Text</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@item.Value">@item.Text</option>
+                                    }
+                                }
                             </select>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">Nước sản xuất</label>
-                            <select asp-for="MaNuocSX" asp-items="ViewBag.NuocSXs" class="form-select">
+                            <select name="MaNuocSX" class="form-select">
                                 <option value="">-- Chọn --</option>
+                                @foreach (SelectListItem item in ViewBag.NuocSXs)
+                                {
+                                    var isSelected = Model.MaNuocSX?.ToString() == item.Value;
+                                    if (isSelected)
+                                    {
+                                        <option value="@item.Value" selected>@item.Text</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@item.Value">@item.Text</option>
+                                    }
+                                }
                             </select>
                         </div>
                         <div class="col-12">
