@@ -42,3 +42,12 @@ logs/
 
 # Secrets
 appsettings.Development.json
+
+# Environment files
+.env
+.env.local
+.env.production
+*.env
+
+# Docker
+docker-compose.override.yml

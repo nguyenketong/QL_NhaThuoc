@@ -59,6 +59,7 @@ Mở file `appsettings.json` và cập nhật connection string theo máy của 
 
 ```
 QL_NhaThuoc/
+├── .github/workflows/    # GitHub Actions CI/CD
 ├── Areas/Admin/          # Khu vực quản trị
 ├── Controllers/          # Các controller
 ├── Data/                 # DbContext
@@ -67,5 +68,38 @@ QL_NhaThuoc/
 ├── Services/             # Các service
 ├── ViewModels/           # View models
 ├── Views/                # Giao diện
-└── wwwroot/              # Static files (CSS, JS, Images)
+├── wwwroot/              # Static files (CSS, JS, Images)
+├── Dockerfile            # Docker configuration
+├── docker-compose.yml    # Docker Compose (local dev)
+└── render.yaml           # Render deployment config
+```
+
+---
+
+## CI/CD và Deployment 🚀
+
+Dự án đã được cấu hình CI/CD pipeline với:
+- ✅ GitHub Actions
+- ✅ Docker containerization
+- ✅ Auto deploy lên Render
+
+### Quick Start:
+
+Xem hướng dẫn: [QUICK_START_DEPLOY.md](QUICK_START_DEPLOY.md)
+
+### Chi tiết:
+
+Xem hướng dẫn đầy đủ: [HUONG_DAN_DEPLOY.md](HUONG_DAN_DEPLOY.md)
+
+### Test Docker local:
+
+```bash
+# Build image
+docker build -t ql-nhathuoc .
+
+# Run container
+docker run -p 8080:8080 ql-nhathuoc
+
+# Hoặc dùng docker-compose
+docker-compose up
 ```

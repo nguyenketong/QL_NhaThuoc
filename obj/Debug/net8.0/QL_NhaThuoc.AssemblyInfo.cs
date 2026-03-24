@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("QL_NhaThuoc")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+afb239e1baa2051798ab83ec95eb6296e9e08288")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+5ea34c17dd3daac4f1927641dc0c1a4862627588")]
 [assembly: System.Reflection.AssemblyProductAttribute("QL_NhaThuoc")]
 [assembly: System.Reflection.AssemblyTitleAttribute("QL_NhaThuoc")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Server=host.docker.internal;Database=QL_NhaThuoc;Trusted_Connection=True;TrustServerCertificate=True;MultipleActiveResultSets=true
+    networks:
+      - ql-nhathuoc-network
+    restart: unless-stopped
+
+networks:
+  ql-nhathuoc-network:
+    driver: bridge

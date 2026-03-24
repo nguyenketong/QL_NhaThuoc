@@ -345,10 +345,19 @@ document.addEventListener('DOMContentLoaded', function() {
 
 async function loadThongBao() {
     try {
+        // Kiểm tra element có tồn tại không
+        const badge = document.getElementById('notification-count');
+        const listEl = document.getElementById('notification-list');
+        
+        if (!badge || !listEl) {
+            // Người dùng chưa đăng nhập, không có notification elements
+            return;
+        }
+
         // Load số lượng chưa đọc
         const countRes = await fetch('/ThongBao/LaySoLuongChuaDoc');
         const countData = await countRes.json();
-        const badge = document.getElementById('notification-count');
+        
         if (countData.soLuong > 0) {
             badge.textContent = countData.soLuong > 9 ? '9+' : countData.soLuong;
             badge.style.display = 'block';
@@ -359,7 +368,6 @@ async function loadThongBao() {
         // Load danh sách thông báo
         const listRes = await fetch('/ThongBao/LayDanhSach');
         const listData = await listRes.json();
-        const listEl = document.getElementById('notification-list');
         
         if (listData.thongBaos && listData.thongBaos.length > 0) {
             listEl.innerHTML = listData.thongBaos.map(tb => `
@@ -372,7 +380,9 @@ async function loadThongBao() {
         } else {
             listEl.innerHTML = '<div class="text-center py-4 text-muted"><i class="fas fa-bell-slash fa-2x mb-2"></i><br>Không có thông báo</div>';
         }
-    } catch(e) { console.error(e); }
+    } catch(e) { 
+        console.error('Lỗi load thông báo:', e); 
+    }
 }
 
 async function danhDauDaDoc(id) {
