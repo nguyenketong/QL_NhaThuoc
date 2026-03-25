@@ -26,9 +26,8 @@ COPY --from=publish /app/publish .
 # Expose port
 EXPOSE 8080
 
-# Set environment variables
-ENV ASPNETCORE_URLS=http://+:8080
+# Set environment variables - Render will override PORT
 ENV ASPNETCORE_ENVIRONMENT=Production
 
 # Run application
-ENTRYPOINT ["dotnet", "QL_NhaThuoc.dll"]
+ENTRYPOINT ["sh", "-c", "dotnet QL_NhaThuoc.dll --urls http://0.0.0.0:${PORT:-8080}"]
