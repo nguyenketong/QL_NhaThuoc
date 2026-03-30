@@ -52,10 +52,10 @@ namespace QL_NhaThuoc.Areas.Admin.Controllers
             // 4. Đơn hàng theo trạng thái
             if (await reader.NextResultAsync() && await reader.ReadAsync())
             {
-                ViewBag.ChoXuLy = reader.GetInt32(reader.GetOrdinal("ChoXuLy"));
-                ViewBag.DangGiao = reader.GetInt32(reader.GetOrdinal("DangGiao"));
-                ViewBag.HoanThanh = reader.GetInt32(reader.GetOrdinal("HoanThanh"));
-                ViewBag.DaHuy = reader.GetInt32(reader.GetOrdinal("DaHuy"));
+                ViewBag.ChoXuLy = reader.IsDBNull(reader.GetOrdinal("ChoXuLy")) ? 0 : reader.GetInt32(reader.GetOrdinal("ChoXuLy"));
+                ViewBag.DangGiao = reader.IsDBNull(reader.GetOrdinal("DangGiao")) ? 0 : reader.GetInt32(reader.GetOrdinal("DangGiao"));
+                ViewBag.HoanThanh = reader.IsDBNull(reader.GetOrdinal("HoanThanh")) ? 0 : reader.GetInt32(reader.GetOrdinal("HoanThanh"));
+                ViewBag.DaHuy = reader.IsDBNull(reader.GetOrdinal("DaHuy")) ? 0 : reader.GetInt32(reader.GetOrdinal("DaHuy"));
             }
 
             // 5. Doanh thu tháng này
