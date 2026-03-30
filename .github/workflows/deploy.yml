@@ -91,20 +91,13 @@ jobs:
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
     
     steps:
-    - name: Trigger Render deployment
+    - name: Trigger Render deployment via Deploy Hook
       run: |
-        curl -X POST "https://api.render.com/v1/services/${{ secrets.RENDER_SERVICE_ID }}/deploys" \
-          -H "Authorization: Bearer ${{ secrets.RENDER_API_KEY }}" \
-          -H "Content-Type: application/json" \
-          -d '{}'
-    
-    - name: Wait for deployment
-      run: |
-        echo "Deployment triggered successfully!"
-        echo "Check status at: https://dashboard.render.com/web/${{ secrets.RENDER_SERVICE_ID }}"
+        curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}"
     
     - name: Deployment notification
       if: success()
       run: |
-        echo "✅ Deployment to Render completed successfully!"
-        echo "🚀 Application is now live!"
+        echo "✅ Deployment triggered successfully!"
+        echo "🚀 Render is pulling new Docker image and deploying..."
+        echo "Check status at: https://dashboard.render.com"
