@@ -11,8 +11,32 @@ namespace QL_NhaThuoc.Filters
         public override void OnActionExecuting(ActionExecutingContext context)
         {
             var session = context.HttpContext.Session;
+            var request = context.HttpContext.Request;
+            
+            // Check Session first
             var vaiTro = session.GetString("VaiTro");
             var maNguoiDung = session.GetInt32("MaNguoiDung");
+
+            // If session is empty, try to restore from cookies
+            if (!maNguoiDung.HasValue || string.IsNullOrEmpty(vaiTro))
+            {
+                // Try to get from cookies
+                if (request.Cookies.TryGetValue("AdminLoggedIn", out var adminCookie) && 
+                    adminCookie == "true" &&
+                    request.Cookies.TryGetValue("MaNguoiDung", out var maNguoiDungCookie) &&
+                    request.Cookies.TryGetValue("VaiTro", out var vaiTroCookie))
+                {
+                    // Restore session from cookies
+                    if (int.TryParse(maNguoiDungCookie, out int parsedMaNguoiDung))
+                    {
+                        session.SetInt32("MaNguoiDung", parsedMaNguoiDung);
+                        session.SetString("VaiTro", vaiTroCookie);
+                        
+                        maNguoiDung = parsedMaNguoiDung;
+                        vaiTro = vaiTroCookie;
+                    }
+                }
+            }
 
             // Kiểm tra đã đăng nhập và có quyền Admin
             if (!maNguoiDung.HasValue || vaiTro != "Admin")

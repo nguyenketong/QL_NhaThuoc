@@ -80,14 +80,19 @@ namespace QL_NhaThuoc.Areas.Admin.Controllers
             HttpContext.Session.SetString("SoDienThoai", admin.SoDienThoai);
             HttpContext.Session.SetString("VaiTro", "Admin");
 
-            // Lưu cookie ghi nhớ đăng nhập (7 ngày)
-            Response.Cookies.Append("AdminLoggedIn", "true", new CookieOptions
+            // Lưu cookie ghi nhớ đăng nhập (7 ngày) - Backup cho session
+            var cookieOptions = new CookieOptions
             {
                 Expires = DateTimeOffset.Now.AddDays(7),
                 HttpOnly = true,
                 Secure = true,
-                SameSite = SameSiteMode.Strict
-            });
+                SameSite = SameSiteMode.Lax, // Changed from Strict to Lax for better compatibility
+                IsEssential = true
+            };
+            
+            Response.Cookies.Append("AdminLoggedIn", "true", cookieOptions);
+            Response.Cookies.Append("MaNguoiDung", admin.MaNguoiDung.ToString(), cookieOptions);
+            Response.Cookies.Append("VaiTro", "Admin", cookieOptions);
 
             // Thông báo cảnh báo nếu đang dùng mật khẩu mặc định
             if (dangDungMatKhauMacDinh)
